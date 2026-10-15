@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  password     String
+  role         Role     @default(RECEPCIONISTA)
+  specialty    String?
+  phone        String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  appointments Appointment[]
+}
+
+model Patient {
+  id           String   @id @default(uuid())
+  name         String
+  lastName     String
+  email        String?
+  phone        String
+  birthDate    DateTime
+  gender       Gender
+  address      String?
+  allergies    String?
+  notes        String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  appointments Appointment[]
+  treatments   Treatment[]
+  payments     Payment[]
+  odontogram   Odontogram?
+}
+
+model Odontogram {
+  id         String   @id @default(uuid())
+  patientId  String   @unique
+  conditions Json     @default("{}")
+  updatedAt  DateTime @updatedAt
+  patient    Patient  @relation(fields: [patientId], references: [id])
+}
+
+model Specialty {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Appointment {
+  id          String            @id @default(uuid())
+  patientId   String
+  doctorId    String
+  date        DateTime
+  duration    Int               @default(30)
+  reason      String
+  status      AppointmentStatus @default(SCHEDULED)
+  notes       String?
+  createdAt   DateTime          @default(now())
+  patient     Patient           @relation(fields: [patientId], references: [id])
+  doctor      User              @relation(fields: [doctorId], references: [id])
+}
+
+model Treatment {
+  id          String          @id @default(uuid())
+  patientId   String
+  name        String
+  description String?
+  cost        Decimal         @db.Decimal(10, 2)
+  status      TreatmentStatus @default(IN_PROGRESS)
+  startDate   DateTime        @default(now())
+  endDate     DateTime?
+  notes       String?
+  patient     Patient         @relation(fields: [patientId], references: [id])
+  payments    Payment[]
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  patientId   String
+  treatmentId String?
+  amount      Decimal       @db.Decimal(10, 2)
+  method      PaymentMethod @default(CASH)
+  concept     String
+  notes       String?
+  createdAt   DateTime      @default(now())
+  patient     Patient       @relation(fields: [patientId], references: [id])
+  treatment   Treatment?    @relation(fields: [treatmentId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  RECEPCIONISTA
+}
+
+enum Gender {
+  MASCULINO
+  FEMENINO
+  OTRO
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum TreatmentStatus {
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+}

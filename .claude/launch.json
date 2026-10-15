@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dental-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "frontend"],
+      "port": 5173
+    },
+    {
+      "name": "dental-backend",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["backend/src/index.js"],
+      "port": 3000
+    }
+  ]
+}

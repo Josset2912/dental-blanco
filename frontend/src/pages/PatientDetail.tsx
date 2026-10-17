@@ -16,6 +16,27 @@ function calcAge(birthDate: string) {
 
 const genderLabel: Record<string, string> = { MASCULINO: 'Masculino', FEMENINO: 'Femenino', OTRO: 'Otro' };
 
+const STATUS_COLORS: Record<string, string> = {
+  IN_PROGRESS: 'bg-[#E6F7FD] text-[#0077B6]',
+  COMPLETED: 'bg-green-50 text-green-600',
+  CANCELLED: 'bg-gray-100 text-gray-500',
+};
+const STATUS_LABEL: Record<string, string> = {
+  IN_PROGRESS: 'En progreso',
+  COMPLETED: 'Completado',
+  CANCELLED: 'Cancelado',
+};
+const METHOD_LABEL: Record<string, string> = { CASH: 'Efectivo', CARD: 'Tarjeta', TRANSFER: 'Transferencia' };
+const METHOD_COLORS: Record<string, string> = {
+  CASH: 'bg-green-50 text-green-700',
+  CARD: 'bg-[#E6F7FD] text-blue-700',
+  TRANSFER: 'bg-purple-50 text-purple-700',
+};
+
+function fmt(v: number) {
+  return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 2 }).format(v);
+}
+
 export default function PatientDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -30,13 +51,13 @@ export default function PatientDetail() {
   });
 
   const updateMut = useMutation({
-    mutationFn: (data: any) => updatePatient(id!, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['patient', id] }); setShowEdit(false); }
+    mutationFn: (data: Parameters<typeof updatePatient>[1]) => updatePatient(id!, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['patient', id] }); setShowEdit(false); },
   });
 
   const deleteMut = useMutation({
     mutationFn: () => deletePatient(id!),
-    onSuccess: () => navigate('/pacientes')
+    onSuccess: () => navigate('/pacientes'),
   });
 
   const { data: treatments = [] } = useQuery({
@@ -62,21 +83,17 @@ export default function PatientDetail() {
   });
 
   const totalPaid = payments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
-  const fmtMXN = (v: number) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 2 }).format(v);
 
   if (isLoading) return (
-    <div className="flex items-center justify-center h-48 text-gray-500 text-sm">
-      Cargando paciente...
-    </div>
+    <div className="flex items-center justify-center h-48 text-gray-500 text-sm">Cargando paciente...</div>
   );
   if (!patient) return (
-    <div className="flex items-center justify-center h-48 text-gray-500 text-sm">
-      Paciente no encontrado
-    </div>
+    <div className="flex items-center justify-center h-48 text-gray-500 text-sm">Paciente no encontrado</div>
   );
 
   return (
     <>
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <button
@@ -101,7 +118,7 @@ export default function PatientDetail() {
             Editar
           </button>
           <button
-            className="px-4 py-2 bg-red-50 text-red-500 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors border-0"
+            className="px-4 py-2 bg-red-50 text-red-500 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
             onClick={() => setConfirmDelete(true)}
           >
             Eliminar
@@ -109,6 +126,7 @@ export default function PatientDetail() {
         </div>
       </div>
 
+      {/* Info cards */}
       <div className="grid grid-cols-2 gap-5 mb-5">
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Información personal</h4>
@@ -118,13 +136,12 @@ export default function PatientDetail() {
           {patient.address && <InfoRow label="Dirección" value={patient.address} />}
           <InfoRow label="Registro" value={new Date(patient.createdAt).toLocaleDateString('es-PE')} last />
         </div>
-
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Notas clínicas</h4>
           <InfoRow label="Alergias" value={patient.allergies || 'Ninguna registrada'} last={!patient.notes} />
           {patient.notes && (
             <div className="mt-4">
-              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Observaciones</h4>
+              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Observaciones</h4>
               <p className="text-sm text-gray-700 leading-relaxed">{patient.notes}</p>
             </div>
           )}
@@ -136,7 +153,7 @@ export default function PatientDetail() {
         <Odontogram patientId={id!} />
       </div>
 
-      {/* Treatments section */}
+      {/* Treatments */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div>
@@ -147,14 +164,15 @@ export default function PatientDetail() {
           </div>
           <button
             onClick={() => setShowTreatmentForm(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-white transition-colors rounded-lg text-xs font-medium" style={{ background: "linear-gradient(135deg,#00AEEF,#0077B6)" }}>
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-white transition-colors rounded-lg text-xs font-medium"
+            style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+          >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
             </svg>
             Nuevo tratamiento
           </button>
         </div>
-
         {treatments.length === 0 ? (
           <div className="text-center py-10 text-gray-400">
             <svg className="w-10 h-10 mx-auto mb-2 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -163,103 +181,103 @@ export default function PatientDetail() {
             <p className="text-sm text-gray-500">Sin tratamientos registrados</p>
           </div>
         ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                {['Tratamiento', 'Descripción', 'Costo', 'Inicio', 'Estado', ''].map(h => (
-                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {treatments.map((t, i) => (
-                <tr key={t.id} className={`hover:bg-gray-50 ${i < treatments.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                  <td className="px-5 py-3.5 text-sm font-medium text-gray-900">{t.name}</td>
-                  <td className=”px-5 py-3.5 text-sm text-gray-500 max-w-[200px] truncate”>{t.description || '—'}</td>
-                  <td className="px-5 py-3.5 text-sm font-medium text-gray-900">
-                    {new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(parseFloat(t.cost))}
-                  </td>
-                  <td className="px-5 py-3.5 text-sm text-gray-600">
-                    {new Date(t.startDate).toLocaleDateString('es-PE')}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
-                      t.status === 'IN_PROGRESS' ? 'bg-[#E6F7FD] text-[#0077B6]' :
-                      t.status === 'COMPLETED'   ? 'bg-green-50 text-green-600' :
-                                                   'bg-gray-100 text-gray-500'
-                    }`}>
-                      {t.status === 'IN_PROGRESS' ? 'En progreso' : t.status === 'COMPLETED' ? 'Completado' : 'Cancelado'}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    {t.status === 'IN_PROGRESS' && (
-                      <button
-                        onClick={() => completeTreatmentMut.mutate(t.id)}
-                        disabled={completeTreatmentMut.isPending}
-                        className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50 disabled:opacity-60"
-                      >
-                        Completar
-                      </button>
-                    )}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  {['Tratamiento', 'Descripción', 'Costo', 'Inicio', 'Estado', ''].map(h => (
+                    <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {treatments.map((t, i) => (
+                  <tr key={t.id} className={`hover:bg-gray-50 ${i < treatments.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                    <td className="px-5 py-3.5 text-sm font-medium text-gray-900">{t.name}</td>
+                    <td className="px-5 py-3.5 text-sm text-gray-500 max-w-[200px] truncate">{t.description || '—'}</td>
+                    <td className="px-5 py-3.5 text-sm font-medium text-gray-900">
+                      {new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(parseFloat(t.cost))}
+                    </td>
+                    <td className="px-5 py-3.5 text-sm text-gray-600">
+                      {new Date(t.startDate).toLocaleDateString('es-PE')}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[t.status]}`}>
+                        {STATUS_LABEL[t.status]}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      {t.status === 'IN_PROGRESS' && (
+                        <button
+                          onClick={() => completeTreatmentMut.mutate(t.id)}
+                          disabled={completeTreatmentMut.isPending}
+                          className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50 disabled:opacity-60"
+                        >
+                          Completar
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {/* Clinical Notes section */}
+      {/* Clinical Notes */}
       <ClinicalNotes patientId={id!} />
 
-      {/* Images section */}
+      {/* Images */}
       <PatientImages patientId={id!} patientName={`${patient.name} ${patient.lastName}`} />
 
-      {/* Payments section */}
+      {/* Payments */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-5">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div>
             <h3 className="text-sm font-semibold text-gray-900">Historial de pagos</h3>
-            <p className="text-xs text-gray-500 mt-0.5">{payments.length} pago{payments.length !== 1 ? 's' : ''} · Total: {fmtMXN(totalPaid)}</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {payments.length} pago{payments.length !== 1 ? 's' : ''} · Total: {fmt(totalPaid)}
+            </p>
           </div>
         </div>
         {payments.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
+          <div className="text-center py-8">
             <p className="text-sm text-gray-500">Sin pagos registrados</p>
           </div>
         ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                {['Fecha', 'Concepto', 'Tratamiento', 'Método', 'Monto'].map(h => (
-                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {payments.map((p, i) => (
-                <tr key={p.id} className={`hover:bg-gray-50 ${i < payments.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                  <td className="px-5 py-3 text-sm text-gray-600 whitespace-nowrap">
-                    {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </td>
-                  <td className="px-5 py-3 text-sm text-gray-700">{p.concept}</td>
-                  <td className=”px-5 py-3 text-sm text-gray-500”>{p.treatment?.name ?? '—'}</td>
-                  <td className="px-5 py-3">
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      p.method === 'CASH' ? 'bg-green-50 text-green-700' :
-                      p.method === 'CARD' ? 'bg-[#E6F7FD] text-blue-700' : 'bg-purple-50 text-purple-700'
-                    }`}>
-                      {p.method === 'CASH' ? 'Efectivo' : p.method === 'CARD' ? 'Tarjeta' : 'Transferencia'}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-sm font-bold text-gray-900">{fmtMXN(parseFloat(p.amount))}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  {['Fecha', 'Concepto', 'Tratamiento', 'Método', 'Monto'].map(h => (
+                    <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {payments.map((p, i) => (
+                  <tr key={p.id} className={`hover:bg-gray-50 ${i < payments.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                    <td className="px-5 py-3 text-sm text-gray-600 whitespace-nowrap">
+                      {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </td>
+                    <td className="px-5 py-3 text-sm text-gray-700">{p.concept}</td>
+                    <td className="px-5 py-3 text-sm text-gray-500">{p.treatment?.name ?? '—'}</td>
+                    <td className="px-5 py-3">
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${METHOD_COLORS[p.method]}`}>
+                        {METHOD_LABEL[p.method]}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-sm font-bold text-gray-900">{fmt(parseFloat(p.amount))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
+      {/* Modals */}
       {showTreatmentForm && (
         <TreatmentForm
           onClose={() => setShowTreatmentForm(false)}
@@ -275,7 +293,7 @@ export default function PatientDetail() {
           title="Editar paciente"
           initial={patient}
           onClose={() => setShowEdit(false)}
-          onSubmit={(data) => updateMut.mutate(data)}
+          onSubmit={data => updateMut.mutate(data)}
           loading={updateMut.isPending}
           error={updateMut.isError ? 'Error al guardar' : ''}
         />
@@ -284,7 +302,7 @@ export default function PatientDetail() {
       {confirmDelete && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl w-full max-w-sm">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+            <div className="px-6 py-5 border-b border-gray-100">
               <h3 className="text-base font-bold text-gray-900">Eliminar paciente</h3>
             </div>
             <div className="px-6 py-5">
@@ -293,13 +311,13 @@ export default function PatientDetail() {
               </p>
               <div className="flex justify-end gap-2">
                 <button
-                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100"
                   onClick={() => setConfirmDelete(false)}
                 >
                   Cancelar
                 </button>
                 <button
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-60 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-60"
                   onClick={() => deleteMut.mutate()}
                   disabled={deleteMut.isPending}
                 >
@@ -322,4 +340,3 @@ function InfoRow({ label, value, last = false }: { label: string; value: string;
     </div>
   );
 }
-

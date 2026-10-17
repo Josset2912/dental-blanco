@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getAppointments, createAppointment, updateAppointment, cancelAppointment,
@@ -35,25 +35,25 @@ const STATUS_DOT: Record<string, string> = {
 };
 
 const DAYS_SHORT = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
-const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const DAYS = ['Dom', 'Lun', 'Mar', 'MiÃ©', 'Jue', 'Vie', 'SÃ¡b'];
 const MONTHS_ES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 
 function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  return new Date(dateStr).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
 }
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' });
+  return new Date(dateStr).toLocaleDateString('es-PE', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
 function toMonthStr(y: number, m: number) {
   return `${y}-${String(m + 1).padStart(2, '0')}`;
 }
 
-// ─── Calendar View ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Calendar View â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CalendarView({
   appointments,
@@ -86,7 +86,7 @@ function CalendarView({
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      {/* Day headers — single letter on mobile, abbreviation on desktop */}
+      {/* Day headers â€” single letter on mobile, abbreviation on desktop */}
       <div className="grid grid-cols-7 border-b border-gray-100">
         {DAYS.map((d, i) => (
           <div key={d} className="py-2 text-center text-xs font-semibold text-gray-400 uppercase">
@@ -144,7 +144,7 @@ function CalendarView({
                   </div>
                 ))}
                 {dayAppts.length > 3 && (
-                  <p className="text-[10px] text-gray-400 pl-1">+{dayAppts.length - 3} más</p>
+                  <p className="text-[10px] text-gray-400 pl-1">+{dayAppts.length - 3} mÃ¡s</p>
                 )}
               </div>
             </div>
@@ -155,7 +155,7 @@ function CalendarView({
   );
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function Appointments() {
   const today = new Date();
@@ -232,7 +232,7 @@ export default function Appointments() {
             <h2 className="text-xl font-bold text-gray-900">Citas</h2>
             <p className="text-sm text-gray-500 mt-0.5">
               {view === 'list'
-                ? `${active.length} cita${active.length !== 1 ? 's' : ''} para este día`
+                ? `${active.length} cita${active.length !== 1 ? 's' : ''} para este dÃ­a`
                 : `${MONTHS_ES[calMonth]} ${calYear}`}
             </p>
           </div>
@@ -320,15 +320,15 @@ export default function Appointments() {
               <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
-              <p className="text-sm font-medium text-gray-700">Sin citas para este día</p>
-              <span className="text-xs">Agenda una nueva cita con el botón de arriba</span>
+              <p className="text-sm font-medium text-gray-700">Sin citas para este dÃ­a</p>
+              <span className="text-xs">Agenda una nueva cita con el botÃ³n de arriba</span>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    {['Hora', 'Paciente', 'Motivo', 'Duración', 'Estado', 'Acciones'].map(h => (
+                    {['Hora', 'Paciente', 'Motivo', 'DuraciÃ³n', 'Estado', 'Acciones'].map(h => (
                       <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">
                         {h}
                       </th>
@@ -422,7 +422,7 @@ export default function Appointments() {
             </div>
             <div className="px-6 py-5">
               <p className="text-sm text-gray-700 mb-5">
-                ¿Estás seguro de que deseas cancelar esta cita? Esta acción no se puede deshacer.
+                Â¿EstÃ¡s seguro de que deseas cancelar esta cita? Esta acciÃ³n no se puede deshacer.
               </p>
               <div className="flex justify-end gap-2">
                 <button
@@ -436,7 +436,7 @@ export default function Appointments() {
                   onClick={() => cancelMut.mutate(confirmCancel)}
                   disabled={cancelMut.isPending}
                 >
-                  {cancelMut.isPending ? 'Cancelando...' : 'Sí, cancelar cita'}
+                  {cancelMut.isPending ? 'Cancelando...' : 'SÃ­, cancelar cita'}
                 </button>
               </div>
             </div>
@@ -446,3 +446,4 @@ export default function Appointments() {
     </>
   );
 }
+

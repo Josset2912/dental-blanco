@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+﻿import { useQuery } from '@tanstack/react-query';
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -24,30 +24,30 @@ export default function Reports() {
   const { data: treatments } = useQuery({ queryKey: ['reports-treatments'], queryFn: getTreatments });
 
   const fmt = (n: number) =>
-    new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 }).format(n);
 
   return (
     <div className="space-y-7">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Reportes y estadísticas</h1>
-        <p className="text-sm text-gray-500 mt-1">Resumen del mes actual y tendencias de los últimos 12 meses</p>
+        <h1 className="text-2xl font-bold text-gray-900">Reportes y estadÃ­sticas</h1>
+        <p className="text-sm text-gray-500 mt-1">Resumen del mes actual y tendencias de los Ãºltimos 12 meses</p>
       </div>
 
       {/* Overview KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard label="Pacientes totales" value={overview?.totalPatients ?? '—'} />
-        <StatCard label="Nuevos este mes" value={overview?.newPatientsMonth ?? '—'} />
-        <StatCard label="Citas este mes" value={overview?.appointmentsMonth ?? '—'} />
+        <StatCard label="Pacientes totales" value={overview?.totalPatients ?? 'â€”'} />
+        <StatCard label="Nuevos este mes" value={overview?.newPatientsMonth ?? 'â€”'} />
+        <StatCard label="Citas este mes" value={overview?.appointmentsMonth ?? 'â€”'} />
         <StatCard
           label="Ingresos este mes"
-          value={overview ? fmt(overview.revenueMonth) : '—'}
+          value={overview ? fmt(overview.revenueMonth) : 'â€”'}
         />
-        <StatCard label="Tratamientos en curso" value={overview?.pendingTreatments ?? '—'} />
+        <StatCard label="Tratamientos en curso" value={overview?.pendingTreatments ?? 'â€”'} />
       </div>
 
       {/* Revenue chart */}
       <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <h2 className="text-sm font-semibold text-gray-700 mb-4">Ingresos mensuales (últimos 12 meses)</h2>
+        <h2 className="text-sm font-semibold text-gray-700 mb-4">Ingresos mensuales (Ãºltimos 12 meses)</h2>
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={revenue ?? []} margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -66,7 +66,7 @@ export default function Reports() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Patients trend */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="text-sm font-semibold text-gray-700 mb-4">Nuevos pacientes (últimos 12 meses)</h2>
+          <h2 className="text-sm font-semibold text-gray-700 mb-4">Nuevos pacientes (Ãºltimos 12 meses)</h2>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={patients ?? []} margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -113,12 +113,12 @@ export default function Reports() {
       {/* Payment methods */}
       {treatments?.byMethod?.length ? (
         <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="text-sm font-semibold text-gray-700 mb-4">Ingresos por método de pago</h2>
+          <h2 className="text-sm font-semibold text-gray-700 mb-4">Ingresos por mÃ©todo de pago</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left text-xs font-medium text-gray-500 pb-2 uppercase">Método</th>
+                  <th className="text-left text-xs font-medium text-gray-500 pb-2 uppercase">MÃ©todo</th>
                   <th className="text-right text-xs font-medium text-gray-500 pb-2 uppercase">Pagos</th>
                   <th className="text-right text-xs font-medium text-gray-500 pb-2 uppercase">Total</th>
                 </tr>
@@ -139,3 +139,4 @@ export default function Reports() {
     </div>
   );
 }
+

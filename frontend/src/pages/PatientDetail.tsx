@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getPatient, updatePatient, deletePatient } from '../api/patients';
@@ -61,7 +61,7 @@ export default function PatientDetail() {
   });
 
   const totalPaid = payments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
-  const fmtMXN = (v: number) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(v);
+  const fmtMXN = (v: number) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 2 }).format(v);
 
   if (isLoading) return (
     <div className="flex items-center justify-center h-48 text-gray-500 text-sm">
@@ -89,7 +89,7 @@ export default function PatientDetail() {
           </button>
           <div>
             <h2 className="text-xl font-bold text-gray-900">{patient.name} {patient.lastName}</h2>
-            <p className="text-sm text-gray-500 mt-0.5">{calcAge(patient.birthDate)} años · {genderLabel[patient.gender]}</p>
+            <p className="text-sm text-gray-500 mt-0.5">{calcAge(patient.birthDate)} aÃ±os Â· {genderLabel[patient.gender]}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -110,16 +110,16 @@ export default function PatientDetail() {
 
       <div className="grid grid-cols-2 gap-5 mb-5">
         <div className="bg-white border border-gray-200 rounded-xl p-6">
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Información personal</h4>
-          <InfoRow label="Teléfono" value={patient.phone} />
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">InformaciÃ³n personal</h4>
+          <InfoRow label="TelÃ©fono" value={patient.phone} />
           {patient.email && <InfoRow label="Correo" value={patient.email} />}
-          <InfoRow label="Fecha de nac." value={new Date(patient.birthDate).toLocaleDateString('es-MX')} />
-          {patient.address && <InfoRow label="Dirección" value={patient.address} />}
-          <InfoRow label="Registro" value={new Date(patient.createdAt).toLocaleDateString('es-MX')} last />
+          <InfoRow label="Fecha de nac." value={new Date(patient.birthDate).toLocaleDateString('es-PE')} />
+          {patient.address && <InfoRow label="DirecciÃ³n" value={patient.address} />}
+          <InfoRow label="Registro" value={new Date(patient.createdAt).toLocaleDateString('es-PE')} last />
         </div>
 
         <div className="bg-white border border-gray-200 rounded-xl p-6">
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Notas clínicas</h4>
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Notas clÃ­nicas</h4>
           <InfoRow label="Alergias" value={patient.allergies || 'Ninguna registrada'} last={!patient.notes} />
           {patient.notes && (
             <div className="mt-4">
@@ -141,7 +141,7 @@ export default function PatientDetail() {
           <div>
             <h3 className="text-sm font-semibold text-gray-900">Tratamientos</h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              {treatments.filter(t => t.status === 'IN_PROGRESS').length} en progreso · {treatments.length} total
+              {treatments.filter(t => t.status === 'IN_PROGRESS').length} en progreso Â· {treatments.length} total
             </p>
           </div>
           <button
@@ -165,7 +165,7 @@ export default function PatientDetail() {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                {['Tratamiento', 'Descripción', 'Costo', 'Inicio', 'Estado', ''].map(h => (
+                {['Tratamiento', 'DescripciÃ³n', 'Costo', 'Inicio', 'Estado', ''].map(h => (
                   <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">{h}</th>
                 ))}
               </tr>
@@ -174,12 +174,12 @@ export default function PatientDetail() {
               {treatments.map((t, i) => (
                 <tr key={t.id} className={`hover:bg-gray-50 ${i < treatments.length - 1 ? 'border-b border-gray-100' : ''}`}>
                   <td className="px-5 py-3.5 text-sm font-medium text-gray-900">{t.name}</td>
-                  <td className="px-5 py-3.5 text-sm text-gray-500 max-w-[200px] truncate">{t.description || '—'}</td>
+                  <td className="px-5 py-3.5 text-sm text-gray-500 max-w-[200px] truncate">{t.description || 'â€”'}</td>
                   <td className="px-5 py-3.5 text-sm font-medium text-gray-900">
-                    {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(parseFloat(t.cost))}
+                    {new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(parseFloat(t.cost))}
                   </td>
                   <td className="px-5 py-3.5 text-sm text-gray-600">
-                    {new Date(t.startDate).toLocaleDateString('es-MX')}
+                    {new Date(t.startDate).toLocaleDateString('es-PE')}
                   </td>
                   <td className="px-5 py-3.5">
                     <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
@@ -227,7 +227,7 @@ export default function PatientDetail() {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                {['Fecha', 'Concepto', 'Tratamiento', 'Método', 'Monto'].map(h => (
+                {['Fecha', 'Concepto', 'Tratamiento', 'MÃ©todo', 'Monto'].map(h => (
                   <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">{h}</th>
                 ))}
               </tr>
@@ -236,10 +236,10 @@ export default function PatientDetail() {
               {payments.map((p, i) => (
                 <tr key={p.id} className={`hover:bg-gray-50 ${i < payments.length - 1 ? 'border-b border-gray-100' : ''}`}>
                   <td className="px-5 py-3 text-sm text-gray-600 whitespace-nowrap">
-                    {new Date(p.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </td>
                   <td className="px-5 py-3 text-sm text-gray-700">{p.concept}</td>
-                  <td className="px-5 py-3 text-sm text-gray-500">{p.treatment?.name ?? '—'}</td>
+                  <td className="px-5 py-3 text-sm text-gray-500">{p.treatment?.name ?? 'â€”'}</td>
                   <td className="px-5 py-3">
                     <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
                       p.method === 'CASH' ? 'bg-green-50 text-green-700' :
@@ -285,7 +285,7 @@ export default function PatientDetail() {
             </div>
             <div className="px-6 py-5">
               <p className="text-sm text-gray-700 mb-5">
-                ¿Estás seguro de eliminar a <strong>{patient.name} {patient.lastName}</strong>? Esta acción no se puede deshacer.
+                Â¿EstÃ¡s seguro de eliminar a <strong>{patient.name} {patient.lastName}</strong>? Esta acciÃ³n no se puede deshacer.
               </p>
               <div className="flex justify-end gap-2">
                 <button
@@ -299,7 +299,7 @@ export default function PatientDetail() {
                   onClick={() => deleteMut.mutate()}
                   disabled={deleteMut.isPending}
                 >
-                  {deleteMut.isPending ? 'Eliminando...' : 'Sí, eliminar'}
+                  {deleteMut.isPending ? 'Eliminando...' : 'SÃ­, eliminar'}
                 </button>
               </div>
             </div>
@@ -318,3 +318,4 @@ function InfoRow({ label, value, last = false }: { label: string; value: string;
     </div>
   );
 }
+

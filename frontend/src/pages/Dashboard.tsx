@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+﻿import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { getDashboard } from '../api/dashboard';
 
@@ -17,11 +17,11 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  return new Date(dateStr).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
 }
 
 function fmt(v: number) {
-  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(v);
+  return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 }).format(v);
 }
 
 function StatCard({ label, value, icon, color }: { label: string; value: string | number; icon: React.ReactNode; color: string }) {
@@ -42,7 +42,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { data, isLoading } = useQuery({ queryKey: ['dashboard'], queryFn: getDashboard });
 
-  const today = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+  const today = new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' });
   const todayCapitalized = today.charAt(0).toUpperCase() + today.slice(1);
 
   if (isLoading) {
@@ -122,7 +122,7 @@ export default function Dashboard() {
               className="text-xs font-medium hover:opacity-80"
               style={{ color: '#00AEEF' }}
             >
-              Ver todas →
+              Ver todas â†’
             </button>
           </div>
           {todayAppointments.length === 0 ? (
@@ -167,7 +167,7 @@ export default function Dashboard() {
               className="text-xs font-medium hover:opacity-80"
               style={{ color: '#00AEEF' }}
             >
-              Ver todos →
+              Ver todos â†’
             </button>
           </div>
           {recentPatients.length === 0 ? (
@@ -198,3 +198,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

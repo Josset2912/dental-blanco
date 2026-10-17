@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getTreatments, createTreatment, updateTreatment } from '../api/treatments';
 import type { Treatment } from '../api/treatments';
@@ -29,7 +29,7 @@ const FILTERS = [
 ];
 
 function formatCost(cost: string) {
-  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(parseFloat(cost));
+  return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(parseFloat(cost));
 }
 
 export default function Treatments() {
@@ -66,7 +66,7 @@ export default function Treatments() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Tratamientos</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{inProgress} en progreso · {treatments.length} total</p>
+          <p className="text-sm text-gray-500 mt-0.5">{inProgress} en progreso Â· {treatments.length} total</p>
         </div>
         <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2 text-white transition-colors" style={{ background: "linear-gradient(135deg,#00AEEF,#0077B6)" }}>
           <PlusIcon /> Nuevo tratamiento
@@ -118,7 +118,7 @@ export default function Treatments() {
                     </td>
                     <td className="px-4 py-3.5 text-sm font-medium text-gray-900">{formatCost(t.cost)}</td>
                     <td className="px-4 py-3.5 text-sm text-gray-600">
-                      {new Date(t.startDate).toLocaleDateString('es-MX')}
+                      {new Date(t.startDate).toLocaleDateString('es-PE')}
                     </td>
                     <td className="px-4 py-3.5">
                       <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[t.status]}`}>
@@ -169,3 +169,4 @@ export default function Treatments() {
     </>
   );
 }
+

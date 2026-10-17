@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPatients } from '../api/patients';
 import type { Treatment } from '../api/treatments';
@@ -16,9 +16,9 @@ interface Props {
 }
 
 const TREATMENT_NAMES = [
-  'Limpieza dental', 'Extracción simple', 'Extracción molar', 'Endodoncia',
+  'Limpieza dental', 'ExtracciÃ³n simple', 'ExtracciÃ³n molar', 'Endodoncia',
   'Resina / Empaste', 'Corona dental', 'Ortodoncia', 'Blanqueamiento',
-  'Implante dental', 'Puente dental', 'Cirugía periodontal', 'Otro',
+  'Implante dental', 'Puente dental', 'CirugÃ­a periodontal', 'Otro',
 ];
 
 const inputClass = 'w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white';
@@ -102,7 +102,7 @@ export default function TreatmentForm({ onClose, onSubmit, loading, error, initi
                 )}
                 {selectedPatient && (
                   <div className="flex justify-between items-center px-3 py-2 bg-[#E6F7FD] text-blue-700 text-sm rounded-lg">
-                    <span>✓ {selectedPatient.name} {selectedPatient.lastName}</span>
+                    <span>âœ“ {selectedPatient.name} {selectedPatient.lastName}</span>
                     <button type="button" className="text-[#0077B6] hover:text-blue-800 text-xs"
                       onClick={() => { setForm(f => ({ ...f, patientId: '' })); setPatientSearch(''); }}>
                       Cambiar
@@ -122,12 +122,12 @@ export default function TreatmentForm({ onClose, onSubmit, loading, error, initi
               </div>
 
               <div className="col-span-2 flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-gray-700">Descripción</label>
+                <label className="text-sm font-medium text-gray-700">DescripciÃ³n</label>
                 <input className={inputClass} value={form.description} onChange={set('description')} placeholder="Detalle del tratamiento..." />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-gray-700">Costo (MXN) *</label>
+                <label className="text-sm font-medium text-gray-700">Costo (S/) *</label>
                 <input type="number" min="0" step="0.01" className={inputClass} value={form.cost} onChange={set('cost')} required placeholder="0.00" />
               </div>
 
@@ -155,3 +155,4 @@ export default function TreatmentForm({ onClose, onSubmit, loading, error, initi
     </div>
   );
 }
+

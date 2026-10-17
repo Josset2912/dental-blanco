@@ -54,7 +54,7 @@ export default function Reports() {
             <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#6b7280' }} />
             <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} tickFormatter={v => `$${(v/1000).toFixed(0)}k`} />
             <Tooltip
-              formatter={(v: number) => [fmt(v), 'Ingresos']}
+              formatter={(v) => [fmt(Number(v)), 'Ingresos']}
               contentStyle={{ borderRadius: 8, fontSize: 12 }}
             />
             <Bar dataKey="total" fill="#3b82f6" radius={[4, 4, 0, 0]} />
@@ -93,7 +93,7 @@ export default function Reports() {
                   nameKey="label"
                   cx="50%" cy="50%"
                   outerRadius={80}
-                  label={({ label, percent }) => `${label} ${(percent * 100).toFixed(0)}%`}
+                  label={({ label, percent }: { label?: string; percent?: number }) => `${label ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
                   labelLine={false}
                 >
                   {treatments.byStatus.map((_, i) => (

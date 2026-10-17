@@ -66,9 +66,9 @@ export default function Treatments() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Tratamientos</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{inProgress} en progreso Â· {treatments.length} total</p>
+          <p className="text-sm text-gray-500 mt-0.5">{inProgress} en progreso · {treatments.length} total</p>
         </div>
-        <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2 text-white transition-colors" style={{ background: "linear-gradient(135deg,#00AEEF,#0077B6)" }}>
+        <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2 text-white transition-colors rounded-lg text-sm font-medium" style={{ background: "linear-gradient(135deg,#00AEEF,#0077B6)" }}>
           <PlusIcon /> Nuevo tratamiento
         </button>
       </div>
@@ -169,4 +169,3 @@ export default function Treatments() {
     </>
   );
 }
-

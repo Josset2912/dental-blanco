@@ -23,7 +23,7 @@ const METHODS = [
 ];
 
 const CONCEPTS = [
-  'Consulta general', 'Limpieza dental', 'ExtracciÃ³n', 'Endodoncia',
+  'Consulta general', 'Limpieza dental', 'Extracción', 'Endodoncia',
   'Ortodoncia', 'Blanqueamiento', 'Implante', 'Corona', 'Pago de tratamiento', 'Otro',
 ];
 
@@ -104,7 +104,7 @@ export default function PaymentForm({ onClose, onSubmit, loading, error, fixedPa
                 )}
                 {selectedPatient && (
                   <div className="flex justify-between items-center px-3 py-2 bg-[#E6F7FD] text-blue-700 text-sm rounded-lg">
-                    <span>âœ“ {selectedPatient.name} {selectedPatient.lastName}</span>
+                    <span>✓ {selectedPatient.name} {selectedPatient.lastName}</span>
                     <button type="button" className="text-[#0077B6] hover:text-blue-800 text-xs"
                       onClick={() => { setForm(f => ({ ...f, patientId: '', treatmentId: '' })); setPatientSearch(''); }}>
                       Cambiar
@@ -121,7 +121,7 @@ export default function PaymentForm({ onClose, onSubmit, loading, error, fixedPa
                 <select className={inputClass} value={form.treatmentId} onChange={set('treatmentId')}>
                   <option value="">Sin vincular</option>
                   {treatments.filter(t => t.status !== 'CANCELLED').map(t => (
-                    <option key={t.id} value={t.id}>{t.name} â€” {new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(parseFloat(t.cost))}</option>
+                    <option key={t.id} value={t.id}>{t.name} — {new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(parseFloat(t.cost))}</option>
                   ))}
                 </select>
               </div>
@@ -133,7 +133,7 @@ export default function PaymentForm({ onClose, onSubmit, loading, error, fixedPa
                 <input type="number" min="0" step="0.01" className={inputClass} value={form.amount} onChange={set('amount')} required placeholder="0.00" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-gray-700">MÃ©todo *</label>
+                <label className="text-sm font-medium text-gray-700">Método *</label>
                 <select className={inputClass} value={form.method} onChange={set('method')}>
                   {METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
                 </select>
@@ -164,4 +164,3 @@ export default function PaymentForm({ onClose, onSubmit, loading, error, fixedPa
     </div>
   );
 }
-

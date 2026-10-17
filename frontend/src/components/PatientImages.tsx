@@ -4,8 +4,8 @@ import { getPatientImages, uploadPatientImage, deletePatientImage, type PatientI
 import { jsPDF } from 'jspdf';
 
 const TYPE_OPTIONS = [
-  { value: 'radiografia', label: 'RadiografÃ­a' },
-  { value: 'foto_clinica', label: 'Foto clÃ­nica' },
+  { value: 'radiografia', label: 'Radiografía' },
+  { value: 'foto_clinica', label: 'Foto clínica' },
   { value: 'documento', label: 'Documento' },
   { value: 'otro', label: 'Otro' },
 ];
@@ -60,7 +60,7 @@ export default function PatientImages({ patientId, patientName }: Props) {
 
       doc.setFontSize(11);
       doc.setTextColor(80, 80, 80);
-      doc.text('Expediente de imÃ¡genes del paciente', pageW / 2, y, { align: 'center' });
+      doc.text('Expediente de imagenes del paciente', pageW / 2, y, { align: 'center' });
       y += 10;
 
       doc.setFontSize(13);
@@ -69,7 +69,7 @@ export default function PatientImages({ patientId, patientName }: Props) {
       y += 7;
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
-      doc.text(`Fecha de exportaciÃ³n: ${new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })}`, 14, y);
+      doc.text(`Fecha de exportacion: ${new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })}`, 14, y);
       y += 10;
 
       doc.setDrawColor(200, 200, 200);
@@ -107,7 +107,7 @@ export default function PatientImages({ patientId, patientName }: Props) {
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-5">
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <div>
-          <h3 className="text-sm font-semibold text-gray-900">RadiografÃ­as e imÃ¡genes</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Radiografías e imágenes</h3>
           <p className="text-xs text-gray-500 mt-0.5">{images.length} archivo{images.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -159,8 +159,8 @@ export default function PatientImages({ patientId, patientName }: Props) {
             <svg className="w-10 h-10 mx-auto mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            <p className="text-sm text-gray-500 font-medium">Arrastra imÃ¡genes aquÃ­ o haz clic para subir</p>
-            <p className="text-xs text-gray-400 mt-1">RadiografÃ­as, fotos clÃ­nicas, documentos</p>
+            <p className="text-sm text-gray-500 font-medium">Arrastra imágenes aquí o haz clic para subir</p>
+            <p className="text-xs text-gray-400 mt-1">Radiografías, fotos clínicas, documentos</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -191,7 +191,7 @@ export default function PatientImages({ patientId, patientName }: Props) {
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <div>
                 <p className="text-sm font-semibold text-gray-900">{preview.name}</p>
-                <p className="text-xs text-gray-500">{TYPE_OPTIONS.find(t => t.value === preview.type)?.label} Â· {new Date(preview.createdAt).toLocaleDateString('es-PE')}</p>
+                <p className="text-xs text-gray-500">{TYPE_OPTIONS.find(t => t.value === preview.type)?.label} · {new Date(preview.createdAt).toLocaleDateString('es-PE')}</p>
               </div>
               <div className="flex items-center gap-2">
                 <a href={preview.url} target="_blank" rel="noreferrer" className="px-3 py-1.5 text-xs font-medium text-[#0077B6] border border-[#00AEEF] rounded-lg hover:bg-[#E6F7FD] transition-colors">
@@ -231,4 +231,3 @@ async function fetchImageAsDataUrl(url: string): Promise<string> {
     reader.readAsDataURL(blob);
   });
 }
-

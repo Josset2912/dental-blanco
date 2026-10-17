@@ -66,7 +66,7 @@ export default function Patients() {
         </span>
         <input
           className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
-          placeholder="Buscar por nombre o telÃ©fono..."
+          placeholder="Buscar por nombre o teléfono..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -82,15 +82,15 @@ export default function Patients() {
             <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>
             </svg>
-            <p className="text-sm font-medium text-gray-700">No hay pacientes {search ? 'con esa bÃºsqueda' : 'registrados'}</p>
-            <span className="text-xs">{!search && 'Crea el primer paciente con el botÃ³n de arriba'}</span>
+            <p className="text-sm font-medium text-gray-700">No hay pacientes {search ? 'con esa búsqueda' : 'registrados'}</p>
+            <span className="text-xs">{!search && 'Crea el primer paciente con el botón de arriba'}</span>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr>
-                  {['Paciente', 'TelÃ©fono', 'GÃ©nero', 'Edad', 'Registro'].map(h => (
+                  {['Paciente', 'Teléfono', 'Género', 'Edad', 'Registro'].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">
                       {h}
                     </th>
@@ -112,7 +112,7 @@ export default function Patients() {
                     <td className="px-4 py-3.5 text-sm border-b border-gray-100">
                       <span className={genderBadgeClass[p.gender]}>{genderLabel[p.gender]}</span>
                     </td>
-                    <td className="px-4 py-3.5 text-sm border-b border-gray-100">{calcAge(p.birthDate)} aÃ±os</td>
+                    <td className="px-4 py-3.5 text-sm border-b border-gray-100">{calcAge(p.birthDate)} años</td>
                     <td className="px-4 py-3.5 text-sm border-b border-gray-100">
                       {new Date(p.createdAt).toLocaleDateString('es-PE')}
                     </td>
@@ -135,4 +135,3 @@ export default function Patients() {
     </>
   );
 }
-

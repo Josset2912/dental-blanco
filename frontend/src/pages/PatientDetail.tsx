@@ -7,6 +7,7 @@ import { getPayments } from '../api/payments';
 import PatientForm from '../components/PatientForm';
 import TreatmentForm from '../components/TreatmentForm';
 import Odontogram from '../components/Odontogram';
+import PatientImages from '../components/PatientImages';
 
 function calcAge(birthDate: string) {
   return Math.floor((Date.now() - new Date(birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
@@ -206,6 +207,9 @@ export default function PatientDetail() {
           </table>
         )}
       </div>
+
+      {/* Images section */}
+      <PatientImages patientId={id!} patientName={`${patient.name} ${patient.lastName}`} />
 
       {/* Payments section */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-5">

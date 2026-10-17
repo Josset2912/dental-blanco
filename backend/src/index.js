@@ -11,6 +11,7 @@ const treatmentRoutes = require('./routes/treatments');
 const paymentRoutes = require('./routes/payments');
 const odontogramRoutes = require('./routes/odontogram');
 const reportsRoutes = require('./routes/reports');
+const imagesRoutes = require('./routes/images');
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use('/api/treatments', treatmentRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/odontogram', odontogramRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/images', imagesRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

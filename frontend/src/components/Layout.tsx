@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { getUser, logout } from '../api/auth';
+import { getPatients } from '../api/patients';
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
@@ -62,10 +63,123 @@ const navItems = [
   { to: '/configuracion', icon: icons.settings,      label: 'Configuración' },
 ];
 
+// ─── Global Patient Search ────────────────────────────────────────────────────
+
+function GlobalSearch() {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!query.trim()) { setResults([]); setOpen(false); return; }
+    setLoading(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const data = await getPatients(query.trim());
+        setResults(data.slice(0, 6));
+        setOpen(true);
+      } catch {
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+  }, [query]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        inputRef.current && !inputRef.current.contains(e.target as Node) &&
+        dropdownRef.current && !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const handleSelect = (id: string) => {
+    setQuery('');
+    setResults([]);
+    setOpen(false);
+    navigate(`/pacientes/${id}`);
+  };
+
+  return (
+    <div className="relative">
+      <div className="relative flex items-center">
+        <svg className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+          ref={inputRef}
+          type="search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onFocus={() => { if (results.length > 0) setOpen(true); }}
+          placeholder="Buscar paciente..."
+          className="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-56 bg-white placeholder-gray-400"
+        />
+        {loading && (
+          <svg className="absolute right-3 w-4 h-4 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4}/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+        )}
+      </div>
+
+      {open && results.length > 0 && (
+        <div
+          ref={dropdownRef}
+          className="absolute top-full left-0 mt-1.5 w-72 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden"
+        >
+          {results.map(p => (
+            <button
+              key={p.id}
+              onClick={() => handleSelect(p.id)}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-50 last:border-0"
+            >
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+              >
+                {(p.name[0] ?? '').toUpperCase()}{(p.lastName[0] ?? '').toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{p.name} {p.lastName}</p>
+                <p className="text-xs text-gray-500 truncate">{p.phone}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {open && !loading && results.length === 0 && query.trim().length > 1 && (
+        <div
+          ref={dropdownRef}
+          className="absolute top-full left-0 mt-1.5 w-72 bg-white border border-gray-200 rounded-xl shadow-lg z-50 px-4 py-3"
+        >
+          <p className="text-sm text-gray-500">Sin resultados para "{query}"</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
+
 export default function Layout() {
   const user = getUser();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const handleLogout = () => { logout(); navigate('/login'); };
   const initials = user?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() ?? 'DR';
@@ -107,6 +221,11 @@ export default function Layout() {
               <p className="text-[10px] text-gray-400 leading-tight">Creamos arte en tu sonrisa</p>
             </div>
           </div>
+        </div>
+
+        {/* Search in sidebar for desktop */}
+        <div className="hidden md:block px-3 pt-3 pb-1">
+          <GlobalSearch />
         </div>
 
         {/* Nav links */}
@@ -157,17 +276,45 @@ export default function Layout() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
           </button>
-          <div className="flex items-center gap-2">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
-            >
-              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
-              </svg>
+
+          {searchOpen ? (
+            <div className="flex-1 flex items-center gap-2">
+              <div className="flex-1">
+                <GlobalSearch />
+              </div>
+              <button
+                onClick={() => setSearchOpen(false)}
+                className="p-2 text-gray-500"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
             </div>
-            <span className="text-sm font-bold" style={{ color: '#0077B6' }}>Blanco Dental</span>
-          </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 flex-1">
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+                >
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
+                  </svg>
+                </div>
+                <span className="text-sm font-bold" style={{ color: '#0077B6' }}>Blanco Dental</span>
+              </div>
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                aria-label="Buscar paciente"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </button>
+            </>
+          )}
         </header>
 
         <main className="flex-1 p-4 md:p-8">

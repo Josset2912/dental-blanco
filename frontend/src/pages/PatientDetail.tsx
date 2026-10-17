@@ -8,6 +8,7 @@ import PatientForm from '../components/PatientForm';
 import TreatmentForm from '../components/TreatmentForm';
 import Odontogram from '../components/Odontogram';
 import PatientImages from '../components/PatientImages';
+import ClinicalNotes from '../components/ClinicalNotes';
 
 function calcAge(birthDate: string) {
   return Math.floor((Date.now() - new Date(birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
@@ -89,7 +90,7 @@ export default function PatientDetail() {
           </button>
           <div>
             <h2 className="text-xl font-bold text-gray-900">{patient.name} {patient.lastName}</h2>
-            <p className="text-sm text-gray-500 mt-0.5">{calcAge(patient.birthDate)} aÃ±os Â· {genderLabel[patient.gender]}</p>
+            <p className="text-sm text-gray-500 mt-0.5">{calcAge(patient.birthDate)} años · {genderLabel[patient.gender]}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -110,16 +111,16 @@ export default function PatientDetail() {
 
       <div className="grid grid-cols-2 gap-5 mb-5">
         <div className="bg-white border border-gray-200 rounded-xl p-6">
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">InformaciÃ³n personal</h4>
-          <InfoRow label="TelÃ©fono" value={patient.phone} />
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Información personal</h4>
+          <InfoRow label="Teléfono" value={patient.phone} />
           {patient.email && <InfoRow label="Correo" value={patient.email} />}
           <InfoRow label="Fecha de nac." value={new Date(patient.birthDate).toLocaleDateString('es-PE')} />
-          {patient.address && <InfoRow label="DirecciÃ³n" value={patient.address} />}
+          {patient.address && <InfoRow label="Dirección" value={patient.address} />}
           <InfoRow label="Registro" value={new Date(patient.createdAt).toLocaleDateString('es-PE')} last />
         </div>
 
         <div className="bg-white border border-gray-200 rounded-xl p-6">
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Notas clÃ­nicas</h4>
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Notas clínicas</h4>
           <InfoRow label="Alergias" value={patient.allergies || 'Ninguna registrada'} last={!patient.notes} />
           {patient.notes && (
             <div className="mt-4">
@@ -141,7 +142,7 @@ export default function PatientDetail() {
           <div>
             <h3 className="text-sm font-semibold text-gray-900">Tratamientos</h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              {treatments.filter(t => t.status === 'IN_PROGRESS').length} en progreso Â· {treatments.length} total
+              {treatments.filter(t => t.status === 'IN_PROGRESS').length} en progreso · {treatments.length} total
             </p>
           </div>
           <button
@@ -165,7 +166,7 @@ export default function PatientDetail() {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                {['Tratamiento', 'DescripciÃ³n', 'Costo', 'Inicio', 'Estado', ''].map(h => (
+                {['Tratamiento', 'Descripción', 'Costo', 'Inicio', 'Estado', ''].map(h => (
                   <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">{h}</th>
                 ))}
               </tr>
@@ -174,7 +175,7 @@ export default function PatientDetail() {
               {treatments.map((t, i) => (
                 <tr key={t.id} className={`hover:bg-gray-50 ${i < treatments.length - 1 ? 'border-b border-gray-100' : ''}`}>
                   <td className="px-5 py-3.5 text-sm font-medium text-gray-900">{t.name}</td>
-                  <td className="px-5 py-3.5 text-sm text-gray-500 max-w-[200px] truncate">{t.description || 'â€”'}</td>
+                  <td className=”px-5 py-3.5 text-sm text-gray-500 max-w-[200px] truncate”>{t.description || '—'}</td>
                   <td className="px-5 py-3.5 text-sm font-medium text-gray-900">
                     {new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(parseFloat(t.cost))}
                   </td>
@@ -208,6 +209,9 @@ export default function PatientDetail() {
         )}
       </div>
 
+      {/* Clinical Notes section */}
+      <ClinicalNotes patientId={id!} />
+
       {/* Images section */}
       <PatientImages patientId={id!} patientName={`${patient.name} ${patient.lastName}`} />
 
@@ -227,7 +231,7 @@ export default function PatientDetail() {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                {['Fecha', 'Concepto', 'Tratamiento', 'MÃ©todo', 'Monto'].map(h => (
+                {['Fecha', 'Concepto', 'Tratamiento', 'Método', 'Monto'].map(h => (
                   <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">{h}</th>
                 ))}
               </tr>
@@ -239,7 +243,7 @@ export default function PatientDetail() {
                     {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </td>
                   <td className="px-5 py-3 text-sm text-gray-700">{p.concept}</td>
-                  <td className="px-5 py-3 text-sm text-gray-500">{p.treatment?.name ?? 'â€”'}</td>
+                  <td className=”px-5 py-3 text-sm text-gray-500”>{p.treatment?.name ?? '—'}</td>
                   <td className="px-5 py-3">
                     <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
                       p.method === 'CASH' ? 'bg-green-50 text-green-700' :
@@ -285,7 +289,7 @@ export default function PatientDetail() {
             </div>
             <div className="px-6 py-5">
               <p className="text-sm text-gray-700 mb-5">
-                Â¿EstÃ¡s seguro de eliminar a <strong>{patient.name} {patient.lastName}</strong>? Esta acciÃ³n no se puede deshacer.
+                ¿Estás seguro de eliminar a <strong>{patient.name} {patient.lastName}</strong>? Esta acción no se puede deshacer.
               </p>
               <div className="flex justify-end gap-2">
                 <button
@@ -299,7 +303,7 @@ export default function PatientDetail() {
                   onClick={() => deleteMut.mutate()}
                   disabled={deleteMut.isPending}
                 >
-                  {deleteMut.isPending ? 'Eliminando...' : 'SÃ­, eliminar'}
+                  {deleteMut.isPending ? 'Eliminando...' : 'Sí, eliminar'}
                 </button>
               </div>
             </div>

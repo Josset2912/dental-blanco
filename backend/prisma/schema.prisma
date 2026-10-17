@@ -8,16 +8,18 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String
-  email        String   @unique
-  password     String
-  role         Role     @default(RECEPCIONISTA)
-  specialty    String?
-  phone        String?
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  appointments Appointment[]
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  password      String
+  role          Role           @default(RECEPCIONISTA)
+  specialty     String?
+  phone         String?
+  active        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  appointments  Appointment[]
+  clinicalNotes ClinicalNote[]
+  blockedSlots  BlockedSlot[]
 }
 
 model Patient {
@@ -33,11 +35,12 @@ model Patient {
   notes        String?
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
-  appointments Appointment[]
-  treatments   Treatment[]
-  payments     Payment[]
-  odontogram   Odontogram?
-  images       PatientImage[]
+  appointments  Appointment[]
+  treatments    Treatment[]
+  payments      Payment[]
+  odontogram    Odontogram?
+  images        PatientImage[]
+  clinicalNotes ClinicalNote[]
 }
 
 model PatientImage {
@@ -49,6 +52,27 @@ model PatientImage {
   type      String   @default("radiografia")
   createdAt DateTime @default(now())
   patient   Patient  @relation(fields: [patientId], references: [id])
+}
+
+model ClinicalNote {
+  id        String   @id @default(uuid())
+  patientId String
+  doctorId  String
+  content   String
+  createdAt DateTime @default(now())
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  doctor    User     @relation(fields: [doctorId], references: [id])
+}
+
+model BlockedSlot {
+  id        String   @id @default(uuid())
+  doctorId  String
+  date      String
+  startTime String
+  endTime   String
+  reason    String?
+  createdAt DateTime @default(now())
+  doctor    User     @relation(fields: [doctorId], references: [id])
 }
 
 model Odontogram {

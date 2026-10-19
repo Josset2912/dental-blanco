@@ -1,7 +1,6 @@
 ﻿import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getPatients } from '../api/patients';
 import type { Treatment } from '../api/treatments';
+import PatientComboBox from './PatientComboBox';
 
 interface Props {
   onClose: () => void;
@@ -32,19 +31,10 @@ export default function TreatmentForm({ onClose, onSubmit, loading, initial, fix
     startDate: initial?.startDate ? initial.startDate.slice(0, 10) : today,
     notes: initial?.notes ?? '',
   });
-  const [patientSearch, setPatientSearch] = useState('');
-
-  const { data: patients = [] } = useQuery({
-    queryKey: ['patients', patientSearch],
-    queryFn: () => getPatients(patientSearch || undefined),
-    enabled: !fixedPatientId,
-  });
 
   const set = (k: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
       setForm(f => ({ ...f, [k]: e.target.value }));
-
-  const selectedPatient = patients.find(p => p.id === form.patientId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,41 +63,11 @@ export default function TreatmentForm({ onClose, onSubmit, loading, initial, fix
 
             {/* Patient selector */}
             {!fixedPatientId && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-gray-700">Paciente *</label>
-                <input
-                  className={inputClass}
-                  placeholder="Buscar paciente..."
-                  value={patientSearch}
-                  onChange={e => { setPatientSearch(e.target.value); setForm(f => ({ ...f, patientId: '' })); }}
-                />
-                {patientSearch && !selectedPatient && (
-                  <div className="relative">
-                    <div className="absolute top-0 left-0 right-0 border border-gray-200 rounded-lg max-h-40 overflow-y-auto bg-white shadow-md z-10">
-                      {patients.length === 0
-                        ? <p className="px-3 py-2.5 text-sm text-gray-500">Sin resultados</p>
-                        : patients.map(p => (
-                          <div key={p.id}
-                            className="px-3 py-2.5 cursor-pointer text-sm hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-                            onClick={() => { setForm(f => ({ ...f, patientId: p.id })); setPatientSearch(`${p.name} ${p.lastName}`); }}>
-                            <span className="font-medium">{p.name} {p.lastName}</span>
-                            <span className="text-gray-500 ml-2">{p.phone}</span>
-                          </div>
-                        ))
-                      }
-                    </div>
-                  </div>
-                )}
-                {selectedPatient && (
-                  <div className="flex justify-between items-center px-3 py-2 bg-[#E6F7FD] text-blue-700 text-sm rounded-lg">
-                    <span>✓ {selectedPatient.name} {selectedPatient.lastName}</span>
-                    <button type="button" className="text-[#0077B6] hover:text-blue-800 text-xs"
-                      onClick={() => { setForm(f => ({ ...f, patientId: '' })); setPatientSearch(''); }}>
-                      Cambiar
-                    </button>
-                  </div>
-                )}
-              </div>
+              <PatientComboBox
+                patientId={form.patientId}
+                onChange={id => setForm(f => ({ ...f, patientId: id }))}
+                required
+              />
             )}
 
             <div className="grid grid-cols-2 gap-4">

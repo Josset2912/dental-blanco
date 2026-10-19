@@ -414,8 +414,9 @@ export default function Odontogram({ patientId }: { patientId: string }) {
         </button>
       </div>
 
-      {/* Canvas con fondo claro */}
-      <div style={{ background: '#f8fafc', padding: '14px 10px', userSelect: 'none', borderBottom: '1px solid #e5e7eb' }}>
+      {/* Canvas con fondo claro — scroll horizontal en mobile */}
+      <div style={{ overflowX: 'auto', borderBottom: '1px solid #e5e7eb' }}>
+      <div style={{ background: '#f8fafc', padding: '14px 10px', userSelect: 'none', minWidth: 420 }}>
         {/* Maxilar Superior */}
         {renderNumbers(UPPER, true)}
         {renderRow(UPPER, true)}
@@ -435,6 +436,7 @@ export default function Odontogram({ patientId }: { patientId: string }) {
         <div style={{ marginBottom: 4 }}>{renderCircles(LOWER, false)}</div>
         {renderRow(LOWER, false)}
         {renderNumbers(LOWER, false)}
+      </div>
       </div>
 
       {/* Condicion activa */}

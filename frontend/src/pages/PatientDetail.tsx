@@ -49,6 +49,9 @@ export default function PatientDetail() {
   const [showEdit, setShowEdit] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showTreatmentForm, setShowTreatmentForm] = useState(false);
+  const [confirmComplete, setConfirmComplete] = useState<typeof treatments[number] | null>(null);
+  const [editTreatment, setEditTreatment] = useState<typeof treatments[number] | null>(null);
+  const [editTreatmentForm, setEditTreatmentForm] = useState<{ status: string; cost: string; description: string; notes: string }>({ status: '', cost: '', description: '', notes: '' });
 
   const { data: patient, isLoading } = useQuery({
     queryKey: ['patient', id],
@@ -81,8 +84,21 @@ export default function PatientDetail() {
 
   const completeTreatmentMut = useMutation({
     mutationFn: (tid: string) => updateTreatment(tid, { status: 'COMPLETED', endDate: new Date().toISOString() }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments', id] }); toast.success('Tratamiento completado'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments', id] }); setConfirmComplete(null); toast.success('Tratamiento completado'); },
     onError: () => toast.error('Error al completar el tratamiento'),
+  });
+
+  const editTreatmentMut = useMutation({
+    mutationFn: (tid: string) => updateTreatment(tid, {
+      status: editTreatmentForm.status as 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED',
+      cost: parseFloat(editTreatmentForm.cost),
+      description: editTreatmentForm.description || undefined,
+      notes: editTreatmentForm.notes || undefined,
+      ...(editTreatmentForm.status === 'COMPLETED' ? { endDate: new Date().toISOString() } : {}),
+      ...(editTreatmentForm.status === 'IN_PROGRESS' ? { endDate: undefined } : {}),
+    }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments', id] }); setEditTreatment(null); toast.success('Tratamiento actualizado'); },
+    onError: () => toast.error('Error al actualizar el tratamiento'),
   });
 
   const { data: payments = [] } = useQuery({
@@ -205,13 +221,18 @@ export default function PatientDetail() {
                   {t.description && <p className="text-xs text-gray-500 mb-1.5">{t.description}</p>}
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-bold text-gray-900">{fmtCost(t.cost)}</span>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-400">{new Date(t.startDate).toLocaleDateString('es-PE')}</span>
+                      <button
+                        onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
+                        className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                      </button>
                       {t.status === 'IN_PROGRESS' && (
                         <button
-                          onClick={() => completeTreatmentMut.mutate(t.id)}
-                          disabled={completeTreatmentMut.isPending}
-                          className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50 disabled:opacity-60"
+                          onClick={() => setConfirmComplete(t)}
+                          className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50"
                         >
                           Completar
                         </button>
@@ -244,15 +265,23 @@ export default function PatientDetail() {
                         </span>
                       </td>
                       <td className="px-5 py-3.5">
-                        {t.status === 'IN_PROGRESS' && (
+                        <div className="flex items-center gap-2">
                           <button
-                            onClick={() => completeTreatmentMut.mutate(t.id)}
-                            disabled={completeTreatmentMut.isPending}
-                            className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50 disabled:opacity-60"
+                            onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
+                            className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
+                            title="Editar tratamiento"
                           >
-                            Completar
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                           </button>
-                        )}
+                          {t.status === 'IN_PROGRESS' && (
+                            <button
+                              onClick={() => setConfirmComplete(t)}
+                              className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50"
+                            >
+                              Completar
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -338,6 +367,134 @@ export default function PatientDetail() {
           </>
         )}
       </div>
+
+      {/* Modal confirmar completar tratamiento */}
+      {confirmComplete && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl w-full max-w-sm shadow-xl">
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <h3 className="text-base font-bold text-gray-900">Completar tratamiento</h3>
+            </div>
+            <div className="px-6 py-5">
+              <div className="bg-gray-50 rounded-lg p-3 mb-4 text-sm space-y-1">
+                <p className="font-semibold text-gray-900">{confirmComplete.name}</p>
+                {confirmComplete.description && <p className="text-gray-500 text-xs">{confirmComplete.description}</p>}
+                <p className="text-gray-700 font-medium">{fmtCost(confirmComplete.cost)}</p>
+              </div>
+              <p className="text-sm text-gray-600 mb-5">¿Confirmas que este tratamiento ha sido completado? Se registrará la fecha de hoy como fecha de término.</p>
+              <div className="flex justify-end gap-2">
+                <button
+                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100"
+                  onClick={() => setConfirmComplete(null)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 disabled:opacity-60"
+                  onClick={() => completeTreatmentMut.mutate(confirmComplete.id)}
+                  disabled={completeTreatmentMut.isPending}
+                >
+                  {completeTreatmentMut.isPending ? 'Guardando...' : 'Sí, completar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal editar tratamiento */}
+      {editTreatment && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl w-full max-w-sm shadow-xl">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+              <h3 className="text-base font-bold text-gray-900">Editar tratamiento</h3>
+              <button onClick={() => setEditTreatment(null)} className="w-7 h-7 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <p className="text-sm font-semibold text-gray-800">{editTreatment.name}</p>
+
+              {/* Estado */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {([
+                    { value: 'IN_PROGRESS', label: 'En progreso', color: 'bg-[#E6F7FD] text-[#0077B6] border-[#00AEEF]' },
+                    { value: 'COMPLETED', label: 'Completado', color: 'bg-green-50 text-green-700 border-green-400' },
+                    { value: 'CANCELLED', label: 'Cancelado', color: 'bg-gray-100 text-gray-600 border-gray-400' },
+                  ] as const).map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setEditTreatmentForm(f => ({ ...f, status: opt.value }))}
+                      className={`py-2 rounded-lg text-xs font-semibold border-2 transition-all ${editTreatmentForm.status === opt.value ? opt.color + ' border-opacity-100' : 'bg-white text-gray-400 border-gray-200'}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Costo */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Costo (S/)</label>
+                <input
+                  type="number" min="0" step="0.01"
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                  value={editTreatmentForm.cost}
+                  onChange={e => setEditTreatmentForm(f => ({ ...f, cost: e.target.value }))}
+                />
+              </div>
+
+              {/* Descripción */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Descripción</label>
+                <input
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                  value={editTreatmentForm.description}
+                  onChange={e => setEditTreatmentForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Descripción del tratamiento..."
+                />
+              </div>
+
+              {/* Notas */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Notas</label>
+                <textarea
+                  rows={2}
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white resize-none"
+                  value={editTreatmentForm.notes}
+                  onChange={e => setEditTreatmentForm(f => ({ ...f, notes: e.target.value }))}
+                  placeholder="Observaciones..."
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100"
+                  onClick={() => setEditTreatment(null)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="px-4 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-60"
+                  style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+                  onClick={() => editTreatmentMut.mutate(editTreatment.id)}
+                  disabled={editTreatmentMut.isPending || !editTreatmentForm.cost}
+                >
+                  {editTreatmentMut.isPending ? 'Guardando...' : 'Guardar cambios'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       {showTreatmentForm && (

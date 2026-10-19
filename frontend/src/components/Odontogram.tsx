@@ -302,9 +302,6 @@ export default function Odontogram({ patientId }: { patientId: string }) {
   const [dirty, setDirty] = useState(false);
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const [canvasScale, setCanvasScale] = useState(1);
-  const [canvasH, setCanvasH] = useState(0);
 
   const { data: remoteState } = useQuery({
     queryKey: ['odontogram', patientId],
@@ -318,21 +315,6 @@ export default function Odontogram({ patientId }: { patientId: string }) {
     }
   }, [remoteState]);
 
-  useEffect(() => {
-    if (canvasRef.current) setCanvasH(canvasRef.current.scrollHeight);
-  }, []);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const naturalW = UPPER.reduce((s, n) => s + getToothWidth(n), 0) + (UPPER.length - 1) * 2 + 20;
-    const obs = new ResizeObserver(([entry]) => {
-      const w = entry.contentRect.width;
-      setCanvasScale(Math.min(1, w / naturalW));
-    });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
 
   const saveMut = useMutation({
     mutationFn: () => saveOdontogram(patientId, localState),
@@ -418,34 +400,36 @@ export default function Odontogram({ patientId }: { patientId: string }) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden" style={{ position: 'relative' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-        <div>
-          <h3 className="text-sm font-semibold text-gray-900">Odontograma</h3>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Haz clic en la silueta de un diente o en los sectores de corona entre los arcos.
-          </p>
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-gray-900">Odontograma</h3>
+            <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">
+              Haz clic en la silueta de un diente o en los sectores de corona entre los arcos.
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5 sm:hidden">
+              Desliza para ver todos los dientes. Toca para marcar.
+            </p>
+          </div>
+          <button
+            onClick={() => saveMut.mutate()}
+            disabled={!dirty || saveMut.isPending}
+            className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-white transition-colors rounded-lg text-xs font-medium disabled:opacity-50"
+            style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+          >
+            {saveMut.isPending ? 'Guardando...' : 'Guardar'}
+          </button>
         </div>
-        <button
-          onClick={() => saveMut.mutate()}
-          disabled={!dirty || saveMut.isPending}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-white transition-colors rounded-lg text-xs font-medium disabled:opacity-50"
-          style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
-        >
-          {saveMut.isPending ? 'Guardando...' : 'Guardar cambios'}
-        </button>
       </div>
 
-      {/* Canvas con fondo claro — escala en mobile para que quepa en pantalla */}
-      <div ref={containerRef} style={{ borderBottom: '1px solid #e5e7eb', overflow: 'hidden' }}>
+      {/* Canvas — scroll horizontal en mobile para mantener tamaño interactivo */}
+      <div ref={containerRef} style={{ borderBottom: '1px solid #e5e7eb', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
       <div
-        ref={canvasRef}
         style={{
           background: '#f8fafc',
           padding: '14px 10px',
           userSelect: 'none',
-          transform: canvasScale < 1 ? `scale(${canvasScale})` : undefined,
-          transformOrigin: 'top left',
-          marginBottom: canvasScale < 1 && canvasH > 0 ? `${canvasH * (canvasScale - 1)}px` : undefined,
+          minWidth: 'max-content',
         }}
       >
         {/* Maxilar Superior */}

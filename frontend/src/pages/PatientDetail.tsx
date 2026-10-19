@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getPatient, updatePatient, deletePatient } from '../api/patients';
 import { getTreatments, createTreatment, updateTreatment } from '../api/treatments';
-import { getPayments, createPayment } from '../api/payments';
+import { getPayments, createPayment, type Payment } from '../api/payments';
+import { generatePaymentReceipt } from '../utils/generatePaymentReceipt';
 import PatientForm from '../components/PatientForm';
 import TreatmentForm from '../components/TreatmentForm';
 import Odontogram from '../components/Odontogram';
@@ -54,6 +55,7 @@ export default function PatientDetail() {
   const [editTreatmentForm, setEditTreatmentForm] = useState<{ status: string; cost: string; description: string; notes: string }>({ status: '', cost: '', description: '', notes: '' });
   const [payTreatment, setPayTreatment] = useState<typeof treatments[number] | null>(null);
   const [payForm, setPayForm] = useState<{ amount: string; method: string; notes: string }>({ amount: '', method: 'CASH', notes: '' });
+  const [lastPayment, setLastPayment] = useState<{ payment: Payment; treatment: typeof treatments[number] } | null>(null);
 
   const { data: patient, isLoading } = useQuery({
     queryKey: ['patient', id],
@@ -112,9 +114,10 @@ export default function PatientDetail() {
       concept: `Pago - ${payTreatment!.name}`,
       notes: payForm.notes || undefined,
     }),
-    onSuccess: () => {
+    onSuccess: (payment) => {
       qc.invalidateQueries({ queryKey: ['treatments', id] });
       qc.invalidateQueries({ queryKey: ['payments', id] });
+      setLastPayment({ payment, treatment: payTreatment! });
       setPayTreatment(null);
       toast.success('Pago registrado correctamente');
     },
@@ -399,7 +402,18 @@ export default function PatientDetail() {
                 <li key={p.id} className="px-5 py-4">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <span className="text-sm font-medium text-gray-900">{p.concept}</span>
-                    <span className="text-sm font-bold text-gray-900 shrink-0">{fmt(parseFloat(p.amount))}</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-sm font-bold text-gray-900">{fmt(parseFloat(p.amount))}</span>
+                      <button
+                        onClick={() => generatePaymentReceipt(p, patient, p.treatment ? treatments.find(t => t.id === p.treatment?.id) ?? null : null)}
+                        className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
+                        title="Descargar comprobante"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${METHOD_COLORS[p.method]}`}>
@@ -418,7 +432,7 @@ export default function PatientDetail() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    {['Fecha', 'Concepto', 'Tratamiento', 'Método', 'Monto'].map(h => (
+                    {['Fecha', 'Concepto', 'Tratamiento', 'Método', 'Monto', ''].map(h => (
                       <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">{h}</th>
                     ))}
                   </tr>
@@ -437,6 +451,17 @@ export default function PatientDetail() {
                         </span>
                       </td>
                       <td className="px-5 py-3 text-sm font-bold text-gray-900">{fmt(parseFloat(p.amount))}</td>
+                      <td className="px-5 py-3">
+                        <button
+                          onClick={() => generatePaymentReceipt(p, patient, p.treatment ? treatments.find(t => t.id === p.treatment?.id) ?? null : null)}
+                          className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
+                          title="Descargar comprobante"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                          </svg>
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -445,6 +470,30 @@ export default function PatientDetail() {
           </>
         )}
       </div>
+
+      {/* Banner descarga de comprobante tras pago exitoso */}
+      {lastPayment && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+          <div className="bg-gray-900 text-white rounded-xl shadow-xl px-5 py-4 flex items-center gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold">Pago registrado</p>
+              <p className="text-xs text-gray-300 mt-0.5 truncate">¿Descargar comprobante?</p>
+            </div>
+            <button
+              onClick={() => {
+                generatePaymentReceipt(lastPayment.payment, patient, lastPayment.treatment);
+                setLastPayment(null);
+              }}
+              className="px-3 py-1.5 text-xs font-semibold text-gray-900 bg-white rounded-lg hover:bg-gray-100 shrink-0"
+            >
+              Descargar
+            </button>
+            <button onClick={() => setLastPayment(null)} className="text-gray-400 hover:text-white shrink-0">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Modal pago rápido por tratamiento */}
       {payTreatment && (

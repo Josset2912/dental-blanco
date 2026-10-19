@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { getPatientsPaged, createPatient } from '../api/patients';
+import { getPatientsPaged, createPatient, updatePatient } from '../api/patients';
 import type { Patient } from '../api/patients';
 import PatientForm from '../components/PatientForm';
 import Pagination from '../components/Pagination';
@@ -20,11 +20,6 @@ const SearchIcon = () => (
 const PhoneIcon = () => (
   <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 8V5z"/>
-  </svg>
-);
-const ChevronIcon = () => (
-  <svg className="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
   </svg>
 );
 
@@ -75,6 +70,7 @@ export default function Patients() {
     else { setSortKey(key); setSortDir('asc'); }
   };
   const [showForm, setShowForm] = useState(false);
+  const [editPatient, setEditPatient] = useState<Patient | null>(null);
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -92,6 +88,12 @@ export default function Patients() {
     mutationFn: createPatient,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['patients'] }); setShowForm(false); toast.success('Paciente creado correctamente'); },
     onError: () => toast.error('Error al guardar el paciente'),
+  });
+
+  const updateMut = useMutation({
+    mutationFn: (data: Parameters<typeof updatePatient>[1]) => updatePatient(editPatient!.id, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['patients'] }); setEditPatient(null); toast.success('Paciente actualizado correctamente'); },
+    onError: () => toast.error('Error al actualizar el paciente'),
   });
 
   const empty = (
@@ -155,26 +157,35 @@ export default function Patients() {
             {patients.map((p: Patient, idx: number) => (
               <li
                 key={p.id}
-                className={`flex items-center gap-3 px-4 py-3.5 cursor-pointer active:bg-gray-50 hover:bg-gray-50 ${idx < patients.length - 1 ? 'border-b border-gray-100' : ''}`}
-                onClick={() => navigate(`/pacientes/${p.id}`)}
+                className={`flex items-center gap-3 px-4 py-3.5 ${idx < patients.length - 1 ? 'border-b border-gray-100' : ''}`}
               >
-                <PatientInitial name={p.name} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-gray-900 text-sm truncate">{p.name} {p.lastName}</span>
-                    <span className={genderBadgeClass[p.gender]}>{genderLabel[p.gender]}</span>
+                <div className="cursor-pointer flex items-center gap-3 flex-1 min-w-0" onClick={() => navigate(`/pacientes/${p.id}`)}>
+                  <PatientInitial name={p.name} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-gray-900 text-sm truncate">{p.name} {p.lastName}</span>
+                      <span className={genderBadgeClass[p.gender]}>{genderLabel[p.gender]}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <PhoneIcon />
+                      <span className="text-xs text-gray-500">{p.phone}</span>
+                      <span className="text-gray-300 text-xs">·</span>
+                      <span className="text-xs text-gray-500">{calcAge(p.birthDate)} años</span>
+                    </div>
+                    {p.email && (
+                      <div className="text-xs text-gray-400 truncate mt-0.5">{p.email}</div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <PhoneIcon />
-                    <span className="text-xs text-gray-500">{p.phone}</span>
-                    <span className="text-gray-300 text-xs">·</span>
-                    <span className="text-xs text-gray-500">{calcAge(p.birthDate)} años</span>
-                  </div>
-                  {p.email && (
-                    <div className="text-xs text-gray-400 truncate mt-0.5">{p.email}</div>
-                  )}
                 </div>
-                <ChevronIcon />
+                <button
+                  onClick={e => { e.stopPropagation(); setEditPatient(p); }}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors shrink-0"
+                  title="Editar paciente"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                </button>
               </li>
             ))}
           </ul>
@@ -226,6 +237,7 @@ export default function Patients() {
                       Registro <SortIcon active={sortKey === 'createdAt'} dir={sortDir} />
                     </button>
                   </th>
+                  <th className="px-4 py-3 w-10" />
                 </tr>
               </thead>
               <tbody>
@@ -236,10 +248,9 @@ export default function Patients() {
                 }).map((p: Patient, idx: number) => (
                   <tr
                     key={p.id}
-                    className={`cursor-pointer transition-colors hover:bg-[#E6F7FD]/40 ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}
-                    onClick={() => navigate(`/pacientes/${p.id}`)}
+                    className={`transition-colors hover:bg-[#E6F7FD]/40 ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}
                   >
-                    <td className="px-4 py-3.5 text-sm border-b border-gray-100">
+                    <td className="px-4 py-3.5 text-sm border-b border-gray-100 cursor-pointer" onClick={() => navigate(`/pacientes/${p.id}`)}>
                       <div className="flex items-center gap-2.5">
                         <PatientInitial name={p.name} />
                         <div>
@@ -248,13 +259,24 @@ export default function Patients() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-600">{p.phone}</td>
-                    <td className="px-4 py-3.5 text-sm border-b border-gray-100">
+                    <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-600 cursor-pointer" onClick={() => navigate(`/pacientes/${p.id}`)}>{p.phone}</td>
+                    <td className="px-4 py-3.5 text-sm border-b border-gray-100 cursor-pointer" onClick={() => navigate(`/pacientes/${p.id}`)}>
                       <span className={genderBadgeClass[p.gender]}>{genderLabel[p.gender]}</span>
                     </td>
-                    <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-600">{calcAge(p.birthDate)} años</td>
-                    <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-500">
+                    <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-600 cursor-pointer" onClick={() => navigate(`/pacientes/${p.id}`)}>{calcAge(p.birthDate)} años</td>
+                    <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-500 cursor-pointer" onClick={() => navigate(`/pacientes/${p.id}`)}>
                       {new Date(p.createdAt).toLocaleDateString('es-PE')}
+                    </td>
+                    <td className="px-4 py-3.5 border-b border-gray-100">
+                      <button
+                        onClick={() => setEditPatient(p)}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
+                        title="Editar paciente"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -271,6 +293,17 @@ export default function Patients() {
           onClose={() => setShowForm(false)}
           onSubmit={(data) => createMut.mutate(data)}
           loading={createMut.isPending}
+        />
+      )}
+
+      {editPatient && (
+        <PatientForm
+          title="Editar paciente"
+          initial={editPatient}
+          isEdit
+          onClose={() => setEditPatient(null)}
+          onSubmit={(data) => updateMut.mutate(data)}
+          loading={updateMut.isPending}
         />
       )}
     </>

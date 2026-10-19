@@ -353,6 +353,7 @@ export default function PatientDetail() {
         <PatientForm
           title="Editar paciente"
           initial={patient}
+          isEdit
           onClose={() => setShowEdit(false)}
           onSubmit={data => updateMut.mutate(data)}
           loading={updateMut.isPending}

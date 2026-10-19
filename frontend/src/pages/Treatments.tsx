@@ -290,8 +290,9 @@ export default function Treatments() {
           </div>
         ) : (
           <>
-            {/* Mobile cards */}
-            <ul className="sm:hidden divide-y divide-gray-100">
+            {/* Mobile cards — scrollable container so header/filters quedan fijos */}
+            <div className="sm:hidden overflow-y-auto max-h-[calc(100svh-26rem)]">
+            <ul className="divide-y divide-gray-100">
               {filtered.map(t => (
                 <li key={t.id} className="px-4 py-4 flex flex-col gap-3">
                   {/* Top row: patient + status */}
@@ -351,6 +352,7 @@ export default function Treatments() {
                 </li>
               ))}
             </ul>
+            </div>
 
             {/* Desktop table */}
             <div className="hidden sm:block overflow-x-auto">

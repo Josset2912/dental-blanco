@@ -7,6 +7,7 @@ export interface DashboardData {
     appointmentsPending: number;
     completedThisMonth: number;
     monthRevenue: number;
+    treatmentsInProgress: number;
   };
   todayAppointments: {
     id: string;

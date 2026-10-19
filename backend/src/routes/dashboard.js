@@ -23,6 +23,7 @@ router.get('/', async (req, res) => {
       todayAppointments,
       recentPatients,
       monthRevenueResult,
+      treatmentsInProgress,
     ] = await Promise.all([
       prisma.patient.count({ where: { active: true } }),
       prisma.appointment.count({
@@ -48,6 +49,7 @@ router.get('/', async (req, res) => {
         _sum: { amount: true },
         where: { createdAt: { gte: monthStart, lte: monthEnd } },
       }),
+      prisma.treatment.count({ where: { status: 'IN_PROGRESS' } }),
     ]);
 
     res.json({
@@ -57,6 +59,7 @@ router.get('/', async (req, res) => {
         appointmentsPending,
         completedThisMonth,
         monthRevenue: monthRevenueResult._sum.amount ?? 0,
+        treatmentsInProgress,
       },
       todayAppointments,
       recentPatients,

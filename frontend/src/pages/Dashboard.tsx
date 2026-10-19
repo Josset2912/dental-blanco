@@ -93,8 +93,8 @@ export default function Dashboard() {
         {/* Hero skeleton */}
         <div className="rounded-2xl h-28 bg-gradient-to-r from-gray-200 to-gray-100" />
         {/* Stat cards skeleton */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
-          {Array.from({ length: 5 }).map((_, i) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
               <div className="w-10 h-10 rounded-xl bg-gray-100 mb-3" />
               <div className="h-6 bg-gray-200 rounded w-3/4 mb-2" />
@@ -177,6 +177,12 @@ export default function Dashboard() {
       gradient: 'linear-gradient(135deg,#10b981,#0d9488)',
       iconPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
     },
+    {
+      label: 'Tratamientos en curso',
+      value: stats.treatmentsInProgress,
+      gradient: 'linear-gradient(135deg,#f43f5e,#e11d48)',
+      iconPath: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+    },
   ];
 
   const quickActions = [
@@ -227,7 +233,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
         {statItems.map((item, i) => (
           <StatCard key={item.label} item={item} index={i} />
         ))}

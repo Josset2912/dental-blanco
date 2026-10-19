@@ -106,13 +106,13 @@ export default function PatientImages({ patientId, patientName }: Props) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-5">
       <div className="px-4 sm:px-5 py-4 border-b border-gray-100">
-        {/* Fila 1: título */}
+        {/* Fila 1: título + controles desktop */}
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold text-gray-900">Radiografías e imágenes</h3>
             <p className="text-xs text-gray-500 mt-0.5">{images.length} archivo{images.length !== 1 ? 's' : ''}</p>
           </div>
-          {/* Desktop: controles inline */}
+          {/* Desktop: todos los controles inline */}
           <div className="hidden sm:flex items-center gap-2">
             <select
               value={selectedType}
@@ -146,45 +146,47 @@ export default function PatientImages({ patientId, patientName }: Props) {
             )}
           </div>
         </div>
-        {/* Mobile: controles en segunda fila */}
-        <div className="flex items-center gap-2 mt-3 sm:hidden">
+        {/* Mobile: select ancho completo + botones debajo */}
+        <div className="sm:hidden mt-3 space-y-2">
           <select
             value={selectedType}
             onChange={e => setSelectedType(e.target.value)}
-            className="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#00AEEF]"
+            className="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#00AEEF]"
           >
             {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
-          <button
-            onClick={() => fileInput.current?.click()}
-            disabled={uploadMut.isPending}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-white rounded-lg text-xs font-medium disabled:opacity-60 transition-colors shrink-0"
-            style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-            </svg>
-            {uploadMut.isPending ? 'Subiendo...' : 'Subir'}
-          </button>
-          {images.length > 0 && (
+          <div className="flex gap-2">
             <button
-              onClick={exportPDF}
-              disabled={exporting}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-medium hover:bg-orange-600 disabled:opacity-60 transition-colors shrink-0"
+              onClick={() => fileInput.current?.click()}
+              disabled={uploadMut.isPending}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-white rounded-lg text-xs font-medium disabled:opacity-60 transition-colors"
+              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
               </svg>
-              {exporting ? 'Exportando...' : 'Exportar PDF'}
+              {uploadMut.isPending ? 'Subiendo...' : 'Subir imagen'}
             </button>
-          )}
+            {images.length > 0 && (
+              <button
+                onClick={exportPDF}
+                disabled={exporting}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-orange-500 text-white rounded-lg text-xs font-medium hover:bg-orange-600 disabled:opacity-60 transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                {exporting ? 'Exportando...' : 'Exportar PDF'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       <input ref={fileInput} type="file" accept="image/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
 
       <div
-        className={`p-6 transition-colors ${dragging ? 'bg-[#E6F7FD]' : ''}`}
+        className={`p-3 sm:p-6 transition-colors ${dragging ? 'bg-[#E6F7FD]' : ''}`}
         onDragOver={e => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={e => { e.preventDefault(); setDragging(false); handleFiles(e.dataTransfer.files); }}
@@ -192,12 +194,12 @@ export default function PatientImages({ patientId, patientName }: Props) {
         {isLoading ? (
           <p className="text-sm text-gray-400 text-center py-6">Cargando...</p>
         ) : images.length === 0 ? (
-          <div className="text-center py-10 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-[#00AEEF] transition-colors" onClick={() => fileInput.current?.click()}>
+          <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-[#00AEEF] transition-colors" onClick={() => fileInput.current?.click()}>
             <svg className="w-10 h-10 mx-auto mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            <p className="text-sm text-gray-500 font-medium">Arrastra imágenes aquí o haz clic para subir</p>
-            <p className="text-xs text-gray-400 mt-1">Radiografías, fotos clínicas, documentos</p>
+            <p className="text-sm text-gray-500 font-medium">Toca para subir imágenes</p>
+            <p className="text-xs text-gray-400 mt-1">Radiografías, fotos, documentos</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

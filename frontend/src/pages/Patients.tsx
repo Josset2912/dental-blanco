@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { getPatients, createPatient } from '../api/patients';
 import type { Patient } from '../api/patients';
 import PatientForm from '../components/PatientForm';
@@ -61,7 +62,8 @@ export default function Patients() {
 
   const createMut = useMutation({
     mutationFn: createPatient,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['patients'] }); setShowForm(false); }
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['patients'] }); setShowForm(false); toast.success('Paciente creado correctamente'); },
+    onError: () => toast.error('Error al guardar el paciente'),
   });
 
   const empty = (
@@ -189,7 +191,6 @@ export default function Patients() {
           onClose={() => setShowForm(false)}
           onSubmit={(data) => createMut.mutate(data)}
           loading={createMut.isPending}
-          error={createMut.isError ? 'Error al guardar el paciente' : ''}
         />
       )}
     </>

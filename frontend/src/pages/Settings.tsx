@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { getUser, changePassword } from '../api/auth';
 
 export default function Settings() {
   const user = getUser();
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
-  const [success, setSuccess] = useState(false);
 
   const changeMut = useMutation({
     mutationFn: () => changePassword(form.currentPassword, form.newPassword),
     onSuccess: () => {
-      setSuccess(true);
       setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setTimeout(() => setSuccess(false), 4000);
+      toast.success('Contraseña actualizada correctamente');
+    },
+    onError: (err: { response?: { data?: { error?: string } } }) => {
+      toast.error(err?.response?.data?.error ?? 'Error al cambiar contraseña');
     },
   });
 
@@ -68,21 +70,6 @@ export default function Settings() {
         {/* Change password */}
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <h3 className="text-sm font-semibold text-gray-900 mb-5">Cambiar contraseña</h3>
-
-          {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-3 py-2.5 rounded-lg mb-4 flex items-center gap-2">
-              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
-              </svg>
-              Contraseña actualizada correctamente
-            </div>
-          )}
-
-          {changeMut.isError && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-3 py-2.5 rounded-lg mb-4">
-              {(changeMut.error as { response?: { data?: { error?: string } } })?.response?.data?.error ?? 'Error al cambiar contraseña'}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">

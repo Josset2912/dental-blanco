@@ -1,23 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { login } from '../api/auth';
 
 export default function Login() {
   const [email, setEmail]       = useState('doctor@dentalblanco.com');
   const [password, setPassword] = useState('');
-  const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     try {
       await login(email, password);
       navigate('/dashboard');
     } catch {
-      setError('Correo o contraseña incorrectos');
+      toast.error('Correo o contraseña incorrectos');
     } finally {
       setLoading(false);
     }
@@ -43,12 +42,6 @@ export default function Login() {
           <h1 className="text-xl font-bold" style={{ color: '#0077B6' }}>Blanco Dental</h1>
           <p className="text-xs text-gray-400 mt-0.5 tracking-wide uppercase">Creamos arte en tu sonrisa</p>
         </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-3 py-2.5 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-1.5">

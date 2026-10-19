@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { getTreatments, createTreatment, updateTreatment } from '../api/treatments';
 import type { Treatment } from '../api/treatments';
 import TreatmentForm from '../components/TreatmentForm';
@@ -45,18 +46,21 @@ export default function Treatments() {
 
   const createMut = useMutation({
     mutationFn: createTreatment,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments'] }); setShowForm(false); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments'] }); setShowForm(false); toast.success('Tratamiento creado correctamente'); },
+    onError: () => toast.error('Error al guardar el tratamiento'),
   });
 
   const updateMut = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateTreatment>[1] }) =>
       updateTreatment(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments'] }); setEditItem(null); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments'] }); setEditItem(null); toast.success('Tratamiento actualizado'); },
+    onError: () => toast.error('Error al actualizar el tratamiento'),
   });
 
   const completeMut = useMutation({
     mutationFn: (id: string) => updateTreatment(id, { status: 'COMPLETED', endDate: new Date().toISOString() }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['treatments'] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments'] }); toast.success('Tratamiento completado'); },
+    onError: () => toast.error('Error al completar el tratamiento'),
   });
 
   const inProgress = treatments.filter(t => t.status === 'IN_PROGRESS').length;
@@ -152,7 +156,6 @@ export default function Treatments() {
           onClose={() => setShowForm(false)}
           onSubmit={data => createMut.mutate(data)}
           loading={createMut.isPending}
-          error={createMut.isError ? 'Error al guardar el tratamiento' : ''}
         />
       )}
 
@@ -161,7 +164,6 @@ export default function Treatments() {
           onClose={() => setEditItem(null)}
           onSubmit={data => updateMut.mutate({ id: editItem.id, data })}
           loading={updateMut.isPending}
-          error={updateMut.isError ? 'Error al actualizar' : ''}
           initial={editItem}
           fixedPatientId={editItem.patientId}
         />

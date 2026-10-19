@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   getAppointments, createAppointment, updateAppointment, cancelAppointment,
   getAppointmentsByMonth,
@@ -316,7 +317,9 @@ export default function Appointments() {
       qc.invalidateQueries({ queryKey: ['appointments'] });
       qc.invalidateQueries({ queryKey: ['appointments-month'] });
       setShowForm(false);
+      toast.success('Cita agendada correctamente');
     },
+    onError: () => toast.error('Error al agendar la cita'),
   });
 
   const statusMut = useMutation({
@@ -325,7 +328,9 @@ export default function Appointments() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['appointments'] });
       qc.invalidateQueries({ queryKey: ['appointments-month'] });
+      toast.success('Estado de cita actualizado');
     },
+    onError: () => toast.error('Error al actualizar la cita'),
   });
 
   const cancelMut = useMutation({
@@ -334,7 +339,9 @@ export default function Appointments() {
       qc.invalidateQueries({ queryKey: ['appointments'] });
       qc.invalidateQueries({ queryKey: ['appointments-month'] });
       setConfirmCancel(null);
+      toast.success('Cita cancelada');
     },
+    onError: () => toast.error('Error al cancelar la cita'),
   });
 
   const blockMut = useMutation({
@@ -342,12 +349,15 @@ export default function Appointments() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['blocked-slots'] });
       setShowBlockForm(false);
+      toast.success('Horario bloqueado');
     },
+    onError: () => toast.error('Error al bloquear el horario'),
   });
 
   const unblockMut = useMutation({
     mutationFn: deleteBlockedSlot,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['blocked-slots'] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['blocked-slots'] }); toast.success('Bloqueo eliminado'); },
+    onError: () => toast.error('Error al eliminar el bloqueo'),
   });
 
   const active = appointments.filter(a => a.status !== 'CANCELLED');
@@ -594,7 +604,6 @@ export default function Appointments() {
           onClose={() => setShowForm(false)}
           onSubmit={data => createMut.mutate(data)}
           loading={createMut.isPending}
-          error={createMut.isError ? 'Error al agendar la cita' : ''}
           defaultDate={date}
         />
       )}

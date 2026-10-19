@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { getOdontogram, saveOdontogram } from '../api/odontogram';
 import type { ToothCondition } from '../api/odontogram';
 import type { OdontogramConditions } from '../api/odontogram';
@@ -321,7 +322,9 @@ export default function Odontogram({ patientId }: { patientId: string }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['odontogram', patientId] });
       setDirty(false);
+      toast.success('Odontograma guardado');
     },
+    onError: () => toast.error('Error al guardar. Intenta de nuevo.'),
   });
 
   const getState = useCallback((num: number): Record<string, ToothCondition> => {
@@ -479,12 +482,6 @@ export default function Odontogram({ patientId }: { patientId: string }) {
           ))}
         </div>
       </div>
-
-      {saveMut.isError && (
-        <div className="mx-5 mb-4 text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-          Error al guardar. Intenta de nuevo.
-        </div>
-      )}
 
       {/* Tooltip */}
       {tooltip && (() => {

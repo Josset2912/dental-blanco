@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { getPayments, getPaymentSummary, createPayment, deletePayment } from '../api/payments';
 import type { Payment } from '../api/payments';
 import PaymentForm from '../components/PaymentForm';
@@ -35,7 +36,9 @@ export default function Payments() {
       qc.invalidateQueries({ queryKey: ['payments'] });
       qc.invalidateQueries({ queryKey: ['payments-summary'] });
       setShowForm(false);
+      toast.success('Pago registrado correctamente');
     },
+    onError: () => toast.error('Error al registrar el pago'),
   });
 
   const deleteMut = useMutation({
@@ -44,7 +47,9 @@ export default function Payments() {
       qc.invalidateQueries({ queryKey: ['payments'] });
       qc.invalidateQueries({ queryKey: ['payments-summary'] });
       setConfirmDelete(null);
+      toast.success('Pago eliminado');
     },
+    onError: () => toast.error('Error al eliminar el pago'),
   });
 
   return (
@@ -138,7 +143,6 @@ export default function Payments() {
           onClose={() => setShowForm(false)}
           onSubmit={data => createMut.mutate(data)}
           loading={createMut.isPending}
-          error={createMut.isError ? 'Error al registrar el pago' : ''}
         />
       )}
 

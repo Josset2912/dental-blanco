@@ -17,7 +17,6 @@ interface Props {
   onClose: () => void;
   onSubmit: (data: { patientId: string; doctorId: string; date: string; duration: number; reason: string; notes?: string }) => void;
   loading: boolean;
-  error: string;
   defaultDate?: string;
 }
 
@@ -26,7 +25,7 @@ const REASONS = ['Consulta general', 'Limpieza dental', 'Extracción', 'Ortodonc
 
 const inputClass = 'px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white';
 
-export default function AppointmentForm({ onClose, onSubmit, loading, error, defaultDate = '' }: Props) {
+export default function AppointmentForm({ onClose, onSubmit, loading, defaultDate = '' }: Props) {
   const user = getUser();
   const today = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState<FormData>({
@@ -82,12 +81,6 @@ export default function AppointmentForm({ onClose, onSubmit, loading, error, def
         </div>
 
         <div className="px-6 py-5">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-3 py-2.5 rounded-lg mb-4">
-              {error}
-            </div>
-          )}
-
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-1.5 mb-4">
               <label className="text-sm font-medium text-gray-700">Paciente *</label>

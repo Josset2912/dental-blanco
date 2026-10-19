@@ -7,14 +7,13 @@ interface Props {
   onClose: () => void;
   onSubmit: (data: FormData) => void;
   loading: boolean;
-  error: string;
   initial?: Partial<FormData>;
   title?: string;
 }
 
 const inputClass = 'px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white';
 
-export default function PatientForm({ onClose, onSubmit, loading, error, initial = {}, title = 'Nuevo paciente' }: Props) {
+export default function PatientForm({ onClose, onSubmit, loading, initial = {}, title = 'Nuevo paciente' }: Props) {
   const [form, setForm] = useState<FormData>({
     name: initial.name ?? '',
     lastName: initial.lastName ?? '',
@@ -54,11 +53,6 @@ export default function PatientForm({ onClose, onSubmit, loading, error, initial
         </div>
 
         <div className="px-6 py-5">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-3 py-2.5 rounded-lg mb-4">
-              {error}
-            </div>
-          )}
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">

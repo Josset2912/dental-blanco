@@ -10,7 +10,6 @@ interface Props {
     cost: number; startDate: string; notes?: string;
   }) => void;
   loading: boolean;
-  error: string;
   initial?: Partial<Treatment>;
   fixedPatientId?: string;
 }
@@ -23,7 +22,7 @@ const TREATMENT_NAMES = [
 
 const inputClass = 'w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white';
 
-export default function TreatmentForm({ onClose, onSubmit, loading, error, initial, fixedPatientId }: Props) {
+export default function TreatmentForm({ onClose, onSubmit, loading, initial, fixedPatientId }: Props) {
   const today = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState({
     patientId: fixedPatientId ?? initial?.patientId ?? '',
@@ -70,7 +69,6 @@ export default function TreatmentForm({ onClose, onSubmit, loading, error, initi
         </div>
 
         <div className="px-6 py-5">
-          {error && <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-3 py-2.5 rounded-lg mb-4">{error}</div>}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
             {/* Patient selector */}

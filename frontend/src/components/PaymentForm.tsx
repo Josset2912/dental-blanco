@@ -10,7 +10,6 @@ interface Props {
     amount: number; method: string; concept: string; notes?: string;
   }) => void;
   loading: boolean;
-  error: string;
   fixedPatientId?: string;
 }
 
@@ -27,7 +26,7 @@ const CONCEPTS = [
   'Ortodoncia', 'Blanqueamiento', 'Implante', 'Corona', 'Pago de tratamiento', 'Otro',
 ];
 
-export default function PaymentForm({ onClose, onSubmit, loading, error, fixedPatientId }: Props) {
+export default function PaymentForm({ onClose, onSubmit, loading, fixedPatientId }: Props) {
   const [patientSearch, setPatientSearch] = useState('');
   const [form, setForm] = useState({
     patientId: fixedPatientId ?? '',
@@ -78,7 +77,6 @@ export default function PaymentForm({ onClose, onSubmit, loading, error, fixedPa
         </div>
 
         <div className="px-6 py-5">
-          {error && <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-3 py-2.5 rounded-lg mb-4">{error}</div>}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
             {/* Patient */}

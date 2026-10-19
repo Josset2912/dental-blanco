@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { getPatient, updatePatient, deletePatient } from '../api/patients';
 import { getTreatments, createTreatment, updateTreatment } from '../api/treatments';
 import { getPayments } from '../api/payments';
@@ -56,12 +57,14 @@ export default function PatientDetail() {
 
   const updateMut = useMutation({
     mutationFn: (data: Parameters<typeof updatePatient>[1]) => updatePatient(id!, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['patient', id] }); setShowEdit(false); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['patient', id] }); setShowEdit(false); toast.success('Paciente actualizado correctamente'); },
+    onError: () => toast.error('Error al guardar el paciente'),
   });
 
   const deleteMut = useMutation({
     mutationFn: () => deletePatient(id!),
-    onSuccess: () => navigate('/pacientes'),
+    onSuccess: () => { navigate('/pacientes'); toast.success('Paciente eliminado'); },
+    onError: () => toast.error('Error al eliminar el paciente'),
   });
 
   const { data: treatments = [] } = useQuery({
@@ -72,12 +75,14 @@ export default function PatientDetail() {
 
   const createTreatmentMut = useMutation({
     mutationFn: createTreatment,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments', id] }); setShowTreatmentForm(false); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments', id] }); setShowTreatmentForm(false); toast.success('Tratamiento creado correctamente'); },
+    onError: () => toast.error('Error al guardar el tratamiento'),
   });
 
   const completeTreatmentMut = useMutation({
     mutationFn: (tid: string) => updateTreatment(tid, { status: 'COMPLETED', endDate: new Date().toISOString() }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['treatments', id] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments', id] }); toast.success('Tratamiento completado'); },
+    onError: () => toast.error('Error al completar el tratamiento'),
   });
 
   const { data: payments = [] } = useQuery({
@@ -340,7 +345,6 @@ export default function PatientDetail() {
           onClose={() => setShowTreatmentForm(false)}
           onSubmit={data => createTreatmentMut.mutate(data)}
           loading={createTreatmentMut.isPending}
-          error={createTreatmentMut.isError ? 'Error al guardar el tratamiento' : ''}
           fixedPatientId={id}
         />
       )}
@@ -352,7 +356,6 @@ export default function PatientDetail() {
           onClose={() => setShowEdit(false)}
           onSubmit={data => updateMut.mutate(data)}
           loading={updateMut.isPending}
-          error={updateMut.isError ? 'Error al guardar' : ''}
         />
       )}
 

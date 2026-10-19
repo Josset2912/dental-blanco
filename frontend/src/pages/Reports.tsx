@@ -68,9 +68,9 @@ function EmptyChart({ height = 220 }: { height?: number }) {
 
 function ChartCard({ title, children, loading }: { title: string; children: React.ReactNode; loading?: boolean }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 min-w-0 overflow-hidden">
       <div className="flex items-center gap-2 mb-5">
-        <div className="w-1.5 h-4 rounded-full" style={{ background: `linear-gradient(to bottom, ${BRAND}, ${BRAND_DARK})` }} />
+        <div className="w-1.5 h-4 rounded-full shrink-0" style={{ background: `linear-gradient(to bottom, ${BRAND}, ${BRAND_DARK})` }} />
         <h2 className="text-sm font-semibold text-gray-800">{title}</h2>
       </div>
       {loading ? (
@@ -261,10 +261,10 @@ export default function Reports() {
       <ChartCard title="Ingresos mensuales (últimos 12 meses)" loading={loadingRevenue}>
         {revenue?.length ? (
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={revenue} margin={{ top: 4, right: 8, left: 8, bottom: 0 }}>
+            <BarChart data={revenue} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={v => `S/${(v / 1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} tickFormatter={v => `S/${(v / 1000).toFixed(0)}k`} axisLine={false} tickLine={false} width={42} />
               <Tooltip
                 formatter={(v) => [fmt(Number(v)), 'Ingresos']}
                 contentStyle={{ borderRadius: 10, fontSize: 12, border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / .1)' }}
@@ -283,10 +283,10 @@ export default function Reports() {
         <ChartCard title="Nuevos pacientes (últimos 12 meses)" loading={loadingPatients}>
           {patients?.length ? (
             <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={patients} margin={{ top: 4, right: 8, left: 8, bottom: 0 }}>
+              <LineChart data={patients} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} allowDecimals={false} axisLine={false} tickLine={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} allowDecimals={false} axisLine={false} tickLine={false} width={28} />
                 <Tooltip contentStyle={{ borderRadius: 10, fontSize: 12, border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / .1)' }} />
                 <Line
                   type="monotone" dataKey="count" stroke="#10b981" strokeWidth={2.5}

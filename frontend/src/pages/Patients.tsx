@@ -52,9 +52,28 @@ function PatientInitial({ name }: { name: string }) {
 
 const LIMIT = 20;
 
+type SortKey = 'name' | 'createdAt' | 'birthDate';
+
+function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
+  return (
+    <svg className={`w-3 h-3 inline ml-1 transition-colors ${active ? 'text-[#00AEEF]' : 'text-gray-300'}`} viewBox="0 0 24 24" fill="currentColor">
+      {dir === 'asc' || !active
+        ? <path d="M7 14l5-5 5 5H7z"/>
+        : <path d="M7 10l5 5 5-5H7z"/>}
+    </svg>
+  );
+}
+
 export default function Patients() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [sortKey, setSortKey] = useState<SortKey>('createdAt');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  };
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -160,31 +179,52 @@ export default function Patients() {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr>
-                  {['Paciente', 'Teléfono', 'Género', 'Edad', 'Registro'].map(h => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">
-                      {h}
-                    </th>
-                  ))}
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="px-4 py-3 text-left">
+                    <button onClick={() => handleSort('name')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
+                      Paciente <SortIcon active={sortKey === 'name'} dir={sortDir} />
+                    </button>
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Teléfono</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Género</th>
+                  <th className="px-4 py-3 text-left">
+                    <button onClick={() => handleSort('birthDate')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
+                      Edad <SortIcon active={sortKey === 'birthDate'} dir={sortDir} />
+                    </button>
+                  </th>
+                  <th className="px-4 py-3 text-left">
+                    <button onClick={() => handleSort('createdAt')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
+                      Registro <SortIcon active={sortKey === 'createdAt'} dir={sortDir} />
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {patients.map((p: Patient, idx: number) => (
+                {[...patients].sort((a, b) => {
+                  let va: string | number = sortKey === 'name' ? `${a.name} ${a.lastName}` : sortKey === 'birthDate' ? a.birthDate : a.createdAt;
+                  let vb: string | number = sortKey === 'name' ? `${b.name} ${b.lastName}` : sortKey === 'birthDate' ? b.birthDate : b.createdAt;
+                  return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+                }).map((p: Patient, idx: number) => (
                   <tr
                     key={p.id}
-                    className={`cursor-pointer hover:bg-gray-50 ${idx < patients.length - 1 ? '' : '[&>td]:border-b-0'}`}
+                    className={`cursor-pointer transition-colors hover:bg-[#E6F7FD]/40 ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}
                     onClick={() => navigate(`/pacientes/${p.id}`)}
                   >
                     <td className="px-4 py-3.5 text-sm border-b border-gray-100">
-                      <div className="font-medium text-gray-900">{p.name} {p.lastName}</div>
-                      {p.email && <div className="text-xs text-gray-500 mt-0.5">{p.email}</div>}
+                      <div className="flex items-center gap-2.5">
+                        <PatientInitial name={p.name} />
+                        <div>
+                          <div className="font-medium text-gray-900">{p.name} {p.lastName}</div>
+                          {p.email && <div className="text-xs text-gray-400 mt-0.5">{p.email}</div>}
+                        </div>
+                      </div>
                     </td>
                     <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-600">{p.phone}</td>
                     <td className="px-4 py-3.5 text-sm border-b border-gray-100">
                       <span className={genderBadgeClass[p.gender]}>{genderLabel[p.gender]}</span>
                     </td>
                     <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-600">{calcAge(p.birthDate)} años</td>
-                    <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-600">
+                    <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-500">
                       {new Date(p.createdAt).toLocaleDateString('es-PE')}
                     </td>
                   </tr>

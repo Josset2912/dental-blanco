@@ -33,11 +33,28 @@ function formatCost(cost: string) {
   return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(parseFloat(cost));
 }
 
+type SortKey = 'patient' | 'cost' | 'startDate';
+
+function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
+  return (
+    <svg className={`w-3 h-3 inline ml-1 ${active ? 'text-[#00AEEF]' : 'text-gray-300'}`} viewBox="0 0 24 24" fill="currentColor">
+      {dir === 'asc' || !active ? <path d="M7 14l5-5 5 5H7z"/> : <path d="M7 10l5 5 5-5H7z"/>}
+    </svg>
+  );
+}
+
 export default function Treatments() {
   const [statusFilter, setStatusFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editItem, setEditItem] = useState<Treatment | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey>('startDate');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const qc = useQueryClient();
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('desc'); }
+  };
 
   const { data: treatments = [], isLoading } = useQuery({
     queryKey: ['treatments', statusFilter],
@@ -103,15 +120,35 @@ export default function Treatments() {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr>
-                  {['Paciente', 'Tratamiento', 'Costo', 'Inicio', 'Estado', 'Acciones'].map(h => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">{h}</th>
-                  ))}
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="px-4 py-3 text-left">
+                    <button onClick={() => handleSort('patient')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
+                      Paciente <SortIcon active={sortKey === 'patient'} dir={sortDir} />
+                    </button>
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Tratamiento</th>
+                  <th className="px-4 py-3 text-left">
+                    <button onClick={() => handleSort('cost')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
+                      Costo <SortIcon active={sortKey === 'cost'} dir={sortDir} />
+                    </button>
+                  </th>
+                  <th className="px-4 py-3 text-left">
+                    <button onClick={() => handleSort('startDate')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
+                      Inicio <SortIcon active={sortKey === 'startDate'} dir={sortDir} />
+                    </button>
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {treatments.map((t, i) => (
-                  <tr key={t.id} className={`hover:bg-gray-50 ${i < treatments.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                {[...treatments].sort((a, b) => {
+                  const va = sortKey === 'cost' ? parseFloat(a.cost) : sortKey === 'patient' ? `${a.patient.name} ${a.patient.lastName}` : a.startDate;
+                  const vb = sortKey === 'cost' ? parseFloat(b.cost) : sortKey === 'patient' ? `${b.patient.name} ${b.patient.lastName}` : b.startDate;
+                  if (typeof va === 'number') return sortDir === 'asc' ? va - (vb as number) : (vb as number) - va;
+                  return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+                }).map((t, i) => (
+                  <tr key={t.id} className={`transition-colors hover:bg-[#E6F7FD]/40 border-b border-gray-100 last:border-0 ${i % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
                     <td className="px-4 py-3.5 text-sm">
                       <p className="font-medium text-gray-900">{t.patient.name} {t.patient.lastName}</p>
                       <p className="text-xs text-gray-500">{t.patient.phone}</p>

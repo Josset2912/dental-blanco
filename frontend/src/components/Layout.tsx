@@ -256,7 +256,7 @@ export default function Layout() {
         {/* Brand + collapse toggle */}
         <div className={`flex items-center border-b border-gray-100 h-14 ${collapsed ? 'justify-center px-2' : 'px-4 gap-2'}`}>
           {!collapsed && (
-            <>
+            <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-80 transition-opacity">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                 style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
                 <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -267,15 +267,15 @@ export default function Layout() {
                 <p className="text-sm font-bold leading-tight truncate" style={{ color: '#0077B6' }}>Blanco Dental</p>
                 <p className="text-[9px] text-gray-400 leading-tight truncate">Creamos arte en tu sonrisa</p>
               </div>
-            </>
+            </button>
           )}
           {collapsed && (
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+            <button type="button" onClick={() => navigate('/dashboard')} className="w-7 h-7 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
               style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
               <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
               </svg>
-            </div>
+            </button>
           )}
         </div>
 
@@ -337,13 +337,16 @@ export default function Layout() {
 
         {/* Mobile top bar */}
         <header className="md:hidden sticky top-0 z-10 bg-white border-b border-gray-100 px-4 h-14 flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-            style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
-            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
-            </svg>
-          </div>
-          <span className="text-sm font-bold flex-1" style={{ color: '#0077B6' }}>Blanco Dental</span>
+          <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
+              </svg>
+            </div>
+            <span className="text-sm font-bold" style={{ color: '#0077B6' }}>Blanco Dental</span>
+          </button>
+          <span className="flex-1" />
           <button onClick={handleLogout} className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors" title="Cerrar sesión">
             {icons.logout}
           </button>

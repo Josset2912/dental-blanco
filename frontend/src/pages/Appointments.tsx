@@ -497,7 +497,20 @@ export default function Appointments() {
       {/* Calendar view */}
       {view === 'calendar' && (
         calLoading ? (
-          <div className="flex items-center justify-center h-64 text-gray-500 text-sm">Cargando...</div>
+          <div className="animate-pulse space-y-2">
+            <div className="grid grid-cols-7 gap-1 mb-1">
+              {['L','M','X','J','V','S','D'].map(d => (
+                <div key={d} className="h-7 bg-gray-100 rounded text-center" />
+              ))}
+            </div>
+            {Array.from({ length: 5 }).map((_, week) => (
+              <div key={week} className="grid grid-cols-7 gap-1">
+                {Array.from({ length: 7 }).map((_, day) => (
+                  <div key={day} className="h-20 bg-gray-100 rounded-lg" />
+                ))}
+              </div>
+            ))}
+          </div>
         ) : (
           <CalendarView
             appointments={monthAppointments}
@@ -513,8 +526,28 @@ export default function Appointments() {
       {view === 'list' && (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           {isLoading ? (
-            <div className="flex items-center justify-center h-48 text-gray-500 text-sm">
-              Cargando citas...
+            <div className="animate-pulse">
+              <div className="h-10 bg-gray-50 border-b border-gray-100 px-4 flex items-center gap-4">
+                {['w-16','w-28','w-24','w-16','w-20','w-16'].map((w, i) => (
+                  <div key={i} className={`h-3 bg-gray-200 rounded ${w}`} />
+                ))}
+              </div>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className={`flex items-center gap-4 px-4 py-3.5 border-b border-gray-50 last:border-0 ${i % 2 === 1 ? 'bg-gray-50/50' : ''}`}>
+                  <div className="space-y-1.5 w-16 shrink-0">
+                    <div className="h-3.5 bg-gray-100 rounded w-full" />
+                    <div className="h-3 bg-gray-50 rounded w-3/4" />
+                  </div>
+                  <div className="space-y-1.5 flex-1">
+                    <div className="h-3.5 bg-gray-100 rounded w-2/5" />
+                    <div className="h-3 bg-gray-50 rounded w-1/4" />
+                  </div>
+                  <div className="h-3 bg-gray-100 rounded w-24" />
+                  <div className="h-3 bg-gray-100 rounded w-12" />
+                  <div className="h-6 bg-gray-100 rounded-full w-20" />
+                  <div className="h-7 bg-gray-100 rounded-md w-16" />
+                </div>
+              ))}
             </div>
           ) : appointments.length === 0 ? (
             <div className="text-center py-16 text-gray-500">

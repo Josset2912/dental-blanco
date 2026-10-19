@@ -139,7 +139,17 @@ export default function Patients() {
       {/* MOBILE: lista de tarjetas */}
       <div className="md:hidden bg-white border border-gray-200 rounded-xl overflow-hidden">
         {isLoading ? (
-          <div className="flex items-center justify-center h-40 text-gray-500 text-sm">Cargando pacientes...</div>
+          <ul className="animate-pulse divide-y divide-gray-100">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <li key={i} className="flex items-center gap-3 px-4 py-3.5">
+                <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="h-3.5 bg-gray-200 rounded w-2/3" />
+                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+                </div>
+              </li>
+            ))}
+          </ul>
         ) : patients.length === 0 ? empty : (
           <ul>
             {patients.map((p: Patient, idx: number) => (
@@ -174,7 +184,26 @@ export default function Patients() {
       {/* DESKTOP: tabla */}
       <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden">
         {isLoading ? (
-          <div className="flex items-center justify-center h-48 text-gray-500 text-sm">Cargando pacientes...</div>
+          <div className="animate-pulse">
+            <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 grid grid-cols-5 gap-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-3 bg-gray-200 rounded w-3/4" />
+              ))}
+            </div>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className={`flex items-center gap-4 px-4 py-4 border-b border-gray-100 ${i % 2 === 1 ? 'bg-gray-50/50' : ''}`}>
+                <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3.5 bg-gray-200 rounded w-1/3" />
+                  <div className="h-3 bg-gray-100 rounded w-1/4" />
+                </div>
+                <div className="h-3 bg-gray-200 rounded w-24" />
+                <div className="h-5 bg-gray-200 rounded-full w-20" />
+                <div className="h-3 bg-gray-200 rounded w-12" />
+                <div className="h-3 bg-gray-100 rounded w-20" />
+              </div>
+            ))}
+          </div>
         ) : patients.length === 0 ? empty : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">

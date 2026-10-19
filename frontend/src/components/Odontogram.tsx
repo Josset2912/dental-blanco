@@ -4,25 +4,21 @@ import { getOdontogram, saveOdontogram } from '../api/odontogram';
 import type { ToothCondition } from '../api/odontogram';
 import type { OdontogramConditions } from '../api/odontogram';
 
-// ─── Condiciones ────────────────────────────────────────────────────────────
 const CONDITIONS: { id: ToothCondition; label: string; color: string }[] = [
-  { id: 'SANO',       label: 'Sano',        color: '#1e2d3e' },
+  { id: 'SANO',       label: 'Sano',        color: '#9ca3af' },
   { id: 'CARIES',     label: 'Caries',      color: '#dc2626' },
   { id: 'OBTURADO',   label: 'Obturado',    color: '#2563eb' },
   { id: 'CORONA',     label: 'Corona',      color: '#d97706' },
   { id: 'ENDODONCIA', label: 'Endodoncia',  color: '#7c3aed' },
-  { id: 'AUSENTE',    label: 'Ausente',     color: '#374151' },
+  { id: 'AUSENTE',    label: 'Ausente',     color: '#9ca3af' },
   { id: 'FRACTURA',   label: 'Fractura',    color: '#ea580c' },
   { id: 'IMPLANTE',   label: 'Implante',    color: '#059669' },
 ];
 
-const SANO_COLOR = '#1e2d3e';
-
-// ─── Layout FDI ─────────────────────────────────────────────────────────────
 const UPPER = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
 const LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
 
-// ─── SVG paths anatómicos (viewBox 0 0 40 88, corona abajo, raíces arriba) ──
+// SVG paths anatomicos (viewBox 0 0 40 88, corona abajo, raices arriba)
 const PATHS: Record<string, string> = {
   CI:  'M20,2 C23,9 26,24 27,40 C28,50 29,56 29,62 L33,65 L33,80 Q33,87 20,87 Q7,87 7,80 L7,65 L11,62 C11,56 12,50 13,40 C14,24 17,9 20,2 Z',
   LI:  'M20,4 C22,11 24,26 25,42 C26,51 27,57 27,63 L31,66 L31,80 Q31,86 20,86 Q9,86 9,80 L9,66 L13,63 C13,57 14,51 15,42 C16,26 18,11 20,4 Z',
@@ -55,15 +51,62 @@ function getToothWidth(num: number): number {
   if (d === 7) return 38; return 32;
 }
 
-function condColor(c: ToothCondition): string {
-  return CONDITIONS.find(x => x.id === c)?.color ?? SANO_COLOR;
+// Punto Y donde termina la raiz y empieza la corona (coordenadas del path)
+function getCrownSplitY(num: number): number {
+  const d = num % 10;
+  if (d === 1 || d === 2) return 62;
+  if (d === 3) return 70;
+  if (d === 4 || d === 5) return 65;
+  return 52;
+}
+
+function crownFillAttr(c: ToothCondition, num: number): string {
+  switch (c) {
+    case 'SANO':       return '#ffffff';
+    case 'CARIES':     return `url(#hc-${num})`;
+    case 'OBTURADO':   return '#2563eb';
+    case 'CORONA':     return '#d97706';
+    case 'ENDODONCIA': return '#7c3aed';
+    case 'AUSENTE':    return '#f9fafb';
+    case 'FRACTURA':   return `url(#hf-${num})`;
+    case 'IMPLANTE':   return '#059669';
+    default:           return '#ffffff';
+  }
+}
+
+function crownStrokeAttr(c: ToothCondition): string {
+  switch (c) {
+    case 'SANO':       return '#9ca3af';
+    case 'CARIES':     return '#dc2626';
+    case 'OBTURADO':   return '#1d4ed8';
+    case 'CORONA':     return '#b45309';
+    case 'ENDODONCIA': return '#6d28d9';
+    case 'AUSENTE':    return '#d1d5db';
+    case 'FRACTURA':   return '#ea580c';
+    case 'IMPLANTE':   return '#047857';
+    default:           return '#9ca3af';
+  }
+}
+
+function surfaceFillAttr(c: ToothCondition): string {
+  switch (c) {
+    case 'SANO':       return '#ffffff';
+    case 'CARIES':     return '#dc2626';
+    case 'OBTURADO':   return '#2563eb';
+    case 'CORONA':     return '#d97706';
+    case 'ENDODONCIA': return '#7c3aed';
+    case 'AUSENTE':    return '#f3f4f6';
+    case 'FRACTURA':   return '#ea580c';
+    case 'IMPLANTE':   return '#059669';
+    default:           return '#ffffff';
+  }
 }
 
 function defaultTooth(): Record<string, ToothCondition> {
   return { w: 'SANO', v: 'SANO', o: 'SANO', l: 'SANO', m: 'SANO', d: 'SANO' };
 }
 
-// ─── Diente (estilo outline médico) ─────────────────────────────────────────
+// Diente con raiz separada de corona
 function Tooth({
   num, state, isUpper, onClick, onHover, onLeave,
 }: {
@@ -78,9 +121,12 @@ function Tooth({
   const w = getToothWidth(num);
   const h = 88;
   const path = getPath(num);
-  const absent = state.w === 'AUSENTE';
-  const toothFill = absent ? '#1a2035' : condColor(state.w) === SANO_COLOR ? SANO_COLOR : condColor(state.w);
+  const cond = (state.w as ToothCondition) ?? 'SANO';
+  const absent = cond === 'AUSENTE';
+  const splitY = getCrownSplitY(num);
   const flipTransform = isUpper ? undefined : `scale(1,-1) translate(0,${-h})`;
+  const stroke = crownStrokeAttr(cond);
+  const rootFill = absent ? '#f9fafb' : '#e5e7eb';
 
   return (
     <svg
@@ -92,26 +138,77 @@ function Tooth({
       onMouseLeave={onLeave}
       onMouseMove={e => onHover(num, e)}
     >
+      <defs>
+        {/* Trama diagonal roja para caries */}
+        <pattern id={`hc-${num}`} patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
+          <rect width="4" height="4" fill="white"/>
+          <line x1="0" y1="0" x2="0" y2="4" stroke="#dc2626" strokeWidth="1.5"/>
+        </pattern>
+        {/* Trama diagonal naranja para fractura */}
+        <pattern id={`hf-${num}`} patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
+          <rect width="4" height="4" fill="white"/>
+          <line x1="0" y1="0" x2="0" y2="4" stroke="#ea580c" strokeWidth="1.5"/>
+        </pattern>
+        {/* Clip para zona de raiz (parte superior del path) */}
+        <clipPath id={`cr-${num}`}>
+          <rect x="0" y="0" width="40" height={splitY} />
+        </clipPath>
+        {/* Clip para zona de corona (parte inferior del path) */}
+        <clipPath id={`cc-${num}`}>
+          <rect x="0" y={splitY} width="40" height={h - splitY} />
+        </clipPath>
+      </defs>
+
       <g transform={flipTransform}>
+        {/* Raiz: siempre gris claro */}
         <path
           d={path}
-          fill={toothFill}
-          stroke="#c8c0b0"
-          strokeWidth="1.4"
+          fill={rootFill}
+          stroke={stroke}
+          strokeWidth="1.2"
           strokeLinejoin="round"
+          clipPath={`url(#cr-${num})`}
         />
+        {/* Corona: color segun condicion */}
+        <path
+          d={path}
+          fill={crownFillAttr(cond, num)}
+          stroke={stroke}
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+          strokeDasharray={absent ? '3,2' : undefined}
+          clipPath={`url(#cc-${num})`}
+        />
+        {/* Linea axial punteada para endodoncia (visible en raiz) */}
+        {cond === 'ENDODONCIA' && (
+          <line
+            x1="20" y1="3" x2="20" y2={splitY - 2}
+            stroke="#c4b5fd" strokeWidth="1" strokeDasharray="2,2"
+            pointerEvents="none"
+          />
+        )}
+        {/* Linea de fractura diagonal sobre corona */}
+        {cond === 'FRACTURA' && (
+          <line
+            x1="12" y1={splitY + 4} x2="28" y2={h - 6}
+            stroke="white" strokeWidth="1.8" strokeLinecap="round"
+            pointerEvents="none"
+          />
+        )}
       </g>
+
+      {/* X para diente ausente */}
       {absent && (
         <>
-          <line x1="8" y1="8" x2={w - 8} y2={h - 8} stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" pointerEvents="none" />
-          <line x1={w - 8} y1="8" x2="8" y2={h - 8} stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" pointerEvents="none" />
+          <line x1="8" y1="8" x2={w - 8} y2={h - 8} stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" pointerEvents="none"/>
+          <line x1={w - 8} y1="8" x2="8" y2={h - 8} stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" pointerEvents="none"/>
         </>
       )}
     </svg>
   );
 }
 
-// ─── Círculo de superficies (5 sectores: V/L, M, O, D, L/V) ─────────────────
+// Circulo de superficies coronales (5 sectores)
 function SurfaceCircle({
   num, state, isUpper, onClick, onHover, onLeave,
 }: {
@@ -147,13 +244,11 @@ function SurfaceCircle({
   }
 
   const segments = [
-    { key: topKey, d: sector(-45, 45)   },
-    { key: 'd',    d: sector(45, 135)   },
-    { key: botKey, d: sector(135, 225)  },
-    { key: 'm',    d: sector(225, 315)  },
+    { key: topKey, d: sector(-45, 45)  },
+    { key: 'd',    d: sector(45, 135)  },
+    { key: botKey, d: sector(135, 225) },
+    { key: 'm',    d: sector(225, 315) },
   ];
-
-  const divStroke = '#4b5563';
 
   return (
     <svg
@@ -166,8 +261,8 @@ function SurfaceCircle({
         <path
           key={seg.key}
           d={seg.d}
-          fill={condColor(state[seg.key] as ToothCondition ?? 'SANO')}
-          stroke={divStroke}
+          fill={surfaceFillAttr((state[seg.key] as ToothCondition) ?? 'SANO')}
+          stroke="#d1d5db"
           strokeWidth="0.7"
           style={{ cursor: 'pointer' }}
           onClick={e => { e.stopPropagation(); onClick(num, seg.key); }}
@@ -175,19 +270,17 @@ function SurfaceCircle({
       ))}
       <circle
         cx={cx} cy={cy} r={ri}
-        fill={condColor(state['o'] as ToothCondition ?? 'SANO')}
-        stroke={divStroke}
+        fill={surfaceFillAttr((state['o'] as ToothCondition) ?? 'SANO')}
+        stroke="#d1d5db"
         strokeWidth="0.7"
         style={{ cursor: 'pointer' }}
         onClick={e => { e.stopPropagation(); onClick(num, 'o'); }}
       />
-      {/* Outer ring */}
-      <circle cx={cx} cy={cy} r={R} fill="none" stroke={divStroke} strokeWidth="0.7" pointerEvents="none" />
+      <circle cx={cx} cy={cy} r={R} fill="none" stroke="#d1d5db" strokeWidth="0.7" pointerEvents="none"/>
     </svg>
   );
 }
 
-// ─── Tooltip label diente ────────────────────────────────────────────────────
 const TOOTH_NAMES: Record<number, string> = {
   11: 'IC sup der', 12: 'IL sup der', 13: 'C sup der', 14: '1PM sup der', 15: '2PM sup der',
   16: '1M sup der', 17: '2M sup der', 18: 'CJ sup der',
@@ -199,7 +292,6 @@ const TOOTH_NAMES: Record<number, string> = {
   46: '1M inf der', 47: '2M inf der', 48: 'CJ inf der',
 };
 
-// ─── Componente principal ────────────────────────────────────────────────────
 interface TooltipInfo { num: number; x: number; y: number }
 
 export default function Odontogram({ patientId }: { patientId: string }) {
@@ -277,7 +369,7 @@ export default function Odontogram({ patientId }: { patientId: string }) {
               width: getToothWidth(n),
               textAlign: 'center',
               fontSize: 9,
-              color: isUpper ? '#6b7280' : '#6b7280',
+              color: isUpper ? '#9ca3af' : '#9ca3af',
               lineHeight: 1.4,
               userSelect: 'none',
             }}
@@ -309,36 +401,45 @@ export default function Odontogram({ patientId }: { patientId: string }) {
         <div>
           <h3 className="text-sm font-semibold text-gray-900">Odontograma</h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            Haz clic en la silueta de un diente o en uno de los círculos de superficie de corona entre los arcos.
+            Haz clic en la silueta de un diente o en los sectores de corona entre los arcos.
           </p>
         </div>
         <button
           onClick={() => saveMut.mutate()}
           disabled={!dirty || saveMut.isPending}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-white transition-colors rounded-lg text-xs font-medium" style={{ background: "linear-gradient(135deg,#00AEEF,#0077B6)" }}>
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-white transition-colors rounded-lg text-xs font-medium disabled:opacity-50"
+          style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+        >
           {saveMut.isPending ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </div>
 
-      {/* Canvas */}
-      <div style={{ background: '#111827', padding: '16px 10px', userSelect: 'none' }}>
+      {/* Canvas con fondo claro */}
+      <div style={{ background: '#f8fafc', padding: '14px 10px', userSelect: 'none', borderBottom: '1px solid #e5e7eb' }}>
         {/* Maxilar Superior */}
         {renderNumbers(UPPER, true)}
         {renderRow(UPPER, true)}
         <div style={{ marginTop: 4 }}>{renderCircles(UPPER, true)}</div>
 
         {/* Divisor */}
-        <div style={{ height: 1, background: '#1f2937', margin: '3px auto', width: '90%' }} />
+        <div style={{ height: 1, background: '#e5e7eb', margin: '4px auto', width: '90%', position: 'relative' }}>
+          <span style={{
+            position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)',
+            background: '#f8fafc', color: '#d1d5db', fontSize: 8, padding: '0 4px', whiteSpace: 'nowrap',
+          }}>
+            ——— linea media ———
+          </span>
+        </div>
 
-        {/* Mandíbula Inferior */}
+        {/* Mandibula Inferior */}
         <div style={{ marginBottom: 4 }}>{renderCircles(LOWER, false)}</div>
         {renderRow(LOWER, false)}
         {renderNumbers(LOWER, false)}
       </div>
 
-      {/* Condición activa */}
+      {/* Condicion activa */}
       <div className="px-5 py-4 border-t border-gray-100">
-        <p className="text-xs text-gray-400 mb-2.5">Condición activa:</p>
+        <p className="text-xs text-gray-400 mb-2.5">Condicion activa:</p>
         <div className="flex flex-wrap gap-2">
           {CONDITIONS.map(c => (
             <button
@@ -352,9 +453,9 @@ export default function Odontogram({ patientId }: { patientId: string }) {
             >
               <span style={{
                 width: 10, height: 10, borderRadius: 2,
-                background: c.id === 'SANO' ? '#c8c0b0' : c.color,
+                background: c.id === 'SANO' ? '#ffffff' : c.id === 'AUSENTE' ? '#e5e7eb' : c.color,
                 flexShrink: 0, display: 'inline-block',
-                border: c.id === 'SANO' ? '1px solid #9ca3af' : 'none',
+                border: c.id === 'SANO' ? '1px solid #9ca3af' : `1px solid ${c.color}`,
               }} />
               {c.label}
             </button>
@@ -379,6 +480,7 @@ export default function Odontogram({ patientId }: { patientId: string }) {
             const label = CONDITIONS.find(c => c.id === v)?.label ?? v;
             return `${surf[k] ?? k}: ${label}`;
           });
+        const toothCond = CONDITIONS.find(c => c.id === st.w);
         return (
           <div
             style={{
@@ -394,19 +496,25 @@ export default function Odontogram({ patientId }: { patientId: string }) {
               pointerEvents: 'none',
               zIndex: 50,
               whiteSpace: 'nowrap',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
               border: '1px solid #374151',
               minWidth: 140,
             }}
           >
-            <div style={{ fontWeight: 600, marginBottom: 2 }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>
               #{tooltip.num} — {name}
             </div>
-            {conds.length === 0 ? (
+            {toothCond && st.w !== 'SANO' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: conds.length ? 3 : 0 }}>
+                <span style={{ width: 8, height: 8, borderRadius: 2, background: toothCond.color, display: 'inline-block', flexShrink: 0 }}/>
+                <span style={{ color: '#e5e7eb', fontWeight: 500 }}>{toothCond.label}</span>
+              </div>
+            )}
+            {conds.length === 0 && st.w === 'SANO' ? (
               <div style={{ color: '#9ca3af' }}>Sin condiciones registradas</div>
             ) : (
               conds.map((c, i) => (
-                <div key={i} style={{ color: '#d1d5db' }}>{c}</div>
+                <div key={i} style={{ color: '#d1d5db', paddingLeft: 2 }}>{c}</div>
               ))
             )}
           </div>
@@ -415,6 +523,3 @@ export default function Odontogram({ patientId }: { patientId: string }) {
     </div>
   );
 }
-
-// suppress unused import warning for TOOTH_NAMES (used if tooltip added later)
-void TOOTH_NAMES;

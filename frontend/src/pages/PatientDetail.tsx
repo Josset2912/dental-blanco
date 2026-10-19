@@ -21,12 +21,12 @@ const genderLabel: Record<string, string> = { MASCULINO: 'Masculino', FEMENINO: 
 const STATUS_COLORS: Record<string, string> = {
   IN_PROGRESS: 'bg-[#E6F7FD] text-[#0077B6]',
   COMPLETED: 'bg-green-50 text-green-600',
-  CANCELLED: 'bg-gray-100 text-gray-500',
+  CANCELLED: 'bg-red-50 text-red-400',
 };
 const STATUS_LABEL: Record<string, string> = {
-  IN_PROGRESS: 'En progreso',
+  IN_PROGRESS: 'En curso',
   COMPLETED: 'Completado',
-  CANCELLED: 'Cancelado',
+  CANCELLED: 'Anulado',
 };
 const METHOD_LABEL: Record<string, string> = { CASH: 'Efectivo', CARD: 'Tarjeta', TRANSFER: 'Transferencia' };
 const METHOD_COLORS: Record<string, string> = {
@@ -54,7 +54,7 @@ export default function PatientDetail() {
   const [editTreatment, setEditTreatment] = useState<typeof treatments[number] | null>(null);
   const [editTreatmentForm, setEditTreatmentForm] = useState<{ status: string; cost: string; description: string; notes: string }>({ status: '', cost: '', description: '', notes: '' });
   const [payTreatment, setPayTreatment] = useState<typeof treatments[number] | null>(null);
-  const [payForm, setPayForm] = useState<{ amount: string; method: string; notes: string }>({ amount: '', method: 'CASH', notes: '' });
+  const [payForm, setPayForm] = useState<{ amount: string; method: string; concept: string; notes: string }>({ amount: '', method: 'CASH', concept: 'Abono', notes: '' });
   const [lastPayment, setLastPayment] = useState<{ payment: Payment; treatment: typeof treatments[number] } | null>(null);
 
   const { data: patient, isLoading } = useQuery({
@@ -111,7 +111,7 @@ export default function PatientDetail() {
       treatmentId: payTreatment!.id,
       amount: parseFloat(payForm.amount),
       method: payForm.method,
-      concept: `Pago - ${payTreatment!.name}`,
+      concept: payForm.concept || 'Abono',
       notes: payForm.notes || undefined,
     }),
     onSuccess: (payment) => {
@@ -275,7 +275,7 @@ export default function PatientDetail() {
                         </button>
                         {!paid && t.status !== 'CANCELLED' && (
                           <button
-                            onClick={() => { setPayTreatment(t); setPayForm({ amount: t.balance.toFixed(2), method: 'CASH', notes: '' }); }}
+                            onClick={() => { setPayTreatment(t); setPayForm({ amount: t.balance.toFixed(2), method: 'CASH', concept: 'Abono', notes: '' }); }}
                             className="px-2.5 py-1 text-xs font-medium text-white rounded-md"
                             style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
                           >
@@ -346,7 +346,7 @@ export default function PatientDetail() {
                             </button>
                             {!paid && t.status !== 'CANCELLED' && (
                               <button
-                                onClick={() => { setPayTreatment(t); setPayForm({ amount: t.balance.toFixed(2), method: 'CASH', notes: '' }); }}
+                                onClick={() => { setPayTreatment(t); setPayForm({ amount: t.balance.toFixed(2), method: 'CASH', concept: 'Abono', notes: '' }); }}
                                 className="px-2.5 py-1 text-xs font-medium text-white rounded-md"
                                 style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
                               >
@@ -562,6 +562,23 @@ export default function PatientDetail() {
                 </div>
               </div>
 
+              {/* Concepto */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tipo de pago</label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {(['Pago inicial', 'Abono', 'Cancelación'] as const).map(c => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setPayForm(f => ({ ...f, concept: c }))}
+                      className={`py-2 rounded-lg text-xs font-semibold border-2 transition-all ${payForm.concept === c ? 'bg-[#E6F7FD] text-[#0077B6] border-[#00AEEF]' : 'bg-white text-gray-400 border-gray-200'}`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Notas */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Notas (opcional)</label>
@@ -569,7 +586,7 @@ export default function PatientDetail() {
                   className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
                   value={payForm.notes}
                   onChange={e => setPayForm(f => ({ ...f, notes: e.target.value }))}
-                  placeholder="Ej: Abono inicial, saldo final..."
+                  placeholder="Observaciones opcionales..."
                 />
               </div>
 
@@ -651,9 +668,9 @@ export default function PatientDetail() {
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</label>
                 <div className="grid grid-cols-3 gap-1.5">
                   {([
-                    { value: 'IN_PROGRESS', label: 'En progreso', color: 'bg-[#E6F7FD] text-[#0077B6] border-[#00AEEF]' },
+                    { value: 'IN_PROGRESS', label: 'En curso', color: 'bg-[#E6F7FD] text-[#0077B6] border-[#00AEEF]' },
                     { value: 'COMPLETED', label: 'Completado', color: 'bg-green-50 text-green-700 border-green-400' },
-                    { value: 'CANCELLED', label: 'Cancelado', color: 'bg-gray-100 text-gray-600 border-gray-400' },
+                    { value: 'CANCELLED', label: 'Anulado', color: 'bg-red-50 text-red-500 border-red-400' },
                   ] as const).map(opt => (
                     <button
                       key={opt.value}

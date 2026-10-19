@@ -21,10 +21,8 @@ const METHODS = [
   { value: 'TRANSFER', label: 'Transferencia' },
 ];
 
-const CONCEPTS = [
-  'Consulta general', 'Limpieza dental', 'Extracción', 'Endodoncia',
-  'Ortodoncia', 'Blanqueamiento', 'Implante', 'Corona', 'Pago de tratamiento', 'Otro',
-];
+const CONCEPTS_TREATMENT = ['Pago inicial', 'Abono', 'Cancelación'];
+const CONCEPTS_GENERAL = ['Consulta', 'Pago inicial', 'Abono', 'Cancelación', 'Otro'];
 
 export default function PaymentForm({ onClose, onSubmit, loading, fixedPatientId }: Props) {
   const [form, setForm] = useState({
@@ -84,7 +82,7 @@ export default function PaymentForm({ onClose, onSubmit, loading, fixedPatientId
             {form.patientId && treatments.length > 0 && (
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-700">Vincular a tratamiento <span className="text-gray-400 font-normal">(opcional)</span></label>
-                <select className={inputClass} value={form.treatmentId} onChange={set('treatmentId')}>
+                <select className={inputClass} value={form.treatmentId} onChange={e => setForm(f => ({ ...f, treatmentId: e.target.value, concept: '' }))}>
                   <option value="">Sin vincular</option>
                   {treatments.filter(t => t.status !== 'CANCELLED').map(t => (
                     <option key={t.id} value={t.id}>{t.name} — {new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(parseFloat(t.cost))}</option>
@@ -116,7 +114,9 @@ export default function PaymentForm({ onClose, onSubmit, loading, fixedPatientId
                 <label className="text-sm font-medium text-gray-700">Concepto *</label>
                 <select className={inputClass} value={form.concept} onChange={set('concept')} required>
                   <option value="">Selecciona...</option>
-                  {CONCEPTS.map(c => <option key={c} value={c}>{c}</option>)}
+                  {(form.treatmentId ? CONCEPTS_TREATMENT : CONCEPTS_GENERAL).map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
                 </select>
               </div>
               <div className="col-span-2 flex flex-col gap-1.5">

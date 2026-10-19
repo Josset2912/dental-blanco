@@ -12,21 +12,21 @@ const PlusIcon = () => (
 );
 
 const STATUS_LABEL: Record<string, string> = {
-  IN_PROGRESS: 'En progreso',
+  IN_PROGRESS: 'En curso',
   COMPLETED: 'Completado',
-  CANCELLED: 'Cancelado',
+  CANCELLED: 'Anulado',
 };
 const STATUS_COLORS: Record<string, string> = {
   IN_PROGRESS: 'bg-[#E6F7FD] text-[#0077B6]',
   COMPLETED: 'bg-green-50 text-green-600',
-  CANCELLED: 'bg-gray-100 text-gray-500',
+  CANCELLED: 'bg-red-50 text-red-400',
 };
 
 const FILTERS = [
   { label: 'Todos', value: '' },
-  { label: 'En progreso', value: 'IN_PROGRESS' },
+  { label: 'En curso', value: 'IN_PROGRESS' },
   { label: 'Completados', value: 'COMPLETED' },
-  { label: 'Cancelados', value: 'CANCELLED' },
+  { label: 'Anulados', value: 'CANCELLED' },
 ];
 
 function formatCost(cost: string) {

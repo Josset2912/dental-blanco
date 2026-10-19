@@ -267,12 +267,14 @@ export default function PatientDetail() {
                       <span className="text-sm font-bold text-gray-900">{fmtCost(t.cost)}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-400">{new Date(t.startDate).toLocaleDateString('es-PE')}</span>
-                        <button
-                          onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
-                          className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                        </button>
+                        {t.status === 'IN_PROGRESS' && (
+                          <button
+                            onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
+                            className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                          </button>
+                        )}
                         {!paid && t.status !== 'CANCELLED' && (
                           <button
                             onClick={() => { setPayTreatment(t); setPayForm({ amount: t.balance.toFixed(2), method: 'CASH', concept: 'Abono', notes: '' }); }}
@@ -337,13 +339,15 @@ export default function PatientDetail() {
                         </td>
                         <td className="px-5 py-3.5">
                           <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
-                              className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
-                              title="Editar tratamiento"
-                            >
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            </button>
+                            {t.status === 'IN_PROGRESS' && (
+                              <button
+                                onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
+                                className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
+                                title="Editar tratamiento"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                              </button>
+                            )}
                             {!paid && t.status !== 'CANCELLED' && (
                               <button
                                 onClick={() => { setPayTreatment(t); setPayForm({ amount: t.balance.toFixed(2), method: 'CASH', concept: 'Abono', notes: '' }); }}

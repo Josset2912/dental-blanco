@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOdontogram, saveOdontogram } from '../api/odontogram';
 import type { ToothCondition } from '../api/odontogram';
@@ -17,6 +17,7 @@ const CONDITIONS: { id: ToothCondition; label: string; color: string }[] = [
 
 const UPPER = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
 const LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+
 
 // SVG paths anatomicos (viewBox 0 0 40 88, corona abajo, raices arriba)
 const PATHS: Record<string, string> = {
@@ -300,6 +301,10 @@ export default function Odontogram({ patientId }: { patientId: string }) {
   const [localState, setLocalState] = useState<OdontogramConditions>({});
   const [dirty, setDirty] = useState(false);
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const [canvasScale, setCanvasScale] = useState(1);
+  const [canvasH, setCanvasH] = useState(0);
 
   const { data: remoteState } = useQuery({
     queryKey: ['odontogram', patientId],
@@ -312,6 +317,22 @@ export default function Odontogram({ patientId }: { patientId: string }) {
       setDirty(false);
     }
   }, [remoteState]);
+
+  useEffect(() => {
+    if (canvasRef.current) setCanvasH(canvasRef.current.scrollHeight);
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const naturalW = UPPER.reduce((s, n) => s + getToothWidth(n), 0) + (UPPER.length - 1) * 2 + 20;
+    const obs = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width;
+      setCanvasScale(Math.min(1, w / naturalW));
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const saveMut = useMutation({
     mutationFn: () => saveOdontogram(patientId, localState),
@@ -414,9 +435,19 @@ export default function Odontogram({ patientId }: { patientId: string }) {
         </button>
       </div>
 
-      {/* Canvas con fondo claro — scroll horizontal en mobile */}
-      <div style={{ overflowX: 'auto', borderBottom: '1px solid #e5e7eb' }}>
-      <div style={{ background: '#f8fafc', padding: '14px 10px', userSelect: 'none', minWidth: 420 }}>
+      {/* Canvas con fondo claro — escala en mobile para que quepa en pantalla */}
+      <div ref={containerRef} style={{ borderBottom: '1px solid #e5e7eb', overflow: 'hidden' }}>
+      <div
+        ref={canvasRef}
+        style={{
+          background: '#f8fafc',
+          padding: '14px 10px',
+          userSelect: 'none',
+          transform: canvasScale < 1 ? `scale(${canvasScale})` : undefined,
+          transformOrigin: 'top left',
+          marginBottom: canvasScale < 1 && canvasH > 0 ? `${canvasH * (canvasScale - 1)}px` : undefined,
+        }}
+      >
         {/* Maxilar Superior */}
         {renderNumbers(UPPER, true)}
         {renderRow(UPPER, true)}

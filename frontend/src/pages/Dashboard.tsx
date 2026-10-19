@@ -35,7 +35,7 @@ function fmt(v: number) {
 
 const cardVariants = {
   hidden: { opacity: 0, y: 16 },
-  show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.28, ease: 'easeOut' } }),
+  show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.28, ease: 'easeOut' as const } }),
 };
 
 interface StatItem {

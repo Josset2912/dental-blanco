@@ -321,7 +321,6 @@ export default function Reports() {
                   </Pie>
                   <Tooltip
                     contentStyle={{ borderRadius: 10, fontSize: 12, border: '1px solid #e5e7eb' }}
-                    formatter={(v: number, name: string) => [v, name]}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -373,7 +372,7 @@ export default function Reports() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(v: number) => [fmt(v), 'Total']}
+                    formatter={(v: unknown) => [fmt(Number(v)), 'Total']}
                     contentStyle={{ borderRadius: 10, fontSize: 12, border: '1px solid #e5e7eb' }}
                   />
                   <Legend iconSize={8} iconType="circle" wrapperStyle={{ fontSize: 12 }} />

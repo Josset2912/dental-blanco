@@ -1,6 +1,9 @@
 import { useState, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DateField, DateInput, DateSegment, Label } from 'react-aria-components';
+import { parseDate, today, getLocalTimeZone } from '@internationalized/date';
+import type { DateValue } from '@internationalized/date';
 import type { Patient } from '../api/patients';
 
 type FormData = Omit<Patient, 'id' | 'createdAt'>;
@@ -171,10 +174,27 @@ export default function PatientForm({
                   <label className="text-xs font-semibold text-gray-600">Apellidos *</label>
                   <input className={inputClass} value={form.lastName} onChange={set('lastName')} required placeholder="Pérez García" />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600">Fecha de nacimiento *</label>
-                  <input className={inputClass} type="date" value={form.birthDate} onChange={set('birthDate')} required />
-                </div>
+                <DateField
+                  value={form.birthDate ? parseDate(form.birthDate) : null}
+                  onChange={(date: DateValue | null) =>
+                    setForm(f => ({ ...f, birthDate: date?.toString() ?? '' }))
+                  }
+                  maxValue={today(getLocalTimeZone())}
+                  isRequired
+                  className="flex flex-col gap-1.5"
+                >
+                  <Label className="text-xs font-semibold text-gray-600">
+                    Fecha de nacimiento *
+                  </Label>
+                  <DateInput className="flex items-center gap-0.5 px-3 h-[42px] border border-gray-200 rounded-xl bg-white text-sm transition-all outline-none focus-within:border-[#00AEEF] focus-within:ring-2 focus-within:ring-[#E6F7FD]">
+                    {(segment) => (
+                      <DateSegment
+                        segment={segment}
+                        className="px-px rounded tabular-nums text-gray-900 outline-none focus:bg-[#00AEEF] focus:text-white data-[placeholder]:text-gray-300 data-[type=literal]:text-gray-300 data-[type=literal]:select-none"
+                      />
+                    )}
+                  </DateInput>
+                </DateField>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-gray-600">Género *</label>
                   <div className="flex gap-1.5 h-[42px] items-center">

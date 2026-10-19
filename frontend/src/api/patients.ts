@@ -14,8 +14,18 @@ export interface Patient {
   createdAt: string;
 }
 
+export interface PaginatedPatients {
+  data: Patient[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export const getPatients = (search?: string) =>
   api.get<Patient[]>('/patients', { params: search ? { search } : {} }).then(r => r.data);
+
+export const getPatientsPaged = (page: number, search?: string, limit = 20) =>
+  api.get<PaginatedPatients>('/patients', { params: { page, limit, ...(search ? { search } : {}) } }).then(r => r.data);
 
 export const getPatient = (id: string) =>
   api.get<Patient>(`/patients/${id}`).then(r => r.data);

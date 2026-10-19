@@ -20,8 +20,18 @@ export interface PaymentSummary {
   countTotal: number;
 }
 
+export interface PaginatedPayments {
+  data: Payment[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export const getPayments = (patientId?: string) =>
   api.get<Payment[]>('/payments', { params: patientId ? { patientId } : {} }).then(r => r.data);
+
+export const getPaymentsPaged = (page: number, patientId?: string, limit = 20) =>
+  api.get<PaginatedPayments>('/payments', { params: { page, limit, ...(patientId ? { patientId } : {}) } }).then(r => r.data);
 
 export const getPaymentSummary = () =>
   api.get<PaymentSummary>('/payments/summary').then(r => r.data);

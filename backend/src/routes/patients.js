@@ -9,20 +9,29 @@ router.use(authenticate);
 
 router.get('/', async (req, res) => {
   try {
-    const { search } = req.query;
-    const patients = await prisma.patient.findMany({
-      where: {
-        active: true,
-        ...(search && {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { lastName: { contains: search, mode: 'insensitive' } },
-            { phone: { contains: search } }
-          ]
-        })
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+    const { search, page, limit } = req.query;
+    const where = {
+      active: true,
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search } }
+        ]
+      })
+    };
+
+    if (page !== undefined) {
+      const take = parseInt(limit) || 20;
+      const skip = (parseInt(page) - 1) * take;
+      const [patients, total] = await Promise.all([
+        prisma.patient.findMany({ where, orderBy: { createdAt: 'desc' }, skip, take }),
+        prisma.patient.count({ where }),
+      ]);
+      return res.json({ data: patients, total, page: parseInt(page), limit: take });
+    }
+
+    const patients = await prisma.patient.findMany({ where, orderBy: { createdAt: 'desc' } });
     res.json(patients);
   } catch {
     res.status(500).json({ error: 'Error al obtener pacientes' });

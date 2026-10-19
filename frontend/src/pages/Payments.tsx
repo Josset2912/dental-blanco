@@ -1,9 +1,12 @@
 ﻿import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { getPayments, getPaymentSummary, createPayment, deletePayment } from '../api/payments';
+import { getPaymentsPaged, getPaymentSummary, createPayment, deletePayment } from '../api/payments';
 import type { Payment } from '../api/payments';
 import PaymentForm from '../components/PaymentForm';
+import Pagination from '../components/Pagination';
+
+const LIMIT = 20;
 
 const PlusIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -25,9 +28,12 @@ function fmt(amount: number | string) {
 export default function Payments() {
   const [showForm, setShowForm] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const qc = useQueryClient();
 
-  const { data: payments = [], isLoading } = useQuery({ queryKey: ['payments'], queryFn: () => getPayments() });
+  const { data, isLoading } = useQuery({ queryKey: ['payments', page], queryFn: () => getPaymentsPaged(page, undefined, LIMIT) });
+  const payments: Payment[] = data?.data ?? [];
+  const total = data?.total ?? 0;
   const { data: summary } = useQuery({ queryKey: ['payments-summary'], queryFn: getPaymentSummary });
 
   const createMut = useMutation({
@@ -57,7 +63,7 @@ export default function Payments() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Pagos</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{payments.length} registro{payments.length !== 1 ? 's' : ''} en total</p>
+          <p className="text-sm text-gray-500 mt-0.5">{total} registro{total !== 1 ? 's' : ''} en total</p>
         </div>
         <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2 text-white transition-colors rounded-lg text-sm font-medium" style={{ background: "linear-gradient(135deg,#00AEEF,#0077B6)" }}>
           <PlusIcon /> Registrar pago
@@ -137,6 +143,8 @@ export default function Payments() {
           </div>
         )}
       </div>
+
+      <Pagination page={page} total={total} limit={LIMIT} onChange={setPage} />
 
       {showForm && (
         <PaymentForm

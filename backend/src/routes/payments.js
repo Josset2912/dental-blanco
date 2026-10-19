@@ -9,15 +9,24 @@ router.use(authenticate);
 
 router.get('/', async (req, res) => {
   try {
-    const { patientId } = req.query;
-    const payments = await prisma.payment.findMany({
-      where: { ...(patientId && { patientId }) },
-      include: {
-        patient: { select: { id: true, name: true, lastName: true } },
-        treatment: { select: { id: true, name: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const { patientId, page, limit } = req.query;
+    const where = { ...(patientId && { patientId }) };
+    const include = {
+      patient: { select: { id: true, name: true, lastName: true } },
+      treatment: { select: { id: true, name: true } },
+    };
+
+    if (page !== undefined) {
+      const take = parseInt(limit) || 20;
+      const skip = (parseInt(page) - 1) * take;
+      const [payments, total] = await Promise.all([
+        prisma.payment.findMany({ where, include, orderBy: { createdAt: 'desc' }, skip, take }),
+        prisma.payment.count({ where }),
+      ]);
+      return res.json({ data: payments, total, page: parseInt(page), limit: take });
+    }
+
+    const payments = await prisma.payment.findMany({ where, include, orderBy: { createdAt: 'desc' } });
     res.json(payments);
   } catch {
     res.status(500).json({ error: 'Error al obtener pagos' });

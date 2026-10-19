@@ -2,9 +2,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { getPatients, createPatient } from '../api/patients';
+import { getPatientsPaged, createPatient } from '../api/patients';
 import type { Patient } from '../api/patients';
 import PatientForm from '../components/PatientForm';
+import Pagination from '../components/Pagination';
 
 const PlusIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -49,16 +50,24 @@ function PatientInitial({ name }: { name: string }) {
   );
 }
 
+const LIMIT = 20;
+
 export default function Patients() {
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  const { data: patients = [], isLoading } = useQuery({
-    queryKey: ['patients', search],
-    queryFn: () => getPatients(search || undefined),
+  const { data, isLoading } = useQuery({
+    queryKey: ['patients', page, search],
+    queryFn: () => getPatientsPaged(page, search || undefined, LIMIT),
   });
+
+  const patients: Patient[] = data?.data ?? [];
+  const total = data?.total ?? 0;
+
+  const handleSearch = (v: string) => { setSearch(v); setPage(1); };
 
   const createMut = useMutation({
     mutationFn: createPatient,
@@ -83,7 +92,7 @@ export default function Patients() {
         <div>
           <h2 className="text-xl font-bold text-gray-900">Pacientes</h2>
           <p className="text-sm text-gray-500 mt-0.5">
-            {patients.length} paciente{patients.length !== 1 ? 's' : ''} registrado{patients.length !== 1 ? 's' : ''}
+            {total} paciente{total !== 1 ? 's' : ''} registrado{total !== 1 ? 's' : ''}
           </p>
         </div>
         <button
@@ -104,7 +113,7 @@ export default function Patients() {
           className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
           placeholder="Buscar por nombre o teléfono..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => handleSearch(e.target.value)}
         />
       </div>
 
@@ -185,6 +194,8 @@ export default function Patients() {
           </div>
         )}
       </div>
+
+      <Pagination page={page} total={total} limit={LIMIT} onChange={setPage} />
 
       {showForm && (
         <PatientForm

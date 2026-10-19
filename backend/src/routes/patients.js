@@ -67,9 +67,11 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
+    const data = { ...req.body };
+    if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const patient = await prisma.patient.update({
       where: { id: req.params.id },
-      data: req.body
+      data
     });
     res.json(patient);
   } catch {

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getPatient, updatePatient, deletePatient } from '../api/patients';
 import { getTreatments, createTreatment, updateTreatment } from '../api/treatments';
-import { getPayments } from '../api/payments';
+import { getPayments, createPayment } from '../api/payments';
 import PatientForm from '../components/PatientForm';
 import TreatmentForm from '../components/TreatmentForm';
 import Odontogram from '../components/Odontogram';
@@ -52,6 +52,8 @@ export default function PatientDetail() {
   const [confirmComplete, setConfirmComplete] = useState<typeof treatments[number] | null>(null);
   const [editTreatment, setEditTreatment] = useState<typeof treatments[number] | null>(null);
   const [editTreatmentForm, setEditTreatmentForm] = useState<{ status: string; cost: string; description: string; notes: string }>({ status: '', cost: '', description: '', notes: '' });
+  const [payTreatment, setPayTreatment] = useState<typeof treatments[number] | null>(null);
+  const [payForm, setPayForm] = useState<{ amount: string; method: string; notes: string }>({ amount: '', method: 'CASH', notes: '' });
 
   const { data: patient, isLoading } = useQuery({
     queryKey: ['patient', id],
@@ -99,6 +101,26 @@ export default function PatientDetail() {
     }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['treatments', id] }); setEditTreatment(null); toast.success('Tratamiento actualizado'); },
     onError: () => toast.error('Error al actualizar el tratamiento'),
+  });
+
+  const quickPayMut = useMutation({
+    mutationFn: () => createPayment({
+      patientId: id!,
+      treatmentId: payTreatment!.id,
+      amount: parseFloat(payForm.amount),
+      method: payForm.method,
+      concept: `Pago - ${payTreatment!.name}`,
+      notes: payForm.notes || undefined,
+    }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['treatments', id] });
+      qc.invalidateQueries({ queryKey: ['payments', id] });
+      setPayTreatment(null);
+      toast.success('Pago registrado correctamente');
+    },
+    onError: (e: { response?: { data?: { error?: string } } }) => {
+      toast.error(e?.response?.data?.error ?? 'Error al registrar el pago');
+    },
   });
 
   const { data: payments = [] } = useQuery({
@@ -210,81 +232,137 @@ export default function PatientDetail() {
           <>
             {/* Mobile: tarjetas */}
             <ul className="sm:hidden divide-y divide-gray-100">
-              {treatments.map(t => (
-                <li key={t.id} className="px-5 py-4">
-                  <div className="flex items-start justify-between gap-2 mb-1.5">
-                    <span className="text-sm font-medium text-gray-900">{t.name}</span>
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${STATUS_COLORS[t.status]}`}>
-                      {STATUS_LABEL[t.status]}
-                    </span>
-                  </div>
-                  {t.description && <p className="text-xs text-gray-500 mb-1.5">{t.description}</p>}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-gray-900">{fmtCost(t.cost)}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-400">{new Date(t.startDate).toLocaleDateString('es-PE')}</span>
-                      <button
-                        onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
-                        className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                      </button>
-                      {t.status === 'IN_PROGRESS' && (
-                        <button
-                          onClick={() => setConfirmComplete(t)}
-                          className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50"
-                        >
-                          Completar
-                        </button>
-                      )}
+              {treatments.map(t => {
+                const cost = parseFloat(t.cost);
+                const pct = cost > 0 ? Math.min(100, (t.totalPaid / cost) * 100) : 0;
+                const paid = pct >= 100;
+                return (
+                  <li key={t.id} className="px-5 py-4">
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <span className="text-sm font-medium text-gray-900">{t.name}</span>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${STATUS_COLORS[t.status]}`}>
+                        {STATUS_LABEL[t.status]}
+                      </span>
                     </div>
-                  </div>
-                </li>
-              ))}
+                    {t.description && <p className="text-xs text-gray-500 mb-1.5">{t.description}</p>}
+                    {/* Barra de progreso */}
+                    <div className="mb-2">
+                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <span>{fmt(t.totalPaid)} pagado</span>
+                        <span className={paid ? 'text-green-600 font-semibold' : 'text-amber-600 font-medium'}>
+                          {paid ? 'Pagado ✓' : `S/ ${t.balance.toFixed(2)} pendiente`}
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${paid ? 'bg-green-400' : 'bg-[#00AEEF]'}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-gray-900">{fmtCost(t.cost)}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400">{new Date(t.startDate).toLocaleDateString('es-PE')}</span>
+                        <button
+                          onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
+                          className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                        {!paid && t.status !== 'CANCELLED' && (
+                          <button
+                            onClick={() => { setPayTreatment(t); setPayForm({ amount: t.balance.toFixed(2), method: 'CASH', notes: '' }); }}
+                            className="px-2.5 py-1 text-xs font-medium text-white rounded-md"
+                            style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
+                          >
+                            Pagar
+                          </button>
+                        )}
+                        {t.status === 'IN_PROGRESS' && (
+                          <button
+                            onClick={() => setConfirmComplete(t)}
+                            className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50"
+                          >
+                            Completar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
             {/* Desktop: tabla */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    {['Tratamiento', 'Descripción', 'Costo', 'Inicio', 'Estado', ''].map(h => (
+                    {['Tratamiento', 'Costo / Pago', 'Inicio', 'Estado', ''].map(h => (
                       <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {treatments.map((t, i) => (
-                    <tr key={t.id} className={`hover:bg-gray-50 ${i < treatments.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                      <td className="px-5 py-3.5 text-sm font-medium text-gray-900">{t.name}</td>
-                      <td className="px-5 py-3.5 text-sm text-gray-500 max-w-[200px] truncate">{t.description || '—'}</td>
-                      <td className="px-5 py-3.5 text-sm font-medium text-gray-900">{fmtCost(t.cost)}</td>
-                      <td className="px-5 py-3.5 text-sm text-gray-600">{new Date(t.startDate).toLocaleDateString('es-PE')}</td>
-                      <td className="px-5 py-3.5">
-                        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[t.status]}`}>
-                          {STATUS_LABEL[t.status]}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
-                            className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
-                            title="Editar tratamiento"
-                          >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                          </button>
-                          {t.status === 'IN_PROGRESS' && (
+                  {treatments.map((t, i) => {
+                    const cost = parseFloat(t.cost);
+                    const pct = cost > 0 ? Math.min(100, (t.totalPaid / cost) * 100) : 0;
+                    const paid = pct >= 100;
+                    return (
+                      <tr key={t.id} className={`hover:bg-gray-50 ${i < treatments.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                        <td className="px-5 py-3.5">
+                          <p className="text-sm font-medium text-gray-900">{t.name}</p>
+                          {t.description && <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[180px]">{t.description}</p>}
+                        </td>
+                        <td className="px-5 py-3.5 min-w-[160px]">
+                          <p className="text-sm font-semibold text-gray-900 mb-1">{fmtCost(t.cost)}</p>
+                          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-1">
+                            <div
+                              className={`h-full rounded-full transition-all ${paid ? 'bg-green-400' : 'bg-[#00AEEF]'}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <p className={`text-xs ${paid ? 'text-green-600 font-semibold' : 'text-amber-600'}`}>
+                            {paid ? 'Pagado ✓' : `S/ ${t.balance.toFixed(2)} pendiente`}
+                          </p>
+                        </td>
+                        <td className="px-5 py-3.5 text-sm text-gray-600 whitespace-nowrap">{new Date(t.startDate).toLocaleDateString('es-PE')}</td>
+                        <td className="px-5 py-3.5">
+                          <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[t.status]}`}>
+                            {STATUS_LABEL[t.status]}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-2">
                             <button
-                              onClick={() => setConfirmComplete(t)}
-                              className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50"
+                              onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
+                              className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
+                              title="Editar tratamiento"
                             >
-                              Completar
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            {!paid && t.status !== 'CANCELLED' && (
+                              <button
+                                onClick={() => { setPayTreatment(t); setPayForm({ amount: t.balance.toFixed(2), method: 'CASH', notes: '' }); }}
+                                className="px-2.5 py-1 text-xs font-medium text-white rounded-md"
+                                style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
+                              >
+                                Pagar
+                              </button>
+                            )}
+                            {t.status === 'IN_PROGRESS' && (
+                              <button
+                                onClick={() => setConfirmComplete(t)}
+                                className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50"
+                              >
+                                Completar
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -367,6 +445,105 @@ export default function PatientDetail() {
           </>
         )}
       </div>
+
+      {/* Modal pago rápido por tratamiento */}
+      {payTreatment && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={e => { if (e.target === e.currentTarget) setPayTreatment(null); }}>
+          <div className="bg-white rounded-xl w-full max-w-sm shadow-xl">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Registrar pago</h3>
+              </div>
+              <button onClick={() => setPayTreatment(null)} className="w-7 h-7 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              {/* Info del tratamiento */}
+              <div className="bg-gray-50 rounded-lg p-3 text-sm space-y-1">
+                <p className="font-semibold text-gray-900">{payTreatment.name}</p>
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>Total: {fmtCost(payTreatment.cost)}</span>
+                  <span>Pagado: {fmt(payTreatment.totalPaid)}</span>
+                </div>
+                <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden mt-1">
+                  <div
+                    className="h-full bg-[#00AEEF] rounded-full"
+                    style={{ width: `${Math.min(100, (payTreatment.totalPaid / parseFloat(payTreatment.cost)) * 100)}%` }}
+                  />
+                </div>
+                <p className="text-amber-600 font-semibold text-xs">Saldo: {fmt(payTreatment.balance)}</p>
+              </div>
+
+              {/* Monto */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Monto a pagar (S/)</label>
+                <input
+                  type="number" min="0.01" step="0.01"
+                  max={payTreatment.balance}
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                  value={payForm.amount}
+                  onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))}
+                />
+              </div>
+
+              {/* Método */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Método de pago</label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {([
+                    { value: 'CASH', label: 'Efectivo' },
+                    { value: 'CARD', label: 'Tarjeta' },
+                    { value: 'TRANSFER', label: 'Transferencia' },
+                  ] as const).map(m => (
+                    <button
+                      key={m.value}
+                      type="button"
+                      onClick={() => setPayForm(f => ({ ...f, method: m.value }))}
+                      className={`py-2 rounded-lg text-xs font-semibold border-2 transition-all ${payForm.method === m.value ? 'bg-[#E6F7FD] text-[#0077B6] border-[#00AEEF]' : 'bg-white text-gray-400 border-gray-200'}`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Notas */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Notas (opcional)</label>
+                <input
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                  value={payForm.notes}
+                  onChange={e => setPayForm(f => ({ ...f, notes: e.target.value }))}
+                  placeholder="Ej: Abono inicial, saldo final..."
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100"
+                  onClick={() => setPayTreatment(null)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="px-4 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-60"
+                  style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
+                  onClick={() => quickPayMut.mutate()}
+                  disabled={quickPayMut.isPending || !payForm.amount || parseFloat(payForm.amount) <= 0}
+                >
+                  {quickPayMut.isPending ? 'Guardando...' : 'Registrar pago'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal confirmar completar tratamiento */}
       {confirmComplete && (

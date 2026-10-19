@@ -11,6 +11,9 @@ export interface Treatment {
   endDate?: string;
   notes?: string;
   patient: { id: string; name: string; lastName: string; phone: string };
+  payments: { amount: string }[];
+  totalPaid: number;
+  balance: number;
 }
 
 export type TreatmentInput = {

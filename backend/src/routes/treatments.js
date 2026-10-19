@@ -7,6 +7,12 @@ const prisma = new PrismaClient();
 
 router.use(authenticate);
 
+function withBalance(t) {
+  const totalPaid = t.payments.reduce((s, p) => s + parseFloat(p.amount), 0);
+  const balance = Math.max(0, parseFloat(t.cost) - totalPaid);
+  return { ...t, totalPaid, balance };
+}
+
 router.get('/', async (req, res) => {
   try {
     const { patientId, status } = req.query;
@@ -17,10 +23,11 @@ router.get('/', async (req, res) => {
       },
       include: {
         patient: { select: { id: true, name: true, lastName: true, phone: true } },
+        payments: { select: { amount: true } },
       },
       orderBy: { startDate: 'desc' },
     });
-    res.json(treatments);
+    res.json(treatments.map(withBalance));
   } catch {
     res.status(500).json({ error: 'Error al obtener tratamientos' });
   }
@@ -32,10 +39,11 @@ router.get('/:id', async (req, res) => {
       where: { id: req.params.id },
       include: {
         patient: { select: { id: true, name: true, lastName: true, phone: true } },
+        payments: { select: { amount: true } },
       },
     });
     if (!treatment) return res.status(404).json({ error: 'Tratamiento no encontrado' });
-    res.json(treatment);
+    res.json(withBalance(treatment));
   } catch {
     res.status(500).json({ error: 'Error al obtener tratamiento' });
   }

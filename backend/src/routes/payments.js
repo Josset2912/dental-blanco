@@ -63,10 +63,24 @@ router.get('/summary', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { createdAt, ...rest } = req.body;
+    const amount = parseFloat(rest.amount);
+
+    if (rest.treatmentId) {
+      const treatment = await prisma.treatment.findUnique({ where: { id: rest.treatmentId } });
+      if (treatment) {
+        const paid = await prisma.payment.aggregate({ _sum: { amount: true }, where: { treatmentId: rest.treatmentId } });
+        const totalPaid = parseFloat(paid._sum.amount ?? 0);
+        const balance = parseFloat(treatment.cost) - totalPaid;
+        if (amount > balance + 0.01) {
+          return res.status(400).json({ error: `El monto supera el saldo pendiente (S/ ${balance.toFixed(2)})` });
+        }
+      }
+    }
+
     const payment = await prisma.payment.create({
       data: {
         ...rest,
-        amount: parseFloat(rest.amount),
+        amount,
         treatmentId: rest.treatmentId || null,
         ...(createdAt && { createdAt: new Date(createdAt) }),
       },

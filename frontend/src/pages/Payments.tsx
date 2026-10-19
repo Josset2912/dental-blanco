@@ -2,6 +2,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { DateField, DateInput, DateSegment } from 'react-aria-components';
+import { parseDate, today, getLocalTimeZone } from '@internationalized/date';
+import type { DateValue } from '@internationalized/date';
 import { getPaymentsPaged, getPaymentSummary, createPayment, deletePayment } from '../api/payments';
 import type { Payment } from '../api/payments';
 import PaymentForm from '../components/PaymentForm';
@@ -236,24 +239,59 @@ export default function Payments() {
         </div>
 
         {/* Date from */}
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
+        <DateField
+          value={dateFrom ? parseDate(dateFrom) : null}
+          onChange={(d: DateValue | null) => { setDateFrom(d?.toString() ?? ''); setPage(1); }}
+          maxValue={dateTo ? parseDate(dateTo) : today(getLocalTimeZone())}
+          className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2 outline-none focus-within:border-[#00AEEF] focus-within:ring-2 focus-within:ring-[#E6F7FD] transition-all"
+        >
           <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
-          <span className="text-xs text-gray-400">Desde</span>
-          <input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setPage(1); }}
-            className="text-sm text-gray-700 outline-none bg-transparent" />
-        </div>
+          <span className="text-xs text-gray-400 shrink-0">Desde</span>
+          <DateInput className="flex items-center gap-0.5">
+            {seg => (
+              <DateSegment segment={seg}
+                className="px-px rounded tabular-nums text-sm text-gray-700 outline-none focus:bg-[#00AEEF] focus:text-white data-[placeholder]:text-gray-300 data-[type=literal]:text-gray-300 data-[type=literal]:select-none" />
+            )}
+          </DateInput>
+          {dateFrom && (
+            <button type="button" onClick={() => { setDateFrom(''); setPage(1); }}
+              className="ml-1 text-gray-300 hover:text-gray-500 transition-colors shrink-0">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          )}
+        </DateField>
 
         {/* Date to */}
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
+        <DateField
+          value={dateTo ? parseDate(dateTo) : null}
+          onChange={(d: DateValue | null) => { setDateTo(d?.toString() ?? ''); setPage(1); }}
+          minValue={dateFrom ? parseDate(dateFrom) : undefined}
+          maxValue={today(getLocalTimeZone())}
+          className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2 outline-none focus-within:border-[#00AEEF] focus-within:ring-2 focus-within:ring-[#E6F7FD] transition-all"
+        >
           <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
-          <span className="text-xs text-gray-400">Hasta</span>
-          <input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setPage(1); }}
-            className="text-sm text-gray-700 outline-none bg-transparent" />
-        </div>
+          <span className="text-xs text-gray-400 shrink-0">Hasta</span>
+          <DateInput className="flex items-center gap-0.5">
+            {seg => (
+              <DateSegment segment={seg}
+                className="px-px rounded tabular-nums text-sm text-gray-700 outline-none focus:bg-[#00AEEF] focus:text-white data-[placeholder]:text-gray-300 data-[type=literal]:text-gray-300 data-[type=literal]:select-none" />
+            )}
+          </DateInput>
+          {dateTo && (
+            <button type="button" onClick={() => { setDateTo(''); setPage(1); }}
+              className="ml-1 text-gray-300 hover:text-gray-500 transition-colors shrink-0">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          )}
+        </DateField>
 
         {hasFilters && (
           <button onClick={clearFilters}

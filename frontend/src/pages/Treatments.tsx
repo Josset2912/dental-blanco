@@ -150,7 +150,7 @@ export default function Treatments() {
 
   const summaryCards = [
     {
-      label: 'En progreso',
+      label: 'En curso',
       value: inProgress.length,
       sub: `S/ ${revenueExpected.toLocaleString('es-PE', { minimumFractionDigits: 0 })} esperado`,
       color: 'from-[#00AEEF] to-[#0077B6]',
@@ -164,10 +164,10 @@ export default function Treatments() {
       iconPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
     },
     {
-      label: 'Cancelados',
+      label: 'Anulados',
       value: cancelled.length,
       sub: `de ${treatments.length} total`,
-      color: 'from-gray-400 to-gray-500',
+      color: 'from-red-400 to-red-500',
       iconPath: 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z',
     },
     {
@@ -289,90 +289,155 @@ export default function Treatments() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-4 py-3 text-left">
-                    <button onClick={() => handleSort('patient')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
-                      Paciente <SortIcon active={sortKey === 'patient'} dir={sortDir} />
-                    </button>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Tratamiento</th>
-                  <th className="px-4 py-3 text-left">
-                    <button onClick={() => handleSort('cost')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
-                      Costo <SortIcon active={sortKey === 'cost'} dir={sortDir} />
-                    </button>
-                  </th>
-                  <th className="px-4 py-3 text-left">
-                    <button onClick={() => handleSort('startDate')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
-                      Inicio <SortIcon active={sortKey === 'startDate'} dir={sortDir} />
-                    </button>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Duración</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((t, i) => (
-                  <tr key={t.id} className={`transition-colors hover:bg-[#E6F7FD]/40 border-b border-gray-100 last:border-0 ${i % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
-                    <td className="px-4 py-3.5 text-sm">
-                      <p className="font-medium text-gray-900">{t.patient.name} {t.patient.lastName}</p>
+          <>
+            {/* Mobile cards */}
+            <ul className="sm:hidden divide-y divide-gray-100">
+              {filtered.map(t => (
+                <li key={t.id} className="px-4 py-4 flex flex-col gap-3">
+                  {/* Top row: patient + status */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{t.patient.name} {t.patient.lastName}</p>
                       <p className="text-xs text-gray-400">{t.patient.phone}</p>
-                    </td>
-                    <td className="px-4 py-3.5 text-sm">
-                      <div className="flex items-center gap-2">
-                        <div>
-                          <p className="font-medium text-gray-900">{t.name}</p>
-                          {t.description && <p className="text-xs text-gray-400 truncate max-w-[160px]">{t.description}</p>}
-                        </div>
-                        {t.notes && <NotesTooltip notes={t.notes} />}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-sm font-semibold text-gray-900">{formatCost(t.cost)}</td>
-                    <td className="px-4 py-3.5 text-sm text-gray-600 whitespace-nowrap">
+                    </div>
+                    <span className={`shrink-0 inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[t.status]}`}>
+                      {STATUS_LABEL[t.status]}
+                    </span>
+                  </div>
+
+                  {/* Treatment name + description */}
+                  <div className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-800">{t.name}</p>
+                      {t.description && <p className="text-xs text-gray-400 mt-0.5">{t.description}</p>}
+                    </div>
+                    {t.notes && <NotesTooltip notes={t.notes} />}
+                  </div>
+
+                  {/* Cost + dates row */}
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span className="font-bold text-gray-900 text-sm">{formatCost(t.cost)}</span>
+                    <span>
                       {new Date(t.startDate).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="px-4 py-3.5 text-sm text-gray-500 whitespace-nowrap">
+                    </span>
+                    <span>
                       {t.status === 'COMPLETED' && t.endDate ? (
                         <span className="text-green-600 font-medium">{daysBetween(t.startDate, t.endDate)} días</span>
                       ) : t.status === 'IN_PROGRESS' ? (
                         <span className="text-[#0077B6]">{daysBetween(t.startDate)} días</span>
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[t.status]}`}>
-                        {STATUS_LABEL[t.status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <div className="flex gap-1.5 flex-wrap">
-                        <button onClick={() => setEditItem(t)}
-                          className="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
-                          Editar
+                      ) : '—'}
+                    </span>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex gap-2 flex-wrap">
+                    <button onClick={() => setEditItem(t)}
+                      className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                      Editar
+                    </button>
+                    {t.status === 'IN_PROGRESS' && (
+                      <>
+                        <button onClick={() => completeMut.mutate(t.id)} disabled={completeMut.isPending}
+                          className="px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 disabled:opacity-60 transition-colors">
+                          Completar
                         </button>
-                        {t.status === 'IN_PROGRESS' && (
-                          <>
-                            <button onClick={() => completeMut.mutate(t.id)} disabled={completeMut.isPending}
-                              className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50 disabled:opacity-60 transition-colors">
-                              Completar
-                            </button>
-                            <button onClick={() => setConfirmCancel(t)}
-                              className="px-2.5 py-1 text-xs font-medium text-red-400 border border-red-100 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors">
-                              Cancelar
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </td>
+                        <button onClick={() => setConfirmCancel(t)}
+                          className="px-3 py-1.5 text-xs font-medium text-red-400 border border-red-100 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
+                          Cancelar
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="px-4 py-3 text-left">
+                      <button onClick={() => handleSort('patient')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
+                        Paciente <SortIcon active={sortKey === 'patient'} dir={sortDir} />
+                      </button>
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Tratamiento</th>
+                    <th className="px-4 py-3 text-left">
+                      <button onClick={() => handleSort('cost')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
+                        Costo <SortIcon active={sortKey === 'cost'} dir={sortDir} />
+                      </button>
+                    </th>
+                    <th className="px-4 py-3 text-left">
+                      <button onClick={() => handleSort('startDate')} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
+                        Inicio <SortIcon active={sortKey === 'startDate'} dir={sortDir} />
+                      </button>
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Duración</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filtered.map((t, i) => (
+                    <tr key={t.id} className={`transition-colors hover:bg-[#E6F7FD]/40 border-b border-gray-100 last:border-0 ${i % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
+                      <td className="px-4 py-3.5 text-sm">
+                        <p className="font-medium text-gray-900">{t.patient.name} {t.patient.lastName}</p>
+                        <p className="text-xs text-gray-400">{t.patient.phone}</p>
+                      </td>
+                      <td className="px-4 py-3.5 text-sm">
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <p className="font-medium text-gray-900">{t.name}</p>
+                            {t.description && <p className="text-xs text-gray-400 truncate max-w-[160px]">{t.description}</p>}
+                          </div>
+                          {t.notes && <NotesTooltip notes={t.notes} />}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-sm font-semibold text-gray-900">{formatCost(t.cost)}</td>
+                      <td className="px-4 py-3.5 text-sm text-gray-600 whitespace-nowrap">
+                        {new Date(t.startDate).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td className="px-4 py-3.5 text-sm text-gray-500 whitespace-nowrap">
+                        {t.status === 'COMPLETED' && t.endDate ? (
+                          <span className="text-green-600 font-medium">{daysBetween(t.startDate, t.endDate)} días</span>
+                        ) : t.status === 'IN_PROGRESS' ? (
+                          <span className="text-[#0077B6]">{daysBetween(t.startDate)} días</span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[t.status]}`}>
+                          {STATUS_LABEL[t.status]}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex gap-1.5 flex-wrap">
+                          <button onClick={() => setEditItem(t)}
+                            className="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                            Editar
+                          </button>
+                          {t.status === 'IN_PROGRESS' && (
+                            <>
+                              <button onClick={() => completeMut.mutate(t.id)} disabled={completeMut.isPending}
+                                className="px-2.5 py-1 text-xs font-medium text-green-600 border border-green-200 rounded-md hover:bg-green-50 disabled:opacity-60 transition-colors">
+                                Completar
+                              </button>
+                              <button onClick={() => setConfirmCancel(t)}
+                                className="px-2.5 py-1 text-xs font-medium text-red-400 border border-red-100 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors">
+                                Cancelar
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

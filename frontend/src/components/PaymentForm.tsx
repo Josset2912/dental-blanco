@@ -96,7 +96,15 @@ export default function PaymentForm({ onClose, onSubmit, loading, fixedPatientId
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-700">Monto (S/) *</label>
-                <input type="number" min="0" step="0.01" className={inputClass} value={form.amount} onChange={set('amount')} required placeholder="0.00" />
+                <input
+                  type="number" min="0.01" step="0.01" className={inputClass}
+                  value={form.amount} onChange={e => {
+                    const v = e.target.value;
+                    if (v === '' || parseFloat(v) > 0) setForm(f => ({ ...f, amount: v }));
+                  }}
+                  required placeholder="0.00"
+                  onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-700">Método *</label>
@@ -113,7 +121,7 @@ export default function PaymentForm({ onClose, onSubmit, loading, fixedPatientId
               </div>
               <div className="col-span-2 flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-700">Notas</label>
-                <textarea className={`${inputClass} resize-y min-h-[60px]`} value={form.notes} onChange={set('notes')} placeholder="Observaciones opcionales..." />
+                <textarea className={`${inputClass} resize-none h-[72px]`} value={form.notes} onChange={set('notes')} placeholder="Observaciones opcionales..." />
               </div>
             </div>
 

@@ -30,13 +30,13 @@ export default function ClinicalNotes({ patientId }: { patientId: string }) {
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mt-5">
-      <div className="px-6 py-4 border-b border-gray-100">
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
         <h3 className="text-sm font-semibold text-gray-900">Notas de evolución clínica</h3>
         <p className="text-xs text-gray-500 mt-0.5">{notes.length} nota{notes.length !== 1 ? 's' : ''} registrada{notes.length !== 1 ? 's' : ''}</p>
       </div>
 
       {/* Add note form */}
-      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-100 bg-gray-50">
         <textarea
           value={content}
           onChange={e => setContent(e.target.value)}
@@ -57,7 +57,7 @@ export default function ClinicalNotes({ patientId }: { patientId: string }) {
       </div>
 
       {/* Notes timeline */}
-      <div className="px-6 py-4">
+      <div className="px-4 sm:px-6 py-4">
         {isLoading ? (
           <p className="text-sm text-gray-400 text-center py-6">Cargando notas...</p>
         ) : notes.length === 0 ? (

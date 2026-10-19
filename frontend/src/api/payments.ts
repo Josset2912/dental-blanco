@@ -30,8 +30,8 @@ export interface PaginatedPayments {
 export const getPayments = (patientId?: string) =>
   api.get<Payment[]>('/payments', { params: patientId ? { patientId } : {} }).then(r => r.data);
 
-export const getPaymentsPaged = (page: number, patientId?: string, limit = 20) =>
-  api.get<PaginatedPayments>('/payments', { params: { page, limit, ...(patientId ? { patientId } : {}) } }).then(r => r.data);
+export const getPaymentsPaged = (page: number, patientId?: string, limit = 20, from?: string, to?: string) =>
+  api.get<PaginatedPayments>('/payments', { params: { page, limit, ...(patientId ? { patientId } : {}), ...(from ? { from } : {}), ...(to ? { to } : {}) } }).then(r => r.data);
 
 export const getPaymentSummary = () =>
   api.get<PaymentSummary>('/payments/summary').then(r => r.data);

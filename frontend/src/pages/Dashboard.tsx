@@ -89,10 +89,56 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-[#00AEEF] border-t-transparent animate-spin" />
-          <p className="text-sm text-gray-400">Cargando dashboard...</p>
+      <div className="space-y-6 animate-pulse">
+        {/* Hero skeleton */}
+        <div className="rounded-2xl h-28 bg-gradient-to-r from-gray-200 to-gray-100" />
+        {/* Stat cards skeleton */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 mb-3" />
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-2" />
+              <div className="h-3 bg-gray-100 rounded w-1/2" />
+            </div>
+          ))}
+        </div>
+        {/* Bottom grid skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex gap-3 items-center">
+              <div className="w-2 h-2 rounded-full bg-gray-200" />
+              <div className="h-3.5 bg-gray-200 rounded w-28" />
+            </div>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-gray-50 last:border-0">
+                <div className="w-12 space-y-1.5">
+                  <div className="h-4 bg-gray-200 rounded" />
+                  <div className="h-2.5 bg-gray-100 rounded w-3/4 mx-auto" />
+                </div>
+                <div className="w-2.5 h-2.5 rounded-full bg-gray-200 shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3.5 bg-gray-200 rounded w-2/5" />
+                  <div className="h-2.5 bg-gray-100 rounded w-1/3" />
+                </div>
+                <div className="h-6 bg-gray-100 rounded-lg w-20" />
+              </div>
+            ))}
+          </div>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex gap-3 items-center">
+              <div className="w-2 h-2 rounded-full bg-gray-200" />
+              <div className="h-3.5 bg-gray-200 rounded w-36" />
+            </div>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-6 py-3.5 border-b border-gray-50 last:border-0">
+                <div className="w-9 h-9 rounded-xl bg-gray-200 shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3.5 bg-gray-200 rounded w-3/4" />
+                  <div className="h-2.5 bg-gray-100 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

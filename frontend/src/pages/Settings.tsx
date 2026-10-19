@@ -3,9 +3,34 @@ import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getUser, changePassword } from '../api/auth';
 
+function loadClinic() {
+  try {
+    return JSON.parse(localStorage.getItem('clinic_profile') ?? '{}');
+  } catch { return {}; }
+}
+
 export default function Settings() {
   const user = getUser();
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  interface ClinicProfile { name: string; phone: string; email: string; address: string; city: string; schedule: string; }
+  const [clinic, setClinic] = useState<ClinicProfile>({
+    name: 'Blanco Dental',
+    phone: '',
+    email: '',
+    address: '',
+    city: '',
+    schedule: 'Lun–Vie 8:00–18:00',
+    ...loadClinic(),
+  });
+  const [clinicSaved, setClinicSaved] = useState(false);
+
+  const saveClinic = (e: React.FormEvent) => {
+    e.preventDefault();
+    try { localStorage.setItem('clinic_profile', JSON.stringify(clinic)); } catch {}
+    setClinicSaved(true);
+    setTimeout(() => setClinicSaved(false), 2000);
+    toast.success('Perfil de clínica guardado');
+  };
 
   const changeMut = useMutation({
     mutationFn: () => changePassword(form.currentPassword, form.newPassword),
@@ -36,7 +61,52 @@ export default function Settings() {
     <div>
       <div className="mb-7">
         <h2 className="text-xl font-bold text-gray-900">Configuración</h2>
-        <p className="text-sm text-gray-500 mt-0.5">Ajustes de tu cuenta</p>
+        <p className="text-sm text-gray-500 mt-0.5">Ajustes de cuenta y clínica</p>
+      </div>
+
+      {/* Clinic profile */}
+      <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+            <svg className="w-4.5 h-4.5 text-white w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+          </div>
+          <h3 className="text-sm font-semibold text-gray-900">Perfil de la clínica</h3>
+        </div>
+        <form onSubmit={saveClinic} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-600">Nombre de la clínica</label>
+            <input className={inputClass} value={clinic.name} onChange={e => setClinic(c => ({ ...c, name: e.target.value }))} placeholder="Blanco Dental" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-600">Teléfono</label>
+            <input className={inputClass} value={clinic.phone} onChange={e => setClinic(c => ({ ...c, phone: e.target.value }))} placeholder="+51 999 999 999" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-600">Correo de contacto</label>
+            <input type="email" className={inputClass} value={clinic.email} onChange={e => setClinic(c => ({ ...c, email: e.target.value }))} placeholder="contacto@blancodental.com" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-600">Horario de atención</label>
+            <input className={inputClass} value={clinic.schedule} onChange={e => setClinic(c => ({ ...c, schedule: e.target.value }))} placeholder="Lun–Vie 8:00–18:00" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-600">Dirección</label>
+            <input className={inputClass} value={clinic.address} onChange={e => setClinic(c => ({ ...c, address: e.target.value }))} placeholder="Av. Principal 123" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-600">Ciudad</label>
+            <input className={inputClass} value={clinic.city} onChange={e => setClinic(c => ({ ...c, city: e.target.value }))} placeholder="Lima" />
+          </div>
+          <div className="sm:col-span-2 flex justify-end pt-2">
+            <button type="submit"
+              className="px-5 py-2 text-sm font-semibold text-white rounded-lg transition-all"
+              style={{ background: clinicSaved ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+              {clinicSaved ? '✓ Guardado' : 'Guardar cambios'}
+            </button>
+          </div>
+        </form>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -152,23 +152,9 @@ export default function PatientDetail() {
         </div>
       </div>
 
-      {/* Odontograma — scroll horizontal en mobile */}
+      {/* Odontograma */}
       <div className="mb-5">
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">Odontograma</h3>
-              <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">
-                Haz clic en la silueta de un diente o en los sectores de corona entre los arcos.
-              </p>
-            </div>
-          </div>
-          {/* El componente Odontogram tiene su propio header con boton guardar,
-              lo envolvemos sin su borde exterior para evitar doble borde */}
-        </div>
-        <div className="-mt-px">
-          <Odontogram patientId={id!} />
-        </div>
+        <Odontogram patientId={id!} />
       </div>
 
       {/* Tratamientos */}
@@ -405,9 +391,9 @@ export default function PatientDetail() {
 
 function InfoRow({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
   return (
-    <div className={`flex justify-between gap-4 py-2.5 text-sm ${last ? '' : 'border-b border-gray-100'}`}>
-      <span className="text-gray-500 shrink-0">{label}</span>
-      <span className="font-medium text-gray-900 text-right">{value}</span>
+    <div className={`py-2.5 text-sm ${last ? '' : 'border-b border-gray-100'}`}>
+      <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+      <p className="font-medium text-gray-900 break-words">{value}</p>
     </div>
   );
 }

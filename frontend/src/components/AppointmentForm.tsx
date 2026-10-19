@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getUser } from '../api/auth';
 import PatientComboBox from './PatientComboBox';
 import { DateField, DateInput, DateSegment, Label } from 'react-aria-components';
@@ -28,6 +28,11 @@ const REASONS = ['Consulta general', 'Limpieza dental', 'Extracción', 'Ortodonc
 const inputClass = 'px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white';
 
 export default function AppointmentForm({ onClose, onSubmit, loading, defaultDate = '' }: Props) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   const user = getUser();
   const todayStr = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState<FormData>({

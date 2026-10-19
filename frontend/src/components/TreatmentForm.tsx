@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿import { useState, useEffect } from 'react';
 import type { Treatment } from '../api/treatments';
 import PatientComboBox from './PatientComboBox';
 
@@ -22,6 +22,11 @@ const TREATMENT_NAMES = [
 const inputClass = 'w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white';
 
 export default function TreatmentForm({ onClose, onSubmit, loading, initial, fixedPatientId }: Props) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   const today = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState({
     patientId: fixedPatientId ?? initial?.patientId ?? '',

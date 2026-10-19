@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DateField, DateInput, DateSegment, Label } from 'react-aria-components';
@@ -96,6 +96,11 @@ export default function PatientForm({
 
   const gradIdx = ((form.name.charCodeAt(0) || 0) + (form.lastName.charCodeAt(0) || 0)) % AVATAR_GRADIENTS.length;
   const gradient = AVATAR_GRADIENTS[gradIdx];
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
   const calcAge = (d: string) => {
     if (!d) return null;

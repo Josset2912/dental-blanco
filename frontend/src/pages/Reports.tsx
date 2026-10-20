@@ -278,6 +278,8 @@ export default function Reports() {
       {/* Revenue bar chart */}
       <ChartCard title="Ingresos mensuales (últimos 12 meses)" loading={loadingRevenue}>
         {revenue?.length ? (
+          <div className="overflow-x-auto">
+          <div style={{ minWidth: 320 }}>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={revenue} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
@@ -291,6 +293,8 @@ export default function Reports() {
               <Bar dataKey="total" fill={BRAND} radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          </div>
+          </div>
         ) : <EmptyChart height={240} />}
       </ChartCard>
 
@@ -300,6 +304,8 @@ export default function Reports() {
         {/* Patients line chart */}
         <ChartCard title="Nuevos pacientes (últimos 12 meses)" loading={loadingPatients}>
           {patients?.length ? (
+            <div className="overflow-x-auto">
+            <div style={{ minWidth: 280 }}>
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={patients} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
@@ -314,6 +320,8 @@ export default function Reports() {
                 />
               </LineChart>
             </ResponsiveContainer>
+            </div>
+            </div>
           ) : <EmptyChart />}
         </ChartCard>
 
@@ -379,7 +387,7 @@ export default function Reports() {
             <select
               value={balanceMonth}
               onChange={e => setBalanceMonth(Number(e.target.value))}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] bg-white"
+              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
             >
               {['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
                 .map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
@@ -387,7 +395,7 @@ export default function Reports() {
             <select
               value={balanceYear}
               onChange={e => setBalanceYear(Number(e.target.value))}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] bg-white"
+              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
             >
               {[now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1].map(y => (
                 <option key={y} value={y}>{y}</option>

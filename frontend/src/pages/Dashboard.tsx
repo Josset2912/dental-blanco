@@ -53,23 +53,23 @@ function StatCard({ item, index }: { item: StatItem; index: number }) {
       initial="hidden"
       animate="show"
       variants={cardVariants}
-      className="relative bg-white rounded-2xl border border-gray-100 p-5 overflow-hidden shadow-sm"
+      className="relative bg-white rounded-2xl border border-gray-100 p-4 md:p-5 overflow-hidden shadow-sm"
     >
       <div
-        className="absolute top-0 right-0 w-24 h-24 rounded-bl-full opacity-10"
+        className="absolute top-0 right-0 w-20 h-20 md:w-24 md:h-24 rounded-bl-full opacity-10"
         style={{ background: item.gradient }}
       />
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+        className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center mb-2.5"
         style={{ background: item.gradient }}
       >
-        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <svg className="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d={item.iconPath} />
         </svg>
       </div>
-      <p className="text-2xl font-bold text-gray-900 leading-tight">{item.value}</p>
-      <p className="text-xs text-gray-500 mt-1">{item.label}</p>
-      {item.sub && <p className="text-xs font-medium mt-1" style={{ color: '#00AEEF' }}>{item.sub}</p>}
+      <p className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">{item.value}</p>
+      <p className="text-[11px] md:text-xs text-gray-500 mt-1 leading-tight">{item.label}</p>
+      {item.sub && <p className="text-[11px] md:text-xs font-medium mt-1" style={{ color: '#00AEEF' }}>{item.sub}</p>}
     </motion.div>
   );
 }
@@ -77,7 +77,11 @@ function StatCard({ item, index }: { item: StatItem; index: number }) {
 export default function Dashboard() {
   const navigate = useNavigate();
   const user = getUser();
-  const { data, isLoading } = useQuery({ queryKey: ['dashboard'], queryFn: getDashboard });
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: getDashboard,
+    refetchInterval: 30_000,
+  });
 
   const now = new Date();
   const hour = now.getHours();
@@ -86,6 +90,27 @@ export default function Dashboard() {
 
   const today = now.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const todayCapitalized = today.charAt(0).toUpperCase() + today.slice(1);
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
+          <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+          </svg>
+        </div>
+        <p className="text-base font-semibold text-gray-900">Error al cargar el dashboard</p>
+        <p className="text-sm text-gray-500 mt-1">Verifica tu conexión e intenta nuevamente</p>
+        <button
+          onClick={() => refetch()}
+          className="mt-5 px-5 py-2.5 text-sm font-medium text-white rounded-xl transition-colors"
+          style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -220,7 +245,7 @@ export default function Dashboard() {
               <button
                 key={a.path}
                 onClick={() => navigate(a.path)}
-                className="flex items-center gap-1.5 px-3 py-2 bg-white/20 hover:bg-white/30 text-white text-xs font-medium rounded-xl transition-colors backdrop-blur-sm border border-white/20"
+                className="flex items-center gap-1.5 px-3 py-2.5 sm:py-2 bg-white/20 hover:bg-white/30 text-white text-xs font-medium rounded-xl transition-colors backdrop-blur-sm border border-white/20 min-h-[40px] sm:min-h-0"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d={a.iconPath} />

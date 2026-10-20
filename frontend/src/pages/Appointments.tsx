@@ -289,7 +289,7 @@ export default function Appointments() {
   const [showForm, setShowForm] = useState(false);
   const [showBlockForm, setShowBlockForm] = useState(false);
   const [showBlockList, setShowBlockList] = useState(false);
-  const [confirmCancel, setConfirmCancel] = useState<string | null>(null);
+  const [confirmCancel, setConfirmCancel] = useState<Appointment | null>(null);
   const qc = useQueryClient();
 
   const { data: appointments = [], isLoading } = useQuery({
@@ -558,7 +558,52 @@ export default function Appointments() {
               <span className="text-xs">Agenda una nueva cita con el botón de arriba</span>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-gray-50">
+              {[...active, ...cancelled].map(a => (
+                <div key={a.id} className="p-4" style={{ opacity: a.status === 'CANCELLED' ? 0.55 : 1 }}>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm truncate">{a.patient.name} {a.patient.lastName}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{a.patient.phone}</p>
+                    </div>
+                    <span className={`${STATUS_CLASS[a.status]} shrink-0`}>{STATUS_LABEL[a.status]}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
+                    <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    {formatTime(a.date)} · {formatDate(a.date)} · {a.duration} min
+                  </div>
+                  <p className="text-xs text-gray-600 mb-3 line-clamp-1">{a.reason}</p>
+                  {a.status !== 'CANCELLED' && a.status !== 'COMPLETED' && (
+                    <div className="flex gap-1.5 flex-wrap">
+                      {a.status === 'SCHEDULED' && (
+                        <button
+                          className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 bg-white hover:bg-gray-50 transition-colors disabled:opacity-60"
+                          onClick={() => statusMut.mutate({ id: a.id, status: 'CONFIRMED' })}
+                          disabled={statusMut.isPending}
+                        >Confirmar</button>
+                      )}
+                      {(a.status === 'SCHEDULED' || a.status === 'CONFIRMED') && (
+                        <button
+                          className="text-xs px-3 py-1.5 border border-green-300 rounded-lg text-green-600 bg-green-50 hover:bg-green-100 transition-colors disabled:opacity-60"
+                          onClick={() => statusMut.mutate({ id: a.id, status: 'COMPLETED' })}
+                          disabled={statusMut.isPending}
+                        >Completar</button>
+                      )}
+                      <button
+                        className="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                        onClick={() => setConfirmCancel(a)}
+                      >Cancelar</button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
@@ -616,7 +661,7 @@ export default function Appointments() {
                             )}
                             <button
                               className="text-xs px-2.5 py-1 rounded-md bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
-                              onClick={() => setConfirmCancel(a.id)}
+                              onClick={() => setConfirmCancel(a)}
                             >
                               Cancelar
                             </button>
@@ -628,6 +673,7 @@ export default function Appointments() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
       )}
@@ -660,8 +706,26 @@ export default function Appointments() {
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
               <h3 className="text-base font-bold text-gray-900">Cancelar cita</h3>
+              <button onClick={() => setConfirmCancel(null)} className="text-gray-400 hover:text-gray-600">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
             </div>
             <div className="px-6 py-5">
+              {/* Resumen de la cita */}
+              <div className="bg-gray-50 rounded-xl p-4 mb-4 space-y-1.5">
+                <p className="text-sm font-semibold text-gray-900">
+                  {confirmCancel.patient.name} {confirmCancel.patient.lastName}
+                </p>
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  {formatTime(confirmCancel.date)} · {formatDate(confirmCancel.date)} · {confirmCancel.duration} min
+                </div>
+                <p className="text-xs text-gray-600 line-clamp-1">{confirmCancel.reason}</p>
+              </div>
               <p className="text-sm text-gray-700 mb-5">
                 ¿Estás seguro de que deseas cancelar esta cita? Esta acción no se puede deshacer.
               </p>
@@ -674,7 +738,7 @@ export default function Appointments() {
                 </button>
                 <button
                   className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-60 transition-colors"
-                  onClick={() => cancelMut.mutate(confirmCancel)}
+                  onClick={() => cancelMut.mutate(confirmCancel.id)}
                   disabled={cancelMut.isPending}
                 >
                   {cancelMut.isPending ? 'Cancelando...' : 'Sí, cancelar cita'}

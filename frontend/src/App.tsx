@@ -133,7 +133,14 @@ export default function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-      <Toaster position="top-right" richColors closeButton />
+      <Toaster
+        position="top-right"
+        richColors
+        closeButton
+        toastOptions={{
+          style: { borderRadius: '12px', fontSize: '14px' },
+        }}
+      />
     </QueryClientProvider>
   );
 }

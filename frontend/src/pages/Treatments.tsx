@@ -463,31 +463,62 @@ export default function Treatments() {
 
       {/* Cancel confirmation modal */}
       {confirmCancel && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={e => { if (e.target === e.currentTarget) setConfirmCancel(null); }}>
-          <div className="bg-white rounded-xl w-full max-w-sm shadow-xl">
-            <div className="px-6 pt-6 pb-4">
-              <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                </svg>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+          onClick={e => { if (e.target === e.currentTarget) setConfirmCancel(null); }}>
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="relative overflow-hidden px-6 pt-5 pb-4 border-b border-gray-100"
+              style={{ background: 'linear-gradient(135deg,#fff5f5 0%,#fee2e2 100%)' }}>
+              <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-red-400/10" />
+              <div className="relative flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: 'linear-gradient(135deg,#f87171,#ef4444)' }}>
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-gray-900">Cancelar tratamiento</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">Esta acción no se puede deshacer</p>
+                  </div>
+                </div>
+                <button onClick={() => setConfirmCancel(null)}
+                  className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/70 text-gray-500 hover:bg-white hover:text-gray-700 transition-colors shadow-sm">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
               </div>
-              <h3 className="text-base font-bold text-gray-900 mb-1">Cancelar tratamiento</h3>
-              <p className="text-sm text-gray-500 mb-1">
-                ¿Estás seguro de cancelar el tratamiento de{' '}
-                <span className="font-semibold text-gray-700">{confirmCancel.patient.name} {confirmCancel.patient.lastName}</span>?
-              </p>
-              <p className="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2 mt-3">
-                <span className="font-medium text-gray-600">{confirmCancel.name}</span> · {formatCost(confirmCancel.cost)}
-              </p>
             </div>
-            <div className="flex gap-2 px-6 pb-6">
+            {/* Body */}
+            <div className="px-6 py-5">
+              <p className="text-sm text-gray-600 mb-4">
+                ¿Estás seguro de cancelar el tratamiento de{' '}
+                <span className="font-semibold text-gray-900">{confirmCancel.patient.name} {confirmCancel.patient.lastName}</span>?
+              </p>
+              <div className="bg-gray-50 rounded-xl p-3.5">
+                <p className="text-sm font-semibold text-gray-800">{confirmCancel.name}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{formatCost(confirmCancel.cost)}</p>
+              </div>
+            </div>
+            <div className="flex gap-2 px-6 pb-5">
               <button onClick={() => setConfirmCancel(null)}
-                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                 No cancelar
               </button>
               <button onClick={() => cancelMut.mutate(confirmCancel.id)} disabled={cancelMut.isPending}
-                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-60 transition-colors">
-                {cancelMut.isPending ? 'Cancelando...' : 'Sí, cancelar'}
+                className="flex-1 px-4 py-2 text-sm font-semibold text-white rounded-xl disabled:opacity-60 transition-all flex items-center justify-center gap-1.5"
+                style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)' }}>
+                {cancelMut.isPending ? (
+                  <>
+                    <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4}/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    Cancelando...
+                  </>
+                ) : 'Sí, cancelar'}
               </button>
             </div>
           </div>

@@ -75,7 +75,7 @@ export default function PatientComboBox({
         </svg>
         <Input
           placeholder="Buscar por nombre o teléfono..."
-          className="w-full pl-9 pr-9 py-2 border border-gray-200 rounded-lg text-sm outline-none
+          className="w-full pl-9 pr-9 py-2.5 border border-gray-200 rounded-xl text-sm outline-none
             focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white transition-all
             placeholder-gray-300"
         />
@@ -88,7 +88,7 @@ export default function PatientComboBox({
 
       {/* Dropdown */}
       <Popover
-        className="border border-gray-200 rounded-lg bg-white shadow-lg overflow-hidden z-50"
+        className="border border-gray-100 rounded-xl bg-white shadow-xl overflow-hidden z-50"
         style={{ width: 'var(--trigger-width)' }}
       >
         <ListBox

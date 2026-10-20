@@ -132,7 +132,7 @@ function GlobalSearch({ collapsed }: { collapsed: boolean }) {
           onChange={e => setQuery(e.target.value)}
           onFocus={() => { if (results.length > 0) setOpen(true); }}
           placeholder="Buscar paciente..."
-          className="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white placeholder-gray-400"
+          className="pl-9 pr-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white placeholder-gray-400"
         />
         {loading && (
           <svg className="absolute right-3 w-4 h-4 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -336,7 +336,7 @@ export default function Layout() {
       <div className={`flex-1 flex flex-col ${mainML} min-h-screen min-w-0 transition-all duration-200`}>
 
         {/* Mobile top bar */}
-        <header className="md:hidden sticky top-0 z-10 bg-white border-b border-gray-100 px-4 h-14 flex items-center gap-3">
+        <header className="md:hidden sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm px-4 h-14 flex items-center gap-3">
           <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
               style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
@@ -366,7 +366,7 @@ export default function Layout() {
               <NavLink
                 key={to}
                 to={to}
-                className="flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors"
+                className="relative flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors"
               >
                 <span className={`transition-colors ${isActive ? 'text-[#00AEEF]' : 'text-gray-400'}`}>
                   {icon}

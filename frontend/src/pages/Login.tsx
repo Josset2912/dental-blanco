@@ -107,9 +107,7 @@ export default function Login() {
                   onChange={e => setEmail(e.target.value)}
                   required
                   placeholder="correo@ejemplo.com"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm outline-none bg-gray-50 lg:bg-gray-50 transition-all"
-                  onFocus={e => { e.target.style.borderColor = '#00AEEF'; e.target.style.boxShadow = '0 0 0 3px rgba(0,174,239,0.12)'; e.target.style.background = 'white'; }}
-                  onBlur={e => { e.target.style.borderColor = '#e5e7eb'; e.target.style.boxShadow = 'none'; e.target.style.background = '#f9fafb'; }}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm outline-none bg-gray-50 transition-all focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] focus:bg-white"
                 />
               </div>
             </div>
@@ -129,9 +127,7 @@ export default function Login() {
                   onChange={e => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-11 py-3 border border-gray-200 rounded-xl text-sm outline-none bg-gray-50 transition-all"
-                  onFocus={e => { e.target.style.borderColor = '#00AEEF'; e.target.style.boxShadow = '0 0 0 3px rgba(0,174,239,0.12)'; e.target.style.background = 'white'; }}
-                  onBlur={e => { e.target.style.borderColor = '#e5e7eb'; e.target.style.boxShadow = 'none'; e.target.style.background = '#f9fafb'; }}
+                  className="w-full pl-10 pr-11 py-3 border border-gray-200 rounded-xl text-sm outline-none bg-gray-50 transition-all focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] focus:bg-white"
                 />
                 <button
                   type="button"

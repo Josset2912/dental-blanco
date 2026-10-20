@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authenticate } = require('../middleware/auth');
+const { validate, schemas } = require('../middleware/validate');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -60,7 +61,7 @@ router.get('/summary', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', validate(schemas.payment), async (req, res) => {
   try {
     const { createdAt, ...rest } = req.body;
     const amount = parseFloat(rest.amount);

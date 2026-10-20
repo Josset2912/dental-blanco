@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authenticate } = require('../middleware/auth');
+const { validate, schemas } = require('../middleware/validate');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -49,7 +50,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', validate(schemas.treatment), async (req, res) => {
   try {
     const treatment = await prisma.treatment.create({
       data: {
@@ -67,7 +68,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', validate(schemas.treatmentUpdate), async (req, res) => {
   try {
     const data = { ...req.body };
     if (data.cost !== undefined) data.cost = parseFloat(data.cost);

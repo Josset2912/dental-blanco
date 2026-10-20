@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authenticate } = require('../middleware/auth');
+const { validate, schemas } = require('../middleware/validate');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -54,10 +55,11 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', validate(schemas.patient), async (req, res) => {
   try {
     const data = { ...req.body };
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
+    if (data.email === '') data.email = null;
     const patient = await prisma.patient.create({ data });
     res.status(201).json(patient);
   } catch {
@@ -65,10 +67,11 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', validate(schemas.patientUpdate), async (req, res) => {
   try {
     const data = { ...req.body };
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
+    if (data.email === '') data.email = null;
     const patient = await prisma.patient.update({
       where: { id: req.params.id },
       data

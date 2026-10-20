@@ -1,9 +1,10 @@
-﻿import { useQuery } from '@tanstack/react-query';
+﻿import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
-import { getOverview, getRevenue, getPatientsReport, getTreatments } from '../api/reports';
+import { getOverview, getRevenue, getPatientsReport, getTreatments, getMonthlyBalance } from '../api/reports';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 
@@ -80,11 +81,28 @@ function ChartCard({ title, children, loading }: { title: string; children: Reac
   );
 }
 
+const METHOD_BADGE: Record<string, string> = {
+  CASH: 'bg-emerald-50 text-emerald-700',
+  CARD: 'bg-[#E6F7FD] text-[#0077B6]',
+  TRANSFER: 'bg-violet-50 text-violet-700',
+};
+const METHOD_LABEL_MAP: Record<string, string> = {
+  CASH: 'Efectivo', CARD: 'Tarjeta', TRANSFER: 'Transferencia',
+};
+
 export default function Reports() {
-  const { data: overview, isLoading: loadingOverview } = useQuery({ queryKey: ['reports-overview'], queryFn: getOverview });
-  const { data: revenue, isLoading: loadingRevenue } = useQuery({ queryKey: ['reports-revenue'], queryFn: getRevenue });
-  const { data: patients, isLoading: loadingPatients } = useQuery({ queryKey: ['reports-patients'], queryFn: getPatientsReport });
+  const now = new Date();
+  const [balanceYear,  setBalanceYear]  = useState(now.getFullYear());
+  const [balanceMonth, setBalanceMonth] = useState(now.getMonth() + 1);
+
+  const { data: overview,   isLoading: loadingOverview   } = useQuery({ queryKey: ['reports-overview'],   queryFn: getOverview });
+  const { data: revenue,    isLoading: loadingRevenue    } = useQuery({ queryKey: ['reports-revenue'],    queryFn: getRevenue });
+  const { data: patients,   isLoading: loadingPatients   } = useQuery({ queryKey: ['reports-patients'],   queryFn: getPatientsReport });
   const { data: treatments, isLoading: loadingTreatments } = useQuery({ queryKey: ['reports-treatments'], queryFn: getTreatments });
+  const { data: balance,    isLoading: loadingBalance    } = useQuery({
+    queryKey: ['reports-balance', balanceYear, balanceMonth],
+    queryFn:  () => getMonthlyBalance(balanceYear, balanceMonth),
+  });
 
   const generatedAt = new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const generatedCapitalized = generatedAt.charAt(0).toUpperCase() + generatedAt.slice(1);
@@ -347,6 +365,175 @@ export default function Reports() {
             </div>
           ) : <EmptyChart />}
         </ChartCard>
+      </div>
+
+      {/* ── Balance mensual detallado ─────────────────────────── */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        {/* Header con selector */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-4 rounded-full shrink-0" style={{ background: `linear-gradient(to bottom, ${BRAND}, ${BRAND_DARK})` }} />
+            <h2 className="text-sm font-semibold text-gray-800">Balance mensual detallado</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              value={balanceMonth}
+              onChange={e => setBalanceMonth(Number(e.target.value))}
+              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] bg-white"
+            >
+              {['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+                .map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+            </select>
+            <select
+              value={balanceYear}
+              onChange={e => setBalanceYear(Number(e.target.value))}
+              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] bg-white"
+            >
+              {[now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1].map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {loadingBalance ? (
+          <div className="animate-pulse space-y-3">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 bg-gray-100 rounded-xl" />)}
+            </div>
+            <div className="h-48 bg-gray-100 rounded-xl mt-4" />
+          </div>
+        ) : (
+          <>
+            {/* KPI cards del mes */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              {[
+                {
+                  label: 'Total ingresado',
+                  value: fmt(balance?.total ?? 0),
+                  sub: balance?.growth != null
+                    ? `${balance.growth >= 0 ? '+' : ''}${balance.growth.toFixed(1)}% vs mes anterior`
+                    : 'Sin datos anteriores',
+                  subColor: balance?.growth != null ? (balance.growth >= 0 ? 'text-emerald-500' : 'text-red-400') : 'text-gray-400',
+                  color: 'from-emerald-500 to-emerald-600',
+                  iconPath: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+                },
+                {
+                  label: 'Pagos realizados',
+                  value: balance?.count ?? 0,
+                  sub: 'transacciones',
+                  subColor: 'text-gray-400',
+                  color: 'from-[#00AEEF] to-[#0077B6]',
+                  iconPath: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+                },
+                {
+                  label: 'Promedio por pago',
+                  value: fmt(balance?.average ?? 0),
+                  sub: 'por transacción',
+                  subColor: 'text-gray-400',
+                  color: 'from-violet-500 to-violet-600',
+                  iconPath: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+                },
+                {
+                  label: 'Mes anterior',
+                  value: fmt(balance?.prevTotal ?? 0),
+                  sub: 'para comparación',
+                  subColor: 'text-gray-400',
+                  color: 'from-amber-400 to-amber-500',
+                  iconPath: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+                },
+              ].map(c => (
+                <div key={c.label} className="bg-gray-50 rounded-xl p-4 flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${c.color} flex items-center justify-center shrink-0`}>
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={c.iconPath}/>
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-base font-bold text-gray-900 leading-tight truncate">{c.value}</p>
+                    <p className="text-xs text-gray-500 truncate">{c.label}</p>
+                    <p className={`text-[10px] truncate ${c.subColor}`}>{c.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desglose por método */}
+            {balance?.byMethod && balance.byMethod.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-5">
+                {balance.byMethod.map(m => (
+                  <div key={m.method} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium ${METHOD_BADGE[m.method] ?? 'bg-gray-100 text-gray-600'}`}>
+                    <span>{m.label}</span>
+                    <span className="opacity-60">·</span>
+                    <span>{m.count} pagos</span>
+                    <span className="opacity-60">·</span>
+                    <span className="font-bold">{fmt(m.total)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Tabla de pagos */}
+            {!balance?.payments?.length ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center mb-3">
+                  <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <p className="text-sm font-medium text-gray-600">Sin pagos en este mes</p>
+                <p className="text-xs text-gray-400 mt-0.5">Selecciona otro mes o registra pagos</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-gray-100">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Paciente</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Concepto</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Método</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Monto</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {balance.payments.map((p, i) => (
+                      <tr key={p.id} className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/60 transition-colors ${i % 2 === 1 ? 'bg-gray-50/30' : ''}`}>
+                        <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
+                          {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })}
+                          <span className="block text-gray-400">
+                            {new Date(p.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-gray-900">{p.patient.name} {p.patient.lastName}</p>
+                          {p.treatment && <p className="text-xs text-gray-400 truncate max-w-[140px]">{p.treatment.name}</p>}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{p.concept}</td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-medium ${METHOD_BADGE[p.method] ?? 'bg-gray-100 text-gray-600'}`}>
+                            {METHOD_LABEL_MAP[p.method] ?? p.method}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right font-bold text-gray-900">{fmt(p.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-gray-200 bg-gray-50">
+                      <td colSpan={4} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        Total del mes
+                      </td>
+                      <td className="px-4 py-3 text-right text-base font-bold" style={{ color: BRAND_DARK }}>
+                        {fmt(balance.total)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Payment methods — donut + tabla */}

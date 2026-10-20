@@ -125,4 +125,75 @@ router.get('/treatments', async (req, res) => {
   }
 });
 
+// Balance mensual detallado: pagos del mes con info de paciente y tratamiento
+router.get('/balance', async (req, res) => {
+  try {
+    const now = new Date();
+    const year  = parseInt(req.query.year)  || now.getFullYear();
+    const month = parseInt(req.query.month) || (now.getMonth() + 1);
+
+    const start = new Date(year, month - 1, 1);
+    const end   = new Date(year, month, 1);
+
+    const payments = await prisma.payment.findMany({
+      where: { createdAt: { gte: start, lt: end } },
+      include: {
+        patient:   { select: { name: true, lastName: true, phone: true } },
+        treatment: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const total    = payments.reduce((s, p) => s + Number(p.amount), 0);
+    const count    = payments.length;
+    const average  = count > 0 ? total / count : 0;
+
+    // Desglose por método
+    const byMethod = {};
+    for (const p of payments) {
+      if (!byMethod[p.method]) byMethod[p.method] = { count: 0, total: 0 };
+      byMethod[p.method].count++;
+      byMethod[p.method].total += Number(p.amount);
+    }
+
+    // Comparar con mes anterior
+    const prevStart = new Date(year, month - 2, 1);
+    const prevEnd   = new Date(year, month - 1, 1);
+    const prevAgg   = await prisma.payment.aggregate({
+      _sum: { amount: true },
+      where: { createdAt: { gte: prevStart, lt: prevEnd } },
+    });
+    const prevTotal = Number(prevAgg._sum.amount ?? 0);
+    const growth    = prevTotal > 0 ? ((total - prevTotal) / prevTotal) * 100 : null;
+
+    const METHOD_LABEL = { CASH: 'Efectivo', CARD: 'Tarjeta', TRANSFER: 'Transferencia' };
+
+    res.json({
+      total,
+      count,
+      average,
+      prevTotal,
+      growth,
+      byMethod: Object.entries(byMethod).map(([method, v]) => ({
+        method,
+        label: METHOD_LABEL[method] ?? method,
+        ...v,
+      })),
+      payments: payments.map(p => ({
+        id:        p.id,
+        amount:    Number(p.amount),
+        method:    p.method,
+        concept:   p.concept,
+        notes:     p.notes,
+        createdAt: p.createdAt,
+        patient:   p.patient,
+        treatment: p.treatment,
+      })),
+    });
+  } catch (e) {
+    console.error('balance error:', e.message);
+    res.status(500).json({ error: 'Error al obtener balance', detail: e.message });
+  }
+});
+
 module.exports = router;

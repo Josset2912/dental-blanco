@@ -38,3 +38,12 @@ export const updatePatient = (id: string, data: Partial<Patient>) =>
 
 export const deletePatient = (id: string) =>
   api.delete(`/patients/${id}`).then(r => r.data);
+
+export interface PatientStats {
+  total: number;
+  newThisMonth: number;
+  byGender: { MASCULINO: number; FEMENINO: number; OTRO: number };
+}
+
+export const getPatientStats = () =>
+  api.get<PatientStats>('/patients/stats').then(r => r.data);

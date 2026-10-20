@@ -2,10 +2,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { getPatientsPaged, createPatient, updatePatient } from '../api/patients';
+import { getPatientsPaged, createPatient, updatePatient, getPatientStats } from '../api/patients';
 import type { Patient } from '../api/patients';
 import PatientForm from '../components/PatientForm';
 import Pagination from '../components/Pagination';
+
+// ── Icons ────────────────────────────────────────────────────────────────────
 
 const PlusIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -18,98 +20,202 @@ const SearchIcon = () => (
   </svg>
 );
 const PhoneIcon = () => (
-  <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 8V5z"/>
   </svg>
 );
+const EditIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+  </svg>
+);
+const ArrowIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+  </svg>
+);
+const CalendarIcon = () => (
+  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+  </svg>
+);
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function calcAge(birthDate: string) {
   const diff = Date.now() - new Date(birthDate).getTime();
   return Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
 }
 
-const genderBadgeClass: Record<string, string> = {
-  MASCULINO: 'inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#E6F7FD] text-[#0077B6]',
-  FEMENINO: 'inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-600',
-  OTRO: 'inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600',
-};
-const genderLabel: Record<string, string> = { MASCULINO: 'Masculino', FEMENINO: 'Femenino', OTRO: 'Otro' };
+function isNew(createdAt: string) {
+  const days = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
+  return days <= 30;
+}
 
-function PatientInitial({ name }: { name: string }) {
+// ── Gender config ─────────────────────────────────────────────────────────────
+
+const GENDER_CONFIG = {
+  MASCULINO: {
+    badge: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-600',
+    avatar: 'from-[#00AEEF] to-[#0077B6]',
+    label: 'Masculino',
+  },
+  FEMENINO: {
+    badge: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-fuchsia-50 text-fuchsia-600',
+    avatar: 'from-fuchsia-400 to-fuchsia-600',
+    label: 'Femenino',
+  },
+  OTRO: {
+    badge: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600',
+    avatar: 'from-gray-400 to-gray-500',
+    label: 'Otro',
+  },
+};
+
+function PatientInitial({ name, gender }: { name: string; gender: Patient['gender'] }) {
   const letter = name.trim().charAt(0).toUpperCase();
+  const gradient = GENDER_CONFIG[gender]?.avatar ?? 'from-[#00AEEF] to-[#0077B6]';
   return (
-    <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-      style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 bg-gradient-to-br ${gradient}`}>
       {letter}
     </div>
   );
 }
 
-const LIMIT = 20;
+// ── Sort ──────────────────────────────────────────────────────────────────────
 
 type SortKey = 'name' | 'createdAt' | 'birthDate';
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   return (
     <svg className={`w-3 h-3 inline ml-1 transition-colors ${active ? 'text-[#00AEEF]' : 'text-gray-300'}`} viewBox="0 0 24 24" fill="currentColor">
-      {dir === 'asc' || !active
-        ? <path d="M7 14l5-5 5 5H7z"/>
-        : <path d="M7 10l5 5 5-5H7z"/>}
+      {dir === 'asc' || !active ? <path d="M7 14l5-5 5 5H7z"/> : <path d="M7 10l5 5 5-5H7z"/>}
     </svg>
   );
 }
+
+// ── Stats bar ─────────────────────────────────────────────────────────────────
+
+function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color: string }) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3.5 flex items-center gap-3">
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${color}`}>
+        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>
+        </svg>
+      </div>
+      <div className="min-w-0">
+        <div className="text-xl font-bold text-gray-900 leading-none">{value}</div>
+        <div className="text-xs text-gray-500 mt-0.5 truncate">{label}</div>
+        {sub && <div className="text-xs font-medium text-emerald-600 mt-0.5">{sub}</div>}
+      </div>
+    </div>
+  );
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+function EmptyState({ search, genderFilter }: { search: string; genderFilter: string }) {
+  const hasFilter = search || genderFilter !== 'TODOS';
+  return (
+    <div className="text-center py-20 px-6">
+      <div className="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+        <svg className="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>
+        </svg>
+      </div>
+      <p className="text-base font-semibold text-gray-700">
+        {hasFilter ? 'Sin resultados' : 'Aún no hay pacientes'}
+      </p>
+      <p className="text-sm text-gray-400 mt-1 max-w-xs mx-auto">
+        {hasFilter
+          ? 'Prueba cambiando los filtros o el término de búsqueda.'
+          : 'Registra el primer paciente con el botón de arriba.'}
+      </p>
+    </div>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+
+const LIMIT = 20;
+type GenderFilter = 'TODOS' | 'MASCULINO' | 'FEMENINO' | 'OTRO';
 
 export default function Patients() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [sortKey, setSortKey] = useState<SortKey>('createdAt');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [genderFilter, setGenderFilter] = useState<GenderFilter>('TODOS');
+  const [showForm, setShowForm] = useState(false);
+  const [editPatient, setEditPatient] = useState<Patient | null>(null);
+  const navigate = useNavigate();
+  const qc = useQueryClient();
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortKey(key); setSortDir('asc'); }
   };
-  const [showForm, setShowForm] = useState(false);
-  const [editPatient, setEditPatient] = useState<Patient | null>(null);
-  const navigate = useNavigate();
-  const qc = useQueryClient();
+
+  const handleSearch = (v: string) => { setSearch(v); setPage(1); };
+  const handleGender = (g: GenderFilter) => { setGenderFilter(g); setPage(1); };
 
   const { data, isLoading } = useQuery({
     queryKey: ['patients', page, search],
     queryFn: () => getPatientsPaged(page, search || undefined, LIMIT),
   });
 
-  const patients: Patient[] = data?.data ?? [];
+  const { data: stats } = useQuery({
+    queryKey: ['patients-stats'],
+    queryFn: getPatientStats,
+    staleTime: 60_000,
+  });
+
+  const allPatients: Patient[] = data?.data ?? [];
   const total = data?.total ?? 0;
 
-  const handleSearch = (v: string) => { setSearch(v); setPage(1); };
+  // client-side gender filter + sort (sobre la página actual)
+  const patients = [...allPatients]
+    .filter(p => genderFilter === 'TODOS' || p.gender === genderFilter)
+    .sort((a, b) => {
+      const va = sortKey === 'name' ? `${a.name} ${a.lastName}` : sortKey === 'birthDate' ? a.birthDate : a.createdAt;
+      const vb = sortKey === 'name' ? `${b.name} ${b.lastName}` : sortKey === 'birthDate' ? b.birthDate : b.createdAt;
+      return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    });
 
   const createMut = useMutation({
     mutationFn: createPatient,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['patients'] }); setShowForm(false); toast.success('Paciente creado correctamente'); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['patients'] });
+      qc.invalidateQueries({ queryKey: ['patients-stats'] });
+      setShowForm(false);
+      toast.success('Paciente creado correctamente');
+    },
     onError: () => toast.error('Error al guardar el paciente'),
   });
 
   const updateMut = useMutation({
-    mutationFn: (data: Parameters<typeof updatePatient>[1]) => updatePatient(editPatient!.id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['patients'] }); setEditPatient(null); toast.success('Paciente actualizado correctamente'); },
+    mutationFn: (d: Parameters<typeof updatePatient>[1]) => updatePatient(editPatient!.id, d),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['patients'] });
+      qc.invalidateQueries({ queryKey: ['patients-stats'] });
+      setEditPatient(null);
+      toast.success('Paciente actualizado correctamente');
+    },
     onError: () => toast.error('Error al actualizar el paciente'),
   });
 
-  const empty = (
-    <div className="text-center py-16 text-gray-500">
-      <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>
-      </svg>
-      <p className="text-sm font-medium text-gray-700">No hay pacientes {search ? 'con esa búsqueda' : 'registrados'}</p>
-      {!search && <span className="text-xs text-gray-400">Crea el primer paciente con el botón de arriba</span>}
-    </div>
-  );
+  const genderChips: { key: GenderFilter; label: string }[] = [
+    { key: 'TODOS', label: 'Todos' },
+    { key: 'MASCULINO', label: 'Masculino' },
+    { key: 'FEMENINO', label: 'Femenino' },
+    { key: 'OTRO', label: 'Otro' },
+  ];
 
   return (
     <>
-      {/* Header — apilado en mobile, fila en sm+ */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-5">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Pacientes</h2>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -118,24 +224,69 @@ export default function Patients() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-white transition-colors rounded-lg text-sm font-medium sm:w-auto"
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-white rounded-lg text-sm font-medium sm:w-auto transition-opacity hover:opacity-90"
           style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
         >
           <PlusIcon /> Nuevo paciente
         </button>
       </div>
 
-      {/* Busqueda */}
-      <div className="relative mb-4">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-          <SearchIcon />
-        </span>
-        <input
-          className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
-          placeholder="Buscar por nombre o teléfono..."
-          value={search}
-          onChange={e => handleSearch(e.target.value)}
+      {/* Stats bar */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <StatCard
+          label="Total pacientes"
+          value={stats?.total ?? '—'}
+          color="bg-gradient-to-br from-[#00AEEF] to-[#0077B6]"
         />
+        <StatCard
+          label="Nuevos este mes"
+          value={stats?.newThisMonth ?? '—'}
+          sub={stats?.newThisMonth ? `+${stats.newThisMonth} ingresaron` : undefined}
+          color="bg-gradient-to-br from-emerald-400 to-emerald-600"
+        />
+        <StatCard
+          label="Masculino"
+          value={stats?.byGender.MASCULINO ?? '—'}
+          color="bg-gradient-to-br from-blue-400 to-blue-600"
+        />
+        <StatCard
+          label="Femenino"
+          value={stats?.byGender.FEMENINO ?? '—'}
+          color="bg-gradient-to-br from-fuchsia-400 to-fuchsia-600"
+        />
+      </div>
+
+      {/* Búsqueda + filtros de género */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <div className="relative flex-1">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <SearchIcon />
+          </span>
+          <input
+            className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+            placeholder="Buscar por nombre o teléfono..."
+            value={search}
+            onChange={e => handleSearch(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-1.5 flex-wrap">
+          {genderChips.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => handleGender(key)}
+              className={`px-3 py-2 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${
+                genderFilter === key
+                  ? 'bg-[#00AEEF] border-[#00AEEF] text-white shadow-sm'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-[#00AEEF] hover:text-[#00AEEF]'
+              }`}
+            >
+              {label}
+              {key !== 'TODOS' && stats
+                ? <span className="ml-1 opacity-70">({stats.byGender[key as keyof typeof stats.byGender]})</span>
+                : null}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* MOBILE: lista de tarjetas */}
@@ -144,7 +295,7 @@ export default function Patients() {
           <ul className="animate-pulse divide-y divide-gray-100">
             {Array.from({ length: 6 }).map((_, i) => (
               <li key={i} className="flex items-center gap-3 px-4 py-3.5">
-                <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
+                <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="h-3.5 bg-gray-200 rounded w-2/3" />
                   <div className="h-3 bg-gray-100 rounded w-1/2" />
@@ -152,29 +303,38 @@ export default function Patients() {
               </li>
             ))}
           </ul>
-        ) : patients.length === 0 ? empty : (
+        ) : patients.length === 0 ? (
+          <EmptyState search={search} genderFilter={genderFilter} />
+        ) : (
           <ul>
-            {patients.map((p: Patient, idx: number) => (
+            {patients.map((p, idx) => (
               <li
                 key={p.id}
                 className={`flex items-center gap-3 px-4 py-3.5 ${idx < patients.length - 1 ? 'border-b border-gray-100' : ''}`}
               >
                 <div className="cursor-pointer flex items-center gap-3 flex-1 min-w-0" onClick={() => navigate(`/pacientes/${p.id}`)}>
-                  <PatientInitial name={p.name} />
+                  <div className="relative">
+                    <PatientInitial name={p.name} gender={p.gender} />
+                    {isNew(p.createdAt) && (
+                      <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full" title="Nuevo este mes" />
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-gray-900 text-sm truncate">{p.name} {p.lastName}</span>
-                      <span className={genderBadgeClass[p.gender]}>{genderLabel[p.gender]}</span>
+                      <span className={GENDER_CONFIG[p.gender].badge}>{GENDER_CONFIG[p.gender].label}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <PhoneIcon />
-                      <span className="text-xs text-gray-500">{p.phone}</span>
-                      <span className="text-gray-300 text-xs">·</span>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <span className="flex items-center gap-1 text-xs text-gray-500">
+                        <PhoneIcon />{p.phone}
+                      </span>
+                      <span className="text-gray-200">·</span>
                       <span className="text-xs text-gray-500">{calcAge(p.birthDate)} años</span>
                     </div>
-                    {p.email && (
-                      <div className="text-xs text-gray-400 truncate mt-0.5">{p.email}</div>
-                    )}
+                    <div className="flex items-center gap-1 mt-0.5 text-xs text-gray-400">
+                      <CalendarIcon />
+                      <span>Desde {new Date(p.createdAt).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                    </div>
                   </div>
                 </div>
                 <button
@@ -182,9 +342,7 @@ export default function Patients() {
                   className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors shrink-0"
                   title="Editar paciente"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
+                  <EditIcon />
                 </button>
               </li>
             ))}
@@ -203,7 +361,7 @@ export default function Patients() {
             </div>
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className={`flex items-center gap-4 px-4 py-4 border-b border-gray-100 ${i % 2 === 1 ? 'bg-gray-50/50' : ''}`}>
-                <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
+                <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
                 <div className="flex-1 space-y-2">
                   <div className="h-3.5 bg-gray-200 rounded w-1/3" />
                   <div className="h-3 bg-gray-100 rounded w-1/4" />
@@ -215,7 +373,9 @@ export default function Patients() {
               </div>
             ))}
           </div>
-        ) : patients.length === 0 ? empty : (
+        ) : patients.length === 0 ? (
+          <EmptyState search={search} genderFilter={genderFilter} />
+        ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
@@ -237,22 +397,23 @@ export default function Patients() {
                       Registro <SortIcon active={sortKey === 'createdAt'} dir={sortDir} />
                     </button>
                   </th>
-                  <th className="px-4 py-3 w-10" />
+                  <th className="px-4 py-3 w-28" />
                 </tr>
               </thead>
               <tbody>
-                {[...patients].sort((a, b) => {
-                  let va: string | number = sortKey === 'name' ? `${a.name} ${a.lastName}` : sortKey === 'birthDate' ? a.birthDate : a.createdAt;
-                  let vb: string | number = sortKey === 'name' ? `${b.name} ${b.lastName}` : sortKey === 'birthDate' ? b.birthDate : b.createdAt;
-                  return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
-                }).map((p: Patient, idx: number) => (
+                {patients.map((p, idx) => (
                   <tr
                     key={p.id}
-                    className={`transition-colors hover:bg-[#E6F7FD]/40 ${idx % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}
+                    className={`group transition-colors hover:bg-[#E6F7FD]/50 ${idx % 2 === 1 ? 'bg-gray-50/40' : 'bg-white'}`}
                   >
                     <td className="px-4 py-3.5 text-sm border-b border-gray-100 cursor-pointer" onClick={() => navigate(`/pacientes/${p.id}`)}>
-                      <div className="flex items-center gap-2.5">
-                        <PatientInitial name={p.name} />
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <PatientInitial name={p.name} gender={p.gender} />
+                          {isNew(p.createdAt) && (
+                            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full" title="Nuevo este mes" />
+                          )}
+                        </div>
                         <div>
                           <div className="font-medium text-gray-900">{p.name} {p.lastName}</div>
                           {p.email && <div className="text-xs text-gray-400 mt-0.5">{p.email}</div>}
@@ -261,22 +422,30 @@ export default function Patients() {
                     </td>
                     <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-600 cursor-pointer" onClick={() => navigate(`/pacientes/${p.id}`)}>{p.phone}</td>
                     <td className="px-4 py-3.5 text-sm border-b border-gray-100 cursor-pointer" onClick={() => navigate(`/pacientes/${p.id}`)}>
-                      <span className={genderBadgeClass[p.gender]}>{genderLabel[p.gender]}</span>
+                      <span className={GENDER_CONFIG[p.gender].badge}>{GENDER_CONFIG[p.gender].label}</span>
                     </td>
                     <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-600 cursor-pointer" onClick={() => navigate(`/pacientes/${p.id}`)}>{calcAge(p.birthDate)} años</td>
                     <td className="px-4 py-3.5 text-sm border-b border-gray-100 text-gray-500 cursor-pointer" onClick={() => navigate(`/pacientes/${p.id}`)}>
                       {new Date(p.createdAt).toLocaleDateString('es-PE')}
                     </td>
                     <td className="px-4 py-3.5 border-b border-gray-100">
-                      <button
-                        onClick={() => setEditPatient(p)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
-                        title="Editar paciente"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                        </svg>
-                      </button>
+                      {/* Acciones visibles al hover */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => navigate(`/pacientes/${p.id}`)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
+                          title="Ver perfil"
+                        >
+                          <ArrowIcon /> Ver
+                        </button>
+                        <button
+                          onClick={() => setEditPatient(p)}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors"
+                          title="Editar paciente"
+                        >
+                          <EditIcon />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

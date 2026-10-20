@@ -8,6 +8,36 @@ const prisma = new PrismaClient();
 
 router.use(authenticate);
 
+router.get('/stats', async (req, res) => {
+  try {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [total, newThisMonth, byGender] = await Promise.all([
+      prisma.patient.count({ where: { active: true } }),
+      prisma.patient.count({ where: { active: true, createdAt: { gte: monthStart } } }),
+      prisma.patient.groupBy({
+        by: ['gender'],
+        where: { active: true },
+        _count: { gender: true },
+      }),
+    ]);
+
+    const genderMap = Object.fromEntries(byGender.map(g => [g.gender, g._count.gender]));
+    res.json({
+      total,
+      newThisMonth,
+      byGender: {
+        MASCULINO: genderMap.MASCULINO ?? 0,
+        FEMENINO: genderMap.FEMENINO ?? 0,
+        OTRO: genderMap.OTRO ?? 0,
+      },
+    });
+  } catch {
+    res.status(500).json({ error: 'Error al obtener estadísticas' });
+  }
+});
+
 router.get('/', async (req, res) => {
   try {
     const { search, page, limit } = req.query;

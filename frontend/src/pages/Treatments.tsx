@@ -290,6 +290,13 @@ export default function Treatments() {
         </div>
       </div>
 
+      {(search || statusFilter || dateFrom || dateTo) && !isLoading && (
+        <p className="text-xs text-gray-500 mb-3">
+          {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
+          {search ? ` para "${search}"` : ''}
+        </p>
+      )}
+
       <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-card">
         {isLoading ? (
           <div className="animate-pulse">

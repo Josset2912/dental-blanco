@@ -297,6 +297,7 @@ export default function Appointments() {
   const [showBlockForm, setShowBlockForm] = useState(false);
   const [showBlockList, setShowBlockList] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState<Appointment | null>(null);
+  const [statusFilter, setStatusFilter] = useState('');
   const qc = useQueryClient();
 
   const { data: appointments = [], isLoading } = useQuery({
@@ -367,8 +368,9 @@ export default function Appointments() {
     onError: () => toast.error('Error al eliminar el bloqueo'),
   });
 
-  const active = appointments.filter(a => a.status !== 'CANCELLED');
-  const cancelled = appointments.filter(a => a.status === 'CANCELLED');
+  const visibleAppointments = statusFilter ? appointments.filter(a => a.status === statusFilter) : appointments;
+  const active = visibleAppointments.filter(a => a.status !== 'CANCELLED');
+  const cancelled = visibleAppointments.filter(a => a.status === 'CANCELLED');
 
   const prevMonth = () => {
     if (calMonth === 0) { setCalYear(y => y - 1); setCalMonth(11); }
@@ -464,6 +466,31 @@ export default function Appointments() {
             </div>
           )}
         </div>
+
+        {/* Status filter chips — list view */}
+        {view === 'list' && (
+          <div className="flex gap-1 overflow-x-auto pb-0.5 mt-2">
+            {[
+              { label: 'Todas', value: '' },
+              { label: 'Agendadas', value: 'SCHEDULED' },
+              { label: 'Confirmadas', value: 'CONFIRMED' },
+              { label: 'Completadas', value: 'COMPLETED' },
+              { label: 'Canceladas', value: 'CANCELLED' },
+            ].map(f => (
+              <button
+                key={f.value}
+                onClick={() => setStatusFilter(f.value)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg border whitespace-nowrap transition-all ${
+                  statusFilter === f.value
+                    ? 'bg-[#00AEEF] border-[#00AEEF] text-white shadow-sm'
+                    : 'bg-white border-gray-200 text-gray-500 hover:border-[#00AEEF] hover:text-[#00AEEF]'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Blocked slots list (calendar view) */}
         {view === 'calendar' && blockedSlots.length > 0 && (

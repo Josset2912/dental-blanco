@@ -171,6 +171,102 @@ function GlobalSearch({ collapsed }: { collapsed: boolean }) {
   );
 }
 
+// ─── Mobile Search Overlay ────────────────────────────────────────────────────
+
+function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (!query.trim()) { setResults([]); return; }
+    setLoading(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const data = await getPatients(query.trim());
+        setResults(data.slice(0, 8));
+      } catch { setResults([]); } finally { setLoading(false); }
+    }, 300);
+  }, [query]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col">
+      {/* Header with search input */}
+      <div className="bg-white border-b border-gray-100 shadow-sm px-4 py-3 flex items-center gap-3">
+        <div className="relative flex-1">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input
+            ref={inputRef}
+            type="search"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Buscar paciente..."
+            className="pl-9 pr-9 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white placeholder-gray-400"
+          />
+          {loading && (
+            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4}/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+          )}
+        </div>
+        <button onClick={onClose} className="text-sm font-semibold text-[#00AEEF] shrink-0 hover:text-[#0077B6] transition-colors">
+          Cancelar
+        </button>
+      </div>
+
+      {/* Results */}
+      <div className="flex-1 bg-white overflow-y-auto" onClick={e => e.stopPropagation()}>
+        {results.length > 0 ? (
+          <ul className="divide-y divide-gray-100">
+            {results.map(p => (
+              <li key={p.id}>
+                <button
+                  onClick={() => { onClose(); navigate(`/pacientes/${p.id}`); }}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors text-left"
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                    style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+                    {(p.name[0] ?? '').toUpperCase()}{(p.lastName[0] ?? '').toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900">{p.name} {p.lastName}</p>
+                    <p className="text-xs text-gray-500">{p.phone}</p>
+                  </div>
+                  <svg className="w-4 h-4 text-gray-300 ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : query.trim().length > 1 && !loading ? (
+          <div className="px-4 py-12 text-center">
+            <p className="text-sm text-gray-500">Sin resultados para "{query}"</p>
+          </div>
+        ) : (
+          <div className="px-4 py-12 text-center">
+            <p className="text-sm text-gray-400">Escribe para buscar pacientes</p>
+          </div>
+        )}
+      </div>
+
+      {/* Tap outside to close */}
+      <div className="flex-shrink-0 h-safe-bottom bg-white" onClick={onClose} />
+    </div>
+  );
+}
+
 // ─── Page transition ──────────────────────────────────────────────────────────
 
 function PageTransition({ children }: { children: React.ReactNode }) {
@@ -234,6 +330,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showMore, setShowMore] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     try { return localStorage.getItem('sidebar-collapsed') === 'true'; } catch { return false; }
   });
@@ -254,6 +351,7 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
+      {showMobileSearch && <MobileSearchOverlay onClose={() => setShowMobileSearch(false)} />}
 
       {/* ── Desktop Sidebar ─────────────────────────────────── */}
       <aside className={`hidden md:flex fixed left-0 top-0 h-full ${sidebarW} bg-white border-r border-gray-100 flex-col z-30 shadow-sm transition-all duration-200`}>
@@ -352,6 +450,15 @@ export default function Layout() {
             <span className="text-sm font-bold" style={{ color: '#0077B6' }}>Blanco Dental</span>
           </button>
           <span className="flex-1" />
+          <button
+            onClick={() => setShowMobileSearch(true)}
+            className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"
+            title="Buscar paciente"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </button>
           <button onClick={handleLogout} className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors" title="Cerrar sesión">
             {icons.logout}
           </button>

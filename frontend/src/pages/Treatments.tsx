@@ -315,6 +315,26 @@ export default function Treatments() {
                     {t.notes && <NotesTooltip notes={t.notes} />}
                   </div>
 
+                  {/* Payment progress bar */}
+                  {(() => {
+                    const cost = parseFloat(t.cost);
+                    const pct = cost > 0 ? Math.min(100, (t.totalPaid / cost) * 100) : 0;
+                    const paid = pct >= 100;
+                    return cost > 0 ? (
+                      <div>
+                        <div className="flex justify-between text-[11px] mb-1">
+                          <span className="text-gray-400">{formatCost(String(t.totalPaid))} pagado</span>
+                          <span className={paid ? 'text-emerald-600 font-semibold' : 'text-amber-500 font-medium'}>
+                            {paid ? 'Saldado ✓' : `S/ ${t.balance.toFixed(2)} pendiente`}
+                          </span>
+                        </div>
+                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full transition-all ${paid ? 'bg-emerald-400' : 'bg-[#00AEEF]'}`} style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
+
                   {/* Cost + dates row */}
                   <div className="flex items-center gap-4 text-xs text-gray-500">
                     <span className="font-bold text-gray-900 text-sm">{formatCost(t.cost)}</span>
@@ -396,7 +416,24 @@ export default function Treatments() {
                           {t.notes && <NotesTooltip notes={t.notes} />}
                         </div>
                       </td>
-                      <td className="px-4 py-3.5 text-sm font-semibold text-gray-900">{formatCost(t.cost)}</td>
+                      <td className="px-4 py-3.5 text-sm">
+                        <p className="font-semibold text-gray-900 mb-1.5">{formatCost(t.cost)}</p>
+                        {(() => {
+                          const cost = parseFloat(t.cost);
+                          const pct = cost > 0 ? Math.min(100, (t.totalPaid / cost) * 100) : 0;
+                          const paid = pct >= 100;
+                          return cost > 0 ? (
+                            <div className="min-w-[120px]">
+                              <div className="h-1 bg-gray-100 rounded-full overflow-hidden mb-0.5">
+                                <div className={`h-full rounded-full transition-all ${paid ? 'bg-emerald-400' : 'bg-[#00AEEF]'}`} style={{ width: `${pct}%` }} />
+                              </div>
+                              <p className={`text-[10px] font-medium ${paid ? 'text-emerald-600' : 'text-amber-500'}`}>
+                                {paid ? 'Saldado ✓' : `S/ ${t.balance.toFixed(2)} pendiente`}
+                              </p>
+                            </div>
+                          ) : null;
+                        })()}
+                      </td>
                       <td className="px-4 py-3.5 text-sm text-gray-600 whitespace-nowrap">
                         {new Date(t.startDate).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </td>

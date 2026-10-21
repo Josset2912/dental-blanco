@@ -236,7 +236,12 @@ export default function Dashboard() {
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p className="text-blue-100 text-sm font-medium">{greeting},</p>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mt-0.5">{firstName} 👋</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mt-0.5 flex items-center gap-2">
+              {firstName}
+              <svg className="w-7 h-7 shrink-0 opacity-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} style={{ color: '#B3DEF4' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"/>
+              </svg>
+            </h2>
             <p className="text-blue-200 text-sm mt-1">{todayCapitalized}</p>
           </div>
 

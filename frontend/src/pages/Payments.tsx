@@ -345,6 +345,27 @@ export default function Payments() {
         </div>
       )}
 
+      {/* ── MOBILE: skeleton ─────────────────────────────────────────── */}
+      {isLoading && (
+        <div className="sm:hidden bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <ul className="animate-pulse divide-y divide-gray-100">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <li key={i} className="px-4 py-4 space-y-2.5">
+                <div className="flex justify-between">
+                  <div className="h-3.5 bg-gray-200 rounded w-1/3" />
+                  <div className="h-3.5 bg-gray-200 rounded w-16" />
+                </div>
+                <div className="h-3 bg-gray-100 rounded w-1/2" />
+                <div className="flex gap-2 items-center">
+                  <div className="h-5 bg-gray-100 rounded-full w-16" />
+                  <div className="h-3 bg-gray-100 rounded w-24" />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* ── MOBILE: tarjetas ──────────────────────────────────────────── */}
       {!isLoading && payments.length > 0 && (
         <div className="sm:hidden bg-white border border-gray-200 rounded-xl overflow-hidden">

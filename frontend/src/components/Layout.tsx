@@ -456,7 +456,7 @@ export default function Layout() {
       <div className={`flex-1 flex flex-col ${mainML} min-h-screen min-w-0 transition-all duration-200`}>
 
         {/* Mobile top bar */}
-        <header className="md:hidden sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm px-4 h-14 flex items-center gap-3">
+        <header className="md:hidden fixed top-0 left-0 right-0 z-20 bg-white border-b border-gray-100 shadow-sm px-4 h-14 flex items-center gap-3">
           <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
               style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
@@ -481,7 +481,7 @@ export default function Layout() {
           </button>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 overflow-x-hidden pb-24 md:pb-8">
+        <main className="flex-1 p-4 md:p-8 overflow-x-hidden pb-24 md:pb-8 pt-[calc(3.5rem+1rem)] md:pt-8">
           <PageTransition>
             <Outlet />
           </PageTransition>

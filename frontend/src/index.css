@@ -31,3 +31,24 @@ html, body {
   overflow-x: hidden;
   max-width: 100vw;
 }
+
+/* Micro-interacciones: feedback táctil en botones */
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* Scrollbar fino y elegante */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}

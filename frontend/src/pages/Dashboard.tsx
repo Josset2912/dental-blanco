@@ -52,8 +52,9 @@ function StatCard({ item, index }: { item: StatItem; index: number }) {
       custom={index}
       initial="hidden"
       animate="show"
+      whileHover={{ y: -3, transition: { duration: 0.2, ease: 'easeOut' } }}
       variants={cardVariants}
-      className="relative bg-white rounded-2xl border border-gray-100 p-4 md:p-5 overflow-hidden shadow-sm"
+      className="relative bg-white rounded-2xl border border-gray-100 p-4 md:p-5 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-default"
     >
       <div
         className="absolute top-0 right-0 w-20 h-20 md:w-24 md:h-24 rounded-bl-full opacity-10"

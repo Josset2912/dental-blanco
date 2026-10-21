@@ -317,7 +317,7 @@ export default function Payments() {
 
       {/* ── Estado vacío ────────────────────────────────────────────────── */}
       {!isLoading && payments.length === 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl flex flex-col items-center justify-center py-16 px-6 text-center">
+        <div className="bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center py-16 px-6 text-center">
           <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center mb-4">
             <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a5 5 0 00-10 0v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2z"/>
@@ -327,11 +327,19 @@ export default function Payments() {
             {hasFilters ? 'Sin resultados con estos filtros' : 'Sin pagos registrados'}
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            {hasFilters ? 'Prueba cambiando el método, la búsqueda o el rango de fechas' : 'Registra el primer pago con el botón de arriba'}
+            {hasFilters ? 'Prueba cambiando el método, la búsqueda o el rango de fechas' : 'Los pagos registrados aparecerán aquí'}
           </p>
-          {hasFilters && (
+          {hasFilters ? (
             <button onClick={clearFilters} className="mt-3 text-xs text-[#00AEEF] hover:text-[#0077B6] font-medium transition-colors">
               Limpiar todos los filtros
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowForm(true)}
+              className="mt-4 px-4 py-2 text-xs font-semibold text-white rounded-xl"
+              style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
+            >
+              Registrar primer pago
             </button>
           )}
         </div>

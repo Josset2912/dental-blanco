@@ -384,6 +384,49 @@ export default function Reports() {
         </ChartCard>
       </div>
 
+      {/* Payment method chart */}
+      <ChartCard title="Distribución por método de pago" loading={loadingTreatments}>
+        {treatments?.byMethod?.length ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie data={treatments.byMethod} dataKey="count" nameKey="label"
+                  cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} strokeWidth={0}>
+                  {treatments.byMethod.map((m, i) => (
+                    <Cell key={i} fill={METHOD_COLORS[m.label] ?? PIE_COLORS[i]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(v) => [v, 'Pagos']} contentStyle={{ borderRadius: 10, fontSize: 12, border: '1px solid #e5e7eb' }} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="space-y-3">
+              {treatments.byMethod.map((m, i) => {
+                const totalCount = treatments.byMethod.reduce((a, x) => a + x.count, 0);
+                const pct = totalCount > 0 ? Math.round((m.count / totalCount) * 100) : 0;
+                const color = METHOD_COLORS[m.label] ?? PIE_COLORS[i];
+                return (
+                  <div key={m.label}>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: color }} />
+                        <span className="text-xs text-gray-600">{m.label}</span>
+                      </div>
+                      <div className="text-right shrink-0 ml-2">
+                        <span className="text-xs font-semibold text-gray-800">{m.count} pagos</span>
+                        <span className="text-xs text-gray-400 ml-1.5">{fmt(m.total)}</span>
+                      </div>
+                    </div>
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : <EmptyChart />}
+      </ChartCard>
+
       {/* ── Balance mensual detallado ─────────────────────────── */}
       {(() => {
         const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];

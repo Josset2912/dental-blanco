@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   getAppointments, createAppointment, updateAppointment, cancelAppointment,
@@ -289,6 +290,7 @@ function CalendarView({
 export default function Appointments() {
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
+  const navigate = useNavigate();
   const [view, setView] = useState<'list' | 'calendar'>('list');
   const [date, setDate] = useState(todayStr);
   const [calYear, setCalYear] = useState(today.getFullYear());
@@ -620,10 +622,10 @@ export default function Appointments() {
               {[...active, ...cancelled].map(a => (
                 <div key={a.id} className="p-4 border-l-[3px]" style={{ opacity: a.status === 'CANCELLED' ? 0.55 : 1, borderLeftColor: STATUS_BORDER[a.status] }}>
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm truncate">{a.patient.name} {a.patient.lastName}</p>
+                    <button onClick={() => navigate(`/pacientes/${a.patient.id}`)} className="text-left min-w-0 group">
+                      <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-[#0077B6] transition-colors">{a.patient.name} {a.patient.lastName}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{a.patient.phone}</p>
-                    </div>
+                    </button>
                     <span className={`${STATUS_CLASS[a.status]} shrink-0`}>{STATUS_LABEL[a.status]}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
@@ -682,8 +684,10 @@ export default function Appointments() {
                         <div className="text-xs text-gray-500 mt-0.5">{formatDate(a.date)}</div>
                       </td>
                       <td className={`px-4 py-3.5 text-sm ${idx < arr.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                        <div className="font-medium text-gray-900">{a.patient.name} {a.patient.lastName}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{a.patient.phone}</div>
+                        <button onClick={() => navigate(`/pacientes/${a.patient.id}`)} className="text-left group">
+                          <div className="font-medium text-gray-900 group-hover:text-[#0077B6] transition-colors">{a.patient.name} {a.patient.lastName}</div>
+                          <div className="text-xs text-gray-500 mt-0.5">{a.patient.phone}</div>
+                        </button>
                       </td>
                       <td className={`px-4 py-3.5 text-sm text-gray-700 ${idx < arr.length - 1 ? 'border-b border-gray-100' : ''}`}>
                         {a.reason}

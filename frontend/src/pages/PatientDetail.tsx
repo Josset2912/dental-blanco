@@ -276,6 +276,12 @@ export default function PatientDetail() {
                     <AlertIcon /> Alergias
                   </span>
                 )}
+                {totalPending > 0 && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-500 border border-red-200">
+                    <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01"/></svg>
+                    Saldo: {fmt(totalPending)}
+                  </span>
+                )}
               </div>
             </div>
           </div>

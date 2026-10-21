@@ -93,10 +93,10 @@ function InfoField({ icon, label, value }: { icon: React.ReactNode; label: strin
 
 function KpiCard({ label, value, sub, colorClass }: { label: string; value: string; sub?: string; colorClass: string }) {
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3 text-center shadow-sm">
-      <p className={`text-xl font-bold ${colorClass}`}>{value}</p>
-      <p className="text-xs text-gray-500 mt-0.5">{label}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+    <div className="bg-white border border-gray-100 rounded-2xl px-2 sm:px-4 py-3 text-center shadow-sm min-w-0">
+      <p className={`text-base sm:text-xl font-bold truncate ${colorClass}`}>{value}</p>
+      <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 leading-tight">{label}</p>
+      {sub && <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">{sub}</p>}
     </div>
   );
 }

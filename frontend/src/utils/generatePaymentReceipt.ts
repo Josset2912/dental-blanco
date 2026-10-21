@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import { LOGO_BASE64 } from './logoBase64';
 
 interface ReceiptPayment {
   id: string;
@@ -58,21 +59,6 @@ function row(doc: jsPDF, label: string, value: string, y: number, bold = false) 
   doc.text(value, 134, y, { align: 'right' });
 }
 
-async function loadImageAsDataUrl(src: string): Promise<string | null> {
-  try {
-    const response = await fetch(src);
-    const blob = await response.blob();
-    return await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return null;
-  }
-}
-
 export async function generatePaymentReceipt(
   payment: ReceiptPayment,
   patient: ReceiptPatient,
@@ -96,21 +82,9 @@ export async function generatePaymentReceipt(
   doc.rect(0, 35, 8, 3, 'F');
 
   // ── Logo ──────────────────────────────────────────────────
-  const logoUrl = '/logo.jpg';
-  const logoData = await loadImageAsDataUrl(logoUrl);
-  if (logoData) {
-    // Logo on the left, contained in a white rounded box
-    doc.setFillColor(255, 255, 255);
-    doc.roundedRect(8, 4, 30, 28, 3, 3, 'F');
-    doc.addImage(logoData, 'JPEG', 8, 4, 30, 28);
-  } else {
-    // Fallback tooth icon if logo fails
-    doc.setFillColor(255, 255, 255);
-    doc.roundedRect(8, 6, 24, 24, 3, 3, 'F');
-    doc.setFontSize(16);
-    doc.setTextColor(...BLUE_DARK);
-    doc.text('🦷', 13, 22);
-  }
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(8, 4, 30, 28, 3, 3, 'F');
+  doc.addImage(LOGO_BASE64, 'JPEG', 8, 4, 30, 28);
 
   // ── Clinic name & tagline ─────────────────────────────────
   doc.setFont('helvetica', 'bold');

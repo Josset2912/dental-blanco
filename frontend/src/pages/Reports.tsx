@@ -381,31 +381,44 @@ export default function Reports() {
       </div>
 
       {/* ── Balance mensual detallado ─────────────────────────── */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-card p-5">
         {/* Header con selector */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-4 rounded-full shrink-0" style={{ background: `linear-gradient(to bottom, ${BRAND}, ${BRAND_DARK})` }} />
-            <h2 className="text-sm font-semibold text-gray-800">Balance mensual detallado</h2>
+            <div>
+              <h2 className="text-sm font-semibold text-gray-800">Balance mensual detallado</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Resumen de ingresos del mes seleccionado</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
-            <select
-              value={balanceMonth}
-              onChange={e => setBalanceMonth(Number(e.target.value))}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
-            >
-              {['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
-                .map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-            </select>
-            <select
-              value={balanceYear}
-              onChange={e => setBalanceYear(Number(e.target.value))}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
-            >
-              {[now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1].map(y => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={balanceMonth}
+                onChange={e => setBalanceMonth(Number(e.target.value))}
+                className="pl-3 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white appearance-none cursor-pointer font-medium text-gray-700"
+              >
+                {['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+                  .map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+              </select>
+              <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
+            <div className="relative">
+              <select
+                value={balanceYear}
+                onChange={e => setBalanceYear(Number(e.target.value))}
+                className="pl-3 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white appearance-none cursor-pointer font-medium text-gray-700"
+              >
+                {[now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1].map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+              <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
           </div>
         </div>
 
@@ -419,72 +432,107 @@ export default function Reports() {
         ) : (
           <>
             {/* KPI cards del mes */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-              {[
-                {
-                  label: 'Total ingresado',
-                  value: fmt(balance?.total ?? 0),
-                  sub: balance?.growth != null
-                    ? `${balance.growth >= 0 ? '+' : ''}${balance.growth.toFixed(1)}% vs mes anterior`
-                    : 'Sin datos anteriores',
-                  subColor: balance?.growth != null ? (balance.growth >= 0 ? 'text-emerald-500' : 'text-red-400') : 'text-gray-400',
-                  color: 'from-emerald-500 to-emerald-600',
-                  iconPath: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-                },
-                {
-                  label: 'Pagos realizados',
-                  value: balance?.count ?? 0,
-                  sub: 'transacciones',
-                  subColor: 'text-gray-400',
-                  color: 'from-[#00AEEF] to-[#0077B6]',
-                  iconPath: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
-                },
-                {
-                  label: 'Promedio por pago',
-                  value: fmt(balance?.average ?? 0),
-                  sub: 'por transacción',
-                  subColor: 'text-gray-400',
-                  color: 'from-violet-500 to-violet-600',
-                  iconPath: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-                },
-                {
-                  label: 'Mes anterior',
-                  value: fmt(balance?.prevTotal ?? 0),
-                  sub: 'para comparación',
-                  subColor: 'text-gray-400',
-                  color: 'from-amber-400 to-amber-500',
-                  iconPath: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-                },
-              ].map(c => (
-                <div key={c.label} className="bg-gray-50 rounded-xl p-4 flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${c.color} flex items-center justify-center shrink-0`}>
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={c.iconPath}/>
-                    </svg>
+            {(() => {
+              const growth = balance?.growth;
+              const hasGrowth = growth != null;
+              const growthUp = hasGrowth && growth! >= 0;
+              return (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+                  {/* Total ingresado */}
+                  <div className="bg-white border border-gray-100 shadow-card rounded-xl p-4 flex items-start gap-3 col-span-2 lg:col-span-1">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 mb-0.5">Total ingresado</p>
+                      <p className="text-xl font-bold text-gray-900 leading-tight">{fmt(balance?.total ?? 0)}</p>
+                      {hasGrowth ? (
+                        <div className={`flex items-center gap-1 mt-1 text-xs font-semibold ${growthUp ? 'text-emerald-500' : 'text-red-400'}`}>
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d={growthUp ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} />
+                          </svg>
+                          {Math.abs(growth!).toFixed(1)}% vs mes anterior
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-gray-400 mt-1">Sin datos anteriores</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-base font-bold text-gray-900 leading-tight truncate">{c.value}</p>
-                    <p className="text-xs text-gray-500 truncate">{c.label}</p>
-                    <p className={`text-[10px] truncate ${c.subColor}`}>{c.sub}</p>
+                  {/* Pagos realizados */}
+                  <div className="bg-white border border-gray-100 shadow-card rounded-xl p-4 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00AEEF] to-[#0077B6] flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                      </svg>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-500 mb-0.5">Pagos realizados</p>
+                      <p className="text-xl font-bold text-gray-900 leading-tight">{balance?.count ?? 0}</p>
+                      <p className="text-[10px] text-gray-400 mt-1">transacciones</p>
+                    </div>
+                  </div>
+                  {/* Promedio */}
+                  <div className="bg-white border border-gray-100 shadow-card rounded-xl p-4 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                      </svg>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-500 mb-0.5">Promedio por pago</p>
+                      <p className="text-xl font-bold text-gray-900 leading-tight">{fmt(balance?.average ?? 0)}</p>
+                      <p className="text-[10px] text-gray-400 mt-1">por transacción</p>
+                    </div>
+                  </div>
+                  {/* Mes anterior */}
+                  <div className="bg-white border border-gray-100 shadow-card rounded-xl p-4 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-500 mb-0.5">Mes anterior</p>
+                      <p className="text-xl font-bold text-gray-900 leading-tight">{fmt(balance?.prevTotal ?? 0)}</p>
+                      <p className="text-[10px] text-gray-400 mt-1">para comparación</p>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })()}
 
             {/* Desglose por método */}
-            {balance?.byMethod && balance.byMethod.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-5">
-                {balance.byMethod.map(m => (
-                  <div key={m.method} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium ${METHOD_BADGE[m.method] ?? 'bg-gray-100 text-gray-600'}`}>
-                    <span>{m.label}</span>
-                    <span className="opacity-60">·</span>
-                    <span>{m.count} pagos</span>
-                    <span className="opacity-60">·</span>
-                    <span className="font-bold">{fmt(m.total)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            {balance?.byMethod && balance.byMethod.length > 0 && (() => {
+              const methodTotal = balance.byMethod.reduce((s, m) => s + m.total, 0);
+              const methodColors: Record<string, { bg: string; bar: string; text: string }> = {
+                CASH:     { bg: 'bg-emerald-50 border-emerald-100',  bar: '#10b981', text: 'text-emerald-700' },
+                CARD:     { bg: 'bg-[#E6F7FD] border-[#b3e8fb]',    bar: '#00AEEF', text: 'text-[#0077B6]'  },
+                TRANSFER: { bg: 'bg-violet-50 border-violet-100',    bar: '#8b5cf6', text: 'text-violet-700' },
+              };
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                  {balance.byMethod.map(m => {
+                    const pct = methodTotal > 0 ? Math.round((m.total / methodTotal) * 100) : 0;
+                    const mc = methodColors[m.method] ?? { bg: 'bg-gray-50 border-gray-100', bar: '#9ca3af', text: 'text-gray-600' };
+                    return (
+                      <div key={m.method} className={`rounded-xl border p-3.5 ${mc.bg}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`text-xs font-semibold ${mc.text}`}>{m.label}</span>
+                          <span className={`text-xs font-bold ${mc.text}`}>{pct}%</span>
+                        </div>
+                        <p className="text-base font-bold text-gray-900">{fmt(m.total)}</p>
+                        <p className="text-xs text-gray-500 mb-2">{m.count} {m.count === 1 ? 'pago' : 'pagos'}</p>
+                        <div className="h-1.5 bg-white/60 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: mc.bar }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
 
             {/* Tabla de pagos */}
             {!balance?.payments?.length ? (
@@ -501,8 +549,10 @@ export default function Reports() {
               <>
                 {/* Mobile: tarjetas */}
                 <div className="sm:hidden rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-100">
-                  {balance.payments.map((p, i) => (
-                    <div key={p.id} className={`px-4 py-3.5 ${i % 2 === 1 ? 'bg-gray-50/40' : ''}`}>
+                  {balance.payments.map((p, i) => {
+                    const borderColor = p.method === 'CASH' ? '#10b981' : p.method === 'CARD' ? '#00AEEF' : p.method === 'TRANSFER' ? '#8b5cf6' : '#d1d5db';
+                    return (
+                    <div key={p.id} className={`px-4 py-3.5 border-l-[3px] ${i % 2 === 1 ? 'bg-gray-50/40' : ''}`} style={{ borderLeftColor: borderColor }}>
                       <div className="flex items-start justify-between gap-2 mb-0.5">
                         <div className="min-w-0">
                           <p className="font-semibold text-gray-900 text-sm truncate">{p.patient.name} {p.patient.lastName}</p>
@@ -520,7 +570,8 @@ export default function Reports() {
                         </span>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                   <div className="px-4 py-3 bg-gray-50 border-t-2 border-gray-200 flex items-center justify-between">
                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Total del mes</span>
                     <span className="text-base font-bold" style={{ color: BRAND_DARK }}>{fmt(balance.total)}</span>
@@ -541,7 +592,7 @@ export default function Reports() {
                     </thead>
                     <tbody>
                       {balance.payments.map((p, i) => (
-                        <tr key={p.id} className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/60 transition-colors ${i % 2 === 1 ? 'bg-gray-50/30' : ''}`}>
+                        <tr key={p.id} className={`border-b border-gray-50 last:border-0 hover:bg-[#E6F7FD]/40 transition-colors ${i % 2 === 1 ? 'bg-gray-50/30' : ''}`}>
                           <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
                             {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })}
                             <span className="block text-gray-400">

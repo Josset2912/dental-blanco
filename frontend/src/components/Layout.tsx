@@ -72,13 +72,17 @@ const secondaryNav = [
   { to: '/configuracion', icon: icons.settings, label: 'Configuración' },
 ];
 
-// mobile bottom nav — 5 most-used items
+// mobile bottom nav — 4 main items + "Más"
 const bottomNav = [
   { to: '/dashboard',    icon: icons.dashboard,    label: 'Inicio' },
   { to: '/pacientes',    icon: icons.patients,     label: 'Pacientes' },
   { to: '/citas',        icon: icons.appointments, label: 'Citas' },
   { to: '/pagos',        icon: icons.payments,     label: 'Pagos' },
-  { to: '/configuracion', icon: icons.settings,   label: 'Config' },
+];
+
+const moreNav = [
+  { to: '/reportes',      icon: icons.reports,  label: 'Reportes' },
+  { to: '/configuracion', icon: icons.settings, label: 'Config' },
 ];
 
 // ─── Global Search ─────────────────────────────────────────────────────────────
@@ -229,6 +233,7 @@ export default function Layout() {
   const user = getUser();
   const navigate = useNavigate();
   const location = useLocation();
+  const [showMore, setShowMore] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     try { return localStorage.getItem('sidebar-collapsed') === 'true'; } catch { return false; }
   });
@@ -359,13 +364,17 @@ export default function Layout() {
         </main>
 
         {/* ── Mobile bottom nav ──────────────────────────────── */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-20 flex safe-bottom">
+        {showMore && (
+          <div className="md:hidden fixed inset-0 z-20" onClick={() => setShowMore(false)} />
+        )}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-30 flex safe-bottom">
           {bottomNav.map(({ to, icon, label }) => {
             const isActive = location.pathname === to || (to !== '/dashboard' && location.pathname.startsWith(to));
             return (
               <NavLink
                 key={to}
                 to={to}
+                onClick={() => setShowMore(false)}
                 className="relative flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors"
               >
                 <span className={`transition-colors ${isActive ? 'text-[#00AEEF]' : 'text-gray-400'}`}>
@@ -380,6 +389,44 @@ export default function Layout() {
               </NavLink>
             );
           })}
+
+          {/* Botón Más */}
+          <button
+            onClick={() => setShowMore(prev => !prev)}
+            className="relative flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors"
+          >
+            {showMore && (
+              <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-[#00AEEF] rounded-full" />
+            )}
+            <span className={`transition-colors ${showMore ? 'text-[#00AEEF]' : 'text-gray-400'}`}>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h.01M12 12h.01M19 12h.01" strokeWidth={2.5}/>
+              </svg>
+            </span>
+            <span className={`text-[10px] font-medium transition-colors ${showMore ? 'text-[#00AEEF]' : 'text-gray-400'}`}>
+              Más
+            </span>
+
+            {/* Popup menú */}
+            {showMore && (
+              <div className="absolute bottom-full right-0 mb-2 mr-1 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden min-w-[160px]">
+                {moreNav.map(({ to, icon: navIcon, label }) => {
+                  const isActive = location.pathname === to || location.pathname.startsWith(to);
+                  return (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      onClick={() => setShowMore(false)}
+                      className={`flex items-center gap-3 px-4 py-3.5 text-sm font-medium transition-colors ${isActive ? 'text-[#0077B6] bg-[#E6F7FD]' : 'text-gray-700'}`}
+                    >
+                      <span className={isActive ? 'text-[#00AEEF]' : 'text-gray-400'}>{navIcon}</span>
+                      <span>{label}</span>
+                    </NavLink>
+                  );
+                })}
+              </div>
+            )}
+          </button>
         </nav>
       </div>
     </div>

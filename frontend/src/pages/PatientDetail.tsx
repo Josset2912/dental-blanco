@@ -93,10 +93,10 @@ function InfoField({ icon, label, value }: { icon: React.ReactNode; label: strin
 
 function KpiCard({ label, value, sub, colorClass }: { label: string; value: string; sub?: string; colorClass: string }) {
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl px-2 sm:px-4 py-3 text-center shadow-sm min-w-0">
-      <p className={`text-base sm:text-xl font-bold truncate ${colorClass}`}>{value}</p>
-      <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 leading-tight">{label}</p>
-      {sub && <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">{sub}</p>}
+    <div className="bg-white border border-gray-100 rounded-2xl px-2 py-3 text-center shadow-sm min-w-0 overflow-hidden">
+      <p className={`text-sm sm:text-lg font-bold leading-tight ${colorClass}`}>{value}</p>
+      <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">{label}</p>
+      {sub && <p className="text-[10px] text-gray-400 mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -263,7 +263,7 @@ export default function PatientDetail() {
           </div>
 
           {/* KPI row */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             <KpiCard
               label="Tratamientos activos"
               value={String(activeCount)}

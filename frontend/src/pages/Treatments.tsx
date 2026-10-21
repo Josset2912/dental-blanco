@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { getTreatments, createTreatment, updateTreatment, cancelTreatment } from '../api/treatments';
 import type { Treatment } from '../api/treatments';
@@ -77,6 +78,7 @@ function NotesTooltip({ notes }: { notes: string }) {
 }
 
 export default function Treatments() {
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -351,10 +353,13 @@ export default function Treatments() {
                 <li key={t.id} className="px-4 py-4 flex flex-col gap-3 border-l-[3px]" style={{ borderLeftColor: t.status === 'IN_PROGRESS' ? '#00AEEF' : t.status === 'COMPLETED' ? '#10b981' : '#ef4444' }}>
                   {/* Top row: patient + status */}
                   <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{t.patient.name} {t.patient.lastName}</p>
+                    <button
+                      onClick={() => navigate(`/pacientes/${t.patient.id}`)}
+                      className="text-left group"
+                    >
+                      <p className="text-sm font-semibold text-gray-900 group-hover:text-[#0077B6] transition-colors">{t.patient.name} {t.patient.lastName}</p>
                       <p className="text-xs text-gray-400">{t.patient.phone}</p>
-                    </div>
+                    </button>
                     <span className={`shrink-0 inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[t.status]}`}>
                       {STATUS_LABEL[t.status]}
                     </span>

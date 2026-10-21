@@ -46,9 +46,10 @@ interface StatItem {
   sub?: string;
   gradient: string;
   iconPath: string;
+  path?: string;
 }
 
-function StatCard({ item, index }: { item: StatItem; index: number }) {
+function StatCard({ item, index, onNavigate }: { item: StatItem; index: number; onNavigate: (path: string) => void }) {
   return (
     <motion.div
       custom={index}
@@ -56,7 +57,8 @@ function StatCard({ item, index }: { item: StatItem; index: number }) {
       animate="show"
       whileHover={{ y: -3, transition: { duration: 0.2, ease: 'easeOut' } }}
       variants={cardVariants}
-      className="relative bg-white rounded-2xl border border-gray-100 p-4 md:p-5 overflow-hidden shadow-card hover:shadow-[0_4px_20px_rgba(0,174,239,0.18)] transition-shadow cursor-default"
+      onClick={() => item.path && onNavigate(item.path)}
+      className={`relative bg-white rounded-2xl border border-gray-100 p-4 md:p-5 overflow-hidden shadow-card hover:shadow-[0_4px_20px_rgba(0,174,239,0.18)] transition-shadow ${item.path ? 'cursor-pointer' : 'cursor-default'}`}
     >
       <div
         className="absolute top-0 right-0 w-20 h-20 md:w-24 md:h-24 rounded-bl-full opacity-10"
@@ -190,36 +192,42 @@ export default function Dashboard() {
       value: fmt(stats.monthRevenue),
       gradient: 'linear-gradient(135deg,#10b981,#059669)',
       iconPath: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+      path: '/pagos',
     },
     {
       label: 'Pacientes totales',
       value: stats.totalPatients,
       gradient: 'linear-gradient(135deg,#00AEEF,#0077B6)',
       iconPath: 'M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z',
+      path: '/pacientes',
     },
     {
       label: 'Citas hoy',
       value: stats.appointmentsToday,
       gradient: 'linear-gradient(135deg,#8b5cf6,#6d28d9)',
       iconPath: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+      path: '/citas',
     },
     {
       label: 'Pendientes',
       value: stats.appointmentsPending,
       gradient: 'linear-gradient(135deg,#f59e0b,#d97706)',
       iconPath: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+      path: '/citas',
     },
     {
       label: 'Completadas este mes',
       value: stats.completedThisMonth,
       gradient: 'linear-gradient(135deg,#10b981,#0d9488)',
       iconPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+      path: '/citas',
     },
     {
       label: 'Tratamientos en curso',
       value: stats.treatmentsInProgress,
       gradient: 'linear-gradient(135deg,#f43f5e,#e11d48)',
       iconPath: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+      path: '/tratamientos',
     },
   ];
 
@@ -278,7 +286,7 @@ export default function Dashboard() {
       {/* Stats grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
         {statItems.map((item, i) => (
-          <StatCard key={item.label} item={item} index={i} />
+          <StatCard key={item.label} item={item} index={i} onNavigate={navigate} />
         ))}
       </div>
 
@@ -348,9 +356,12 @@ export default function Dashboard() {
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">
+                    <button
+                      onClick={() => navigate(`/pacientes/${a.patient.id}`)}
+                      className="text-sm font-semibold text-gray-900 truncate hover:text-[#0077B6] transition-colors text-left w-full"
+                    >
                       {a.patient.name} {a.patient.lastName}
-                    </p>
+                    </button>
                     <p className="text-xs text-gray-400 mt-0.5 truncate">{a.reason}</p>
                   </div>
 

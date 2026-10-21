@@ -134,12 +134,24 @@ export default function AppointmentForm({ onClose, onSubmit, loading, defaultDat
                   {DURATION_OPTIONS.map(d => <option key={d} value={d}>{d} minutos</option>)}
                 </select>
               </div>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1.5 col-span-2">
                 <label className="text-sm font-medium text-gray-700">Motivo *</label>
-                <select className={inputClass} value={form.reason} onChange={set('reason')} required>
-                  <option value="">Selecciona...</option>
-                  {REASONS.map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
+                <div className="flex flex-wrap gap-1.5">
+                  {REASONS.map(r => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, reason: r }))}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
+                        form.reason === r
+                          ? 'bg-[#00AEEF] border-[#00AEEF] text-white shadow-sm'
+                          : 'bg-white border-gray-200 text-gray-600 hover:border-[#00AEEF] hover:text-[#00AEEF]'
+                      }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="flex flex-col gap-1.5 col-span-2">
                 <label className="text-sm font-medium text-gray-700">Notas adicionales</label>

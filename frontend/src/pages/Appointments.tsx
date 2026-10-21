@@ -436,12 +436,22 @@ export default function Appointments() {
           </div>
 
           {view === 'list' ? (
-            <input
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              className="flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD]"
-            />
+            <div className="flex-1 min-w-0 flex gap-2">
+              <input
+                type="date"
+                value={date}
+                onChange={e => setDate(e.target.value)}
+                className="flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD]"
+              />
+              {date !== todayStr && (
+                <button
+                  onClick={() => setDate(todayStr)}
+                  className="px-3 py-2 text-xs font-medium rounded-lg border border-[#00AEEF] text-[#00AEEF] hover:bg-[#E6F7FD] whitespace-nowrap transition-all"
+                >
+                  Hoy
+                </button>
+              )}
+            </div>
           ) : (
             <div className="flex items-center gap-1">
               <button

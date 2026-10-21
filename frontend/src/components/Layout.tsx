@@ -83,8 +83,9 @@ const bottomNav = [
 ];
 
 const moreNav = [
-  { to: '/reportes',      icon: icons.reports,  label: 'Reportes' },
-  { to: '/configuracion', icon: icons.settings, label: 'Config' },
+  { to: '/tratamientos',  icon: icons.treatments, label: 'Tratamientos' },
+  { to: '/reportes',      icon: icons.reports,    label: 'Reportes' },
+  { to: '/configuracion', icon: icons.settings,   label: 'Config' },
 ];
 
 // ─── Global Search ─────────────────────────────────────────────────────────────

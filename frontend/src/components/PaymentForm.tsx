@@ -140,9 +140,22 @@ export default function PaymentForm({ onClose, onSubmit, loading, fixedPatientId
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-700">Método *</label>
-                <select className={inputClass} value={form.method} onChange={set('method')}>
-                  {METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                </select>
+                <div className="flex gap-2">
+                  {METHODS.map(m => (
+                    <button
+                      key={m.value}
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, method: m.value as 'CASH' | 'CARD' | 'TRANSFER' }))}
+                      className={`flex-1 py-2 text-xs font-semibold rounded-lg border transition-all ${
+                        form.method === m.value
+                          ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
+                          : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-400 hover:text-emerald-600'
+                      }`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="sm:col-span-2 flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-700">Concepto *</label>

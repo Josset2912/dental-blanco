@@ -24,8 +24,11 @@ interface Props {
 
 const DURATION_OPTIONS = [15, 30, 45, 60, 90];
 const REASONS = ['Consulta general', 'Limpieza dental', 'Extracción', 'Ortodoncia', 'Endodoncia', 'Revisión', 'Urgencia', 'Otro'];
+const HOURS   = Array.from({ length: 14 }, (_, i) => String(i + 7).padStart(2, '0'));
+const MINUTES = ['00', '15', '30', '45'];
 
-const inputClass = 'px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white';
+const dateFieldClass = 'flex items-center gap-0.5 px-3 h-[38px] border border-gray-200 rounded-lg bg-white text-sm transition-all outline-none focus-within:border-[#00AEEF] focus-within:ring-2 focus-within:ring-[#E6F7FD]';
+const segmentClass   = 'px-px rounded tabular-nums text-gray-900 outline-none focus:bg-[#00AEEF] focus:text-white data-[placeholder]:text-gray-300 data-[type=literal]:text-gray-300 data-[type=literal]:select-none';
 
 export default function AppointmentForm({ onClose, onSubmit, loading, defaultDate = '' }: Props) {
   useEffect(() => {
@@ -35,6 +38,7 @@ export default function AppointmentForm({ onClose, onSubmit, loading, defaultDat
 
   const user = getUser();
   const todayStr = new Date().toISOString().slice(0, 10);
+
   const [form, setForm] = useState<FormData>({
     patientId: '',
     doctorId: user?.id ?? '',
@@ -45,8 +49,10 @@ export default function AppointmentForm({ onClose, onSubmit, loading, defaultDat
     notes: '',
   });
 
-  const set = (k: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-    setForm(f => ({ ...f, [k]: e.target.value }));
+  const [hh, mm] = form.time.split(':');
+
+  const setHour = (h: string) => setForm(f => ({ ...f, time: `${h}:${f.time.split(':')[1]}` }));
+  const setMin  = (m: string) => setForm(f => ({ ...f, time: `${f.time.split(':')[0]}:${m}` }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,18 +67,26 @@ export default function AppointmentForm({ onClose, onSubmit, loading, defaultDat
     });
   };
 
-  const dateFieldClass = 'flex items-center gap-0.5 px-3 h-[38px] border border-gray-200 rounded-lg bg-white text-sm transition-all outline-none focus-within:border-[#00AEEF] focus-within:ring-2 focus-within:ring-[#E6F7FD]';
-  const segmentClass = 'px-px rounded tabular-nums text-gray-900 outline-none focus:bg-[#00AEEF] focus:text-white data-[placeholder]:text-gray-300 data-[type=literal]:text-gray-300 data-[type=literal]:select-none';
+  const chipBase  = 'px-3 py-1.5 text-xs font-medium rounded-lg border transition-all';
+  const chipOn    = 'bg-[#00AEEF] border-[#00AEEF] text-white shadow-sm';
+  const chipOff   = 'bg-white border-gray-200 text-gray-600 hover:border-[#00AEEF] hover:text-[#00AEEF]';
+  const durOn     = 'bg-[#00AEEF] border-[#00AEEF] text-white shadow-sm';
+  const durOff    = 'bg-white border-gray-200 text-gray-600 hover:border-[#00AEEF] hover:text-[#00AEEF]';
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 sm:p-4"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-        {/* Header con acento */}
-        <div className="relative overflow-hidden px-6 pt-5 pb-4 border-b border-gray-100"
-          style={{ background: 'linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%)' }}>
+      <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg max-h-[92vh] sm:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+
+        {/* Header */}
+        <div
+          className="relative overflow-hidden px-5 pt-5 pb-4 border-b border-gray-100"
+          style={{ background: 'linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%)' }}
+        >
+          {/* Drag handle — solo mobile */}
+          <div className="sm:hidden w-10 h-1 rounded-full bg-gray-300/70 mx-auto mb-4" />
           <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-[#00AEEF]/10" />
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -89,8 +103,7 @@ export default function AppointmentForm({ onClose, onSubmit, loading, defaultDat
             </div>
             <button
               className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/70 text-gray-500 hover:bg-white hover:text-gray-700 transition-colors shadow-sm"
-              onClick={onClose}
-              type="button"
+              onClick={onClose} type="button"
             >
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -99,76 +112,104 @@ export default function AppointmentForm({ onClose, onSubmit, loading, defaultDat
           </div>
         </div>
 
-        <div className="px-6 py-5 overflow-y-auto flex-1">
-          <form onSubmit={handleSubmit} id="appt-form">
-            <div className="mb-4">
-              <PatientComboBox
-                patientId={form.patientId}
-                onChange={id => setForm(f => ({ ...f, patientId: id }))}
-                required
-              />
-            </div>
+        {/* Body */}
+        <div className="px-5 py-5 overflow-y-auto flex-1 space-y-4">
+          <form onSubmit={handleSubmit} id="appt-form" className="space-y-4">
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <DateField
-                  value={form.date ? parseDate(form.date) : null}
-                  onChange={(date: DateValue | null) => setForm(f => ({ ...f, date: date?.toString() ?? todayStr }))}
-                  minValue={today(getLocalTimeZone())}
-                  isRequired
-                  className="flex flex-col gap-1.5"
-                >
-                  <Label className="text-sm font-medium text-gray-700">Fecha *</Label>
-                  <DateInput className={dateFieldClass}>
-                    {(segment) => <DateSegment segment={segment} className={segmentClass} />}
-                  </DateInput>
-                </DateField>
-              </div>
+            {/* Paciente */}
+            <PatientComboBox
+              patientId={form.patientId}
+              onChange={id => setForm(f => ({ ...f, patientId: id }))}
+              required
+            />
+
+            {/* Fecha + Hora */}
+            <div className="grid grid-cols-2 gap-3">
+              <DateField
+                value={form.date ? parseDate(form.date) : null}
+                onChange={(date: DateValue | null) => setForm(f => ({ ...f, date: date?.toString() ?? todayStr }))}
+                minValue={today(getLocalTimeZone())}
+                isRequired
+                className="flex flex-col gap-1.5"
+              >
+                <Label className="text-sm font-medium text-gray-700">Fecha *</Label>
+                <DateInput className={dateFieldClass}>
+                  {(segment) => <DateSegment segment={segment} className={segmentClass} />}
+                </DateInput>
+              </DateField>
+
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-700">Hora *</label>
-                <input className={inputClass} type="time" value={form.time} onChange={set('time')} required />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-gray-700">Duración *</label>
-                <select className={inputClass} value={form.duration} onChange={set('duration')}>
-                  {DURATION_OPTIONS.map(d => <option key={d} value={d}>{d} minutos</option>)}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1.5 col-span-2">
-                <label className="text-sm font-medium text-gray-700">Motivo *</label>
-                <div className="flex flex-wrap gap-1.5">
-                  {REASONS.map(r => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setForm(f => ({ ...f, reason: r }))}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
-                        form.reason === r
-                          ? 'bg-[#00AEEF] border-[#00AEEF] text-white shadow-sm'
-                          : 'bg-white border-gray-200 text-gray-600 hover:border-[#00AEEF] hover:text-[#00AEEF]'
-                      }`}
-                    >
-                      {r}
-                    </button>
-                  ))}
+                <div className="flex items-center h-[38px] border border-gray-200 rounded-lg bg-white overflow-hidden focus-within:border-[#00AEEF] focus-within:ring-2 focus-within:ring-[#E6F7FD] transition-all">
+                  <select
+                    value={hh}
+                    onChange={e => setHour(e.target.value)}
+                    className="flex-1 h-full bg-transparent text-sm text-center outline-none appearance-none cursor-pointer font-semibold text-gray-900 pl-2"
+                  >
+                    {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                  </select>
+                  <span className="text-gray-300 font-bold select-none shrink-0">:</span>
+                  <select
+                    value={mm}
+                    onChange={e => setMin(e.target.value)}
+                    className="flex-1 h-full bg-transparent text-sm text-center outline-none appearance-none cursor-pointer font-semibold text-gray-900 pr-2"
+                  >
+                    {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
                 </div>
               </div>
-              <div className="flex flex-col gap-1.5 col-span-2">
-                <label className="text-sm font-medium text-gray-700">Notas adicionales</label>
-                <textarea
-                  className={`${inputClass} resize-y min-h-[80px]`}
-                  value={form.notes}
-                  onChange={set('notes')}
-                  placeholder="Observaciones, instrucciones especiales..."
-                />
+            </div>
+
+            {/* Duración */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">Duración *</label>
+              <div className="flex gap-2">
+                {DURATION_OPTIONS.map(d => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, duration: d }))}
+                    className={`flex-1 py-2 text-xs font-semibold rounded-lg border transition-all ${form.duration === d ? durOn : durOff}`}
+                  >
+                    {d}m
+                  </button>
+                ))}
               </div>
+            </div>
+
+            {/* Motivo */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">Motivo *</label>
+              <div className="flex flex-wrap gap-1.5">
+                {REASONS.map(r => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, reason: r }))}
+                    className={`${chipBase} ${form.reason === r ? chipOn : chipOff}`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Notas */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-gray-700">Notas adicionales</label>
+              <textarea
+                className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white resize-none h-[72px] placeholder-gray-300"
+                value={form.notes}
+                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                placeholder="Observaciones, instrucciones especiales..."
+              />
             </div>
 
           </form>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between gap-3 bg-gray-50/60">
+        <div className="px-5 py-4 border-t border-gray-100 flex items-center justify-between gap-3 bg-gray-50/60">
           <p className="text-xs text-gray-400">Los campos con * son obligatorios</p>
           <div className="flex gap-2">
             <button
@@ -204,6 +245,7 @@ export default function AppointmentForm({ onClose, onSubmit, loading, defaultDat
             </button>
           </div>
         </div>
+
       </div>
     </div>
   );

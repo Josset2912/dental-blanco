@@ -58,7 +58,7 @@ export default function Login() {
               <div key={f.label} className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                   style={{ background: 'rgba(255,255,255,0.15)' }}>
-                  <svg className="w-4.5 h-4.5 text-white w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d={f.icon}/>
                   </svg>
                 </div>
@@ -94,7 +94,7 @@ export default function Login() {
 
             {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold text-gray-700">Correo electrónico</label>
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Correo electrónico</label>
               <div className="relative">
                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -114,7 +114,7 @@ export default function Login() {
 
             {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold text-gray-700">Contraseña</label>
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Contraseña</label>
               <div className="relative">
                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>

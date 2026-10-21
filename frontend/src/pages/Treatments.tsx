@@ -186,7 +186,7 @@ export default function Treatments() {
           <h2 className="text-xl font-bold text-gray-900">Tratamientos</h2>
           <p className="text-sm text-gray-500 mt-0.5">{inProgress.length} en progreso · {treatments.length} total</p>
         </div>
-        <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2 text-white transition-colors rounded-lg text-sm font-medium" style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+        <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2.5 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity" style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
           <PlusIcon /> Nuevo tratamiento
         </button>
       </div>
@@ -213,7 +213,7 @@ export default function Treatments() {
 
       {/* Filters + search */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
           {FILTERS.map(f => (
             <button key={f.value} onClick={() => setStatusFilter(f.value)}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
@@ -231,7 +231,7 @@ export default function Treatments() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar paciente o tratamiento..."
-            className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white placeholder-gray-300"
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white placeholder-gray-300"
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -243,7 +243,7 @@ export default function Treatments() {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="animate-pulse">
             <div className="h-10 bg-gray-50 border-b border-gray-100 px-4 flex items-center gap-6">

@@ -98,8 +98,8 @@ function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
 
 function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3.5 flex items-center gap-3">
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${color}`}>
+    <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-sm">
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
         <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>
         </svg>
@@ -119,7 +119,7 @@ function EmptyState({ search, genderFilter }: { search: string; genderFilter: st
   const hasFilter = search || genderFilter !== 'TODOS';
   return (
     <div className="text-center py-20 px-6">
-      <div className="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+      <div className="w-20 h-20 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-4">
         <svg className="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>
         </svg>
@@ -224,7 +224,7 @@ export default function Patients() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-white rounded-lg text-sm font-medium sm:w-auto transition-opacity hover:opacity-90"
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-white rounded-xl text-sm font-medium sm:w-auto transition-opacity hover:opacity-90"
           style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
         >
           <PlusIcon /> Nuevo paciente
@@ -263,7 +263,7 @@ export default function Patients() {
             <SearchIcon />
           </span>
           <input
-            className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+            className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
             placeholder="Buscar por nombre o teléfono..."
             value={search}
             onChange={e => handleSearch(e.target.value)}

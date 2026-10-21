@@ -93,7 +93,7 @@ function InfoField({ icon, label, value }: { icon: React.ReactNode; label: strin
 
 function KpiCard({ label, value, sub, colorClass }: { label: string; value: string; sub?: string; colorClass: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-center">
+    <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3 text-center shadow-sm">
       <p className={`text-xl font-bold ${colorClass}`}>{value}</p>
       <p className="text-xs text-gray-500 mt-0.5">{label}</p>
       {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
@@ -662,18 +662,21 @@ export default function PatientDetail() {
       {/* ── Modal: pago rápido ─────────────────────────────────────────── */}
       {payTreatment && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={e => { if (e.target === e.currentTarget) setPayTreatment(null); }}>
-          <div className="bg-white rounded-xl w-full max-w-sm shadow-xl">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+            <div className="px-6 py-5 relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%)' }}>
+              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }} />
+              <div className="flex items-center justify-between relative">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900">Registrar pago</h3>
                 </div>
-                <h3 className="text-base font-bold text-gray-900">Registrar pago</h3>
+                <button onClick={() => setPayTreatment(null)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/60 text-gray-500 hover:bg-white transition-colors"><CloseIcon /></button>
               </div>
-              <button onClick={() => setPayTreatment(null)} className="w-7 h-7 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200"><CloseIcon /></button>
             </div>
             <div className="px-6 py-5 space-y-4">
-              <div className="bg-gray-50 rounded-lg p-3 text-sm space-y-1">
+              <div className="bg-gray-50 rounded-xl p-3 text-sm space-y-1">
                 <p className="font-semibold text-gray-900">{payTreatment.name}</p>
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>Total: {fmtCost(payTreatment.cost)}</span>
@@ -688,7 +691,7 @@ export default function PatientDetail() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Monto a pagar (S/)</label>
                 <input type="number" min="0.01" step="0.01" max={payTreatment.balance}
-                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
                   value={payForm.amount} onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))} />
               </div>
 
@@ -718,13 +721,13 @@ export default function PatientDetail() {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Notas (opcional)</label>
-                <input className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                <input className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
                   value={payForm.notes} onChange={e => setPayForm(f => ({ ...f, notes: e.target.value }))} placeholder="Observaciones opcionales..." />
               </div>
 
               <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
-                <button className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100" onClick={() => setPayTreatment(null)}>Cancelar</button>
-                <button className="px-4 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-60"
+                <button className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-100" onClick={() => setPayTreatment(null)}>Cancelar</button>
+                <button className="px-4 py-2 text-sm font-medium text-white rounded-xl disabled:opacity-60"
                   style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
                   onClick={() => quickPayMut.mutate()}
                   disabled={quickPayMut.isPending || !payForm.amount || parseFloat(payForm.amount) <= 0}>
@@ -739,24 +742,28 @@ export default function PatientDetail() {
       {/* ── Modal: completar tratamiento ───────────────────────────────── */}
       {confirmComplete && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-sm shadow-xl">
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+            <div className="px-6 py-5 relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%)' }}>
+              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }} />
+              <div className="flex items-center gap-3 relative">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Completar tratamiento</h3>
               </div>
-              <h3 className="text-base font-bold text-gray-900">Completar tratamiento</h3>
             </div>
             <div className="px-6 py-5">
-              <div className="bg-gray-50 rounded-lg p-3 mb-4 text-sm space-y-1">
+              <div className="bg-gray-50 rounded-xl p-3 mb-4 text-sm space-y-1">
                 <p className="font-semibold text-gray-900">{confirmComplete.name}</p>
                 {confirmComplete.description && <p className="text-gray-500 text-xs">{confirmComplete.description}</p>}
                 <p className="text-gray-700 font-medium">{fmtCost(confirmComplete.cost)}</p>
               </div>
               <p className="text-sm text-gray-600 mb-5">¿Confirmas que este tratamiento ha sido completado? Se registrará la fecha de hoy como fecha de término.</p>
               <div className="flex justify-end gap-2">
-                <button className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100" onClick={() => setConfirmComplete(null)}>Cancelar</button>
-                <button className="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 disabled:opacity-60"
-                  onClick={() => completeTreatmentMut.mutate(confirmComplete.id)} disabled={completeTreatmentMut.isPending}>
+                <button className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-100" onClick={() => setConfirmComplete(null)}>Cancelar</button>
+                <button className="px-4 py-2 text-sm font-medium text-white rounded-xl hover:opacity-90 disabled:opacity-60"
+                  style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
+                  onClick={() => completeTreatmentMut.mutate(confirmComplete.id)} disabled={completeTreatmentMut.isPending} >
                   {completeTreatmentMut.isPending ? 'Guardando...' : 'Sí, completar'}
                 </button>
               </div>
@@ -768,10 +775,18 @@ export default function PatientDetail() {
       {/* ── Modal: editar tratamiento ──────────────────────────────────── */}
       {editTreatment && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-sm shadow-xl">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Editar tratamiento</h3>
-              <button onClick={() => setEditTreatment(null)} className="w-7 h-7 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200"><CloseIcon /></button>
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+            <div className="px-6 py-5 relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%)' }}>
+              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20" style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }} />
+              <div className="flex items-center justify-between relative">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900">Editar tratamiento</h3>
+                </div>
+                <button onClick={() => setEditTreatment(null)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/60 text-gray-500 hover:bg-white transition-colors"><CloseIcon /></button>
+              </div>
             </div>
             <div className="px-6 py-5 space-y-4">
               <p className="text-sm font-semibold text-gray-800">{editTreatment.name}</p>
@@ -795,26 +810,26 @@ export default function PatientDetail() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Costo (S/)</label>
                 <input type="number" min="0" step="0.01"
-                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
                   value={editTreatmentForm.cost} onChange={e => setEditTreatmentForm(f => ({ ...f, cost: e.target.value }))} />
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Descripción</label>
-                <input className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                <input className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
                   value={editTreatmentForm.description} onChange={e => setEditTreatmentForm(f => ({ ...f, description: e.target.value }))} placeholder="Descripción del tratamiento..." />
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Notas</label>
                 <textarea rows={2}
-                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white resize-none"
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white resize-none"
                   value={editTreatmentForm.notes} onChange={e => setEditTreatmentForm(f => ({ ...f, notes: e.target.value }))} placeholder="Observaciones..." />
               </div>
 
               <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
-                <button className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100" onClick={() => setEditTreatment(null)}>Cancelar</button>
-                <button className="px-4 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-60"
+                <button className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-100" onClick={() => setEditTreatment(null)}>Cancelar</button>
+                <button className="px-4 py-2 text-sm font-medium text-white rounded-xl disabled:opacity-60"
                   style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
                   onClick={() => editTreatmentMut.mutate(editTreatment.id)}
                   disabled={editTreatmentMut.isPending || !editTreatmentForm.cost}>
@@ -837,17 +852,27 @@ export default function PatientDetail() {
 
       {confirmDelete && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-sm shadow-xl">
-            <div className="px-6 py-5 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Eliminar paciente</h3>
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+            <div className="px-6 py-5 relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#fff5f5 0%,#fee2e2 100%)' }}>
+              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20" style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)' }} />
+              <div className="flex items-center gap-3 relative">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)' }}>
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-900">Eliminar paciente</h3>
+                  <p className="text-xs text-red-500 font-medium">Esta acción no se puede deshacer</p>
+                </div>
+              </div>
             </div>
             <div className="px-6 py-5">
               <p className="text-sm text-gray-700 mb-5">
-                ¿Estás seguro de eliminar a <strong>{patient.name} {patient.lastName}</strong>? Esta acción no se puede deshacer.
+                ¿Estás seguro de eliminar a <strong>{patient.name} {patient.lastName}</strong>? Se borrarán todos sus datos, tratamientos y pagos.
               </p>
               <div className="flex justify-end gap-2">
-                <button className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100" onClick={() => setConfirmDelete(false)}>Cancelar</button>
-                <button className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-60"
+                <button className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-100" onClick={() => setConfirmDelete(false)}>Cancelar</button>
+                <button className="px-4 py-2 text-sm font-medium text-white rounded-xl hover:opacity-90 disabled:opacity-60"
+                  style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)' }}
                   onClick={() => deleteMut.mutate()} disabled={deleteMut.isPending}>
                   {deleteMut.isPending ? 'Eliminando...' : 'Sí, eliminar'}
                 </button>

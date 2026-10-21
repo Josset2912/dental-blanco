@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { getUser, logout } from '../api/auth';
 import { getPatients } from '../api/patients';
+import { getDashboard } from '../api/dashboard';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -288,8 +290,8 @@ function PageTransition({ children }: { children: React.ReactNode }) {
 
 // ─── Nav item (sidebar) ───────────────────────────────────────────────────────
 
-function SideNavItem({ to, icon, label, collapsed, onClick }: {
-  to: string; icon: React.ReactNode; label: string; collapsed: boolean; onClick?: () => void;
+function SideNavItem({ to, icon, label, collapsed, onClick, badge }: {
+  to: string; icon: React.ReactNode; label: string; collapsed: boolean; onClick?: () => void; badge?: number;
 }) {
   return (
     <NavLink
@@ -310,8 +312,18 @@ function SideNavItem({ to, icon, label, collapsed, onClick }: {
           {isActive && (
             <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#00AEEF] rounded-r-full" />
           )}
-          {icon}
+          <span className="relative shrink-0">
+            {icon}
+            {collapsed && badge != null && badge > 0 && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#00AEEF] rounded-full" />
+            )}
+          </span>
           {!collapsed && <span>{label}</span>}
+          {!collapsed && badge != null && badge > 0 && (
+            <span className="ml-auto px-1.5 py-0.5 bg-[#00AEEF] text-white text-[10px] font-bold rounded-full min-w-[18px] text-center leading-[14px]">
+              {badge > 99 ? '99+' : badge}
+            </span>
+          )}
           {collapsed && (
             <span className="pointer-events-none absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
               {label}
@@ -334,6 +346,9 @@ export default function Layout() {
   const [collapsed, setCollapsed] = useState(() => {
     try { return localStorage.getItem('sidebar-collapsed') === 'true'; } catch { return false; }
   });
+
+  const { data: dashData } = useQuery({ queryKey: ['dashboard'], queryFn: getDashboard, staleTime: 60_000 });
+  const pendingToday = dashData?.stats?.appointmentsPending ?? 0;
 
   const handleLogout = () => { logout(); navigate('/login'); };
   const initials = user?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() ?? 'DR';
@@ -388,7 +403,9 @@ export default function Layout() {
         {/* Main nav */}
         <nav className="flex-1 px-2 py-2 flex flex-col gap-0.5 overflow-y-auto">
           {mainNav.map(({ to, icon, label }) => (
-            <SideNavItem key={to} to={to} icon={icon} label={label} collapsed={collapsed} />
+            <SideNavItem key={to} to={to} icon={icon} label={label} collapsed={collapsed}
+              badge={to === '/citas' ? pendingToday : undefined}
+            />
           ))}
 
           {/* Separator */}
@@ -477,6 +494,7 @@ export default function Layout() {
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-30 flex safe-bottom">
           {bottomNav.map(({ to, icon, label }) => {
             const isActive = location.pathname === to || (to !== '/dashboard' && location.pathname.startsWith(to));
+            const navBadge = to === '/citas' ? pendingToday : 0;
             return (
               <NavLink
                 key={to}
@@ -484,8 +502,13 @@ export default function Layout() {
                 onClick={() => setShowMore(false)}
                 className="relative flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors"
               >
-                <span className={`transition-colors ${isActive ? 'text-[#00AEEF]' : 'text-gray-400'}`}>
+                <span className={`relative transition-colors ${isActive ? 'text-[#00AEEF]' : 'text-gray-400'}`}>
                   {icon}
+                  {navBadge > 0 && (
+                    <span className="absolute -top-1 -right-1.5 w-4 h-4 bg-[#00AEEF] text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none">
+                      {navBadge > 9 ? '9+' : navBadge}
+                    </span>
+                  )}
                 </span>
                 <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-[#00AEEF]' : 'text-gray-400'}`}>
                   {label}

@@ -1,8 +1,9 @@
-﻿import { useQuery } from '@tanstack/react-query';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getDashboard } from '../api/dashboard';
 import { getUser } from '../api/auth';
+import { updateAppointment } from '../api/appointments';
 
 const STATUS_LABEL: Record<string, string> = {
   SCHEDULED: 'Agendada',
@@ -78,10 +79,17 @@ function StatCard({ item, index }: { item: StatItem; index: number }) {
 export default function Dashboard() {
   const navigate = useNavigate();
   const user = getUser();
+  const qc = useQueryClient();
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['dashboard'],
     queryFn: getDashboard,
     refetchInterval: 30_000,
+  });
+
+  const statusMut = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      updateAppointment(id, { status: status as 'CONFIRMED' | 'COMPLETED' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['dashboard'] }),
   });
 
   const now = new Date();
@@ -342,10 +350,36 @@ export default function Dashboard() {
                     <p className="text-xs text-gray-400 mt-0.5 truncate">{a.reason}</p>
                   </div>
 
-                  {/* Status badge */}
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg bg-gray-50 shrink-0 ${STATUS_TEXT[a.status]}`}>
-                    {STATUS_LABEL[a.status]}
-                  </span>
+                  {/* Quick actions + status */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {a.status === 'SCHEDULED' && (
+                      <button
+                        onClick={() => statusMut.mutate({ id: a.id, status: 'CONFIRMED' })}
+                        disabled={statusMut.isPending}
+                        className="w-7 h-7 rounded-lg bg-[#E6F7FD] text-[#0077B6] hover:bg-[#00AEEF] hover:text-white transition-colors flex items-center justify-center shrink-0 disabled:opacity-50"
+                        title="Confirmar cita"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4"/>
+                        </svg>
+                      </button>
+                    )}
+                    {(a.status === 'SCHEDULED' || a.status === 'CONFIRMED') && (
+                      <button
+                        onClick={() => statusMut.mutate({ id: a.id, status: 'COMPLETED' })}
+                        disabled={statusMut.isPending}
+                        className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-colors flex items-center justify-center shrink-0 disabled:opacity-50"
+                        title="Marcar como completada"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                      </button>
+                    )}
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg bg-gray-50 ${STATUS_TEXT[a.status]}`}>
+                      {STATUS_LABEL[a.status]}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>

@@ -79,6 +79,8 @@ function NotesTooltip({ notes }: { notes: string }) {
 export default function Treatments() {
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editItem, setEditItem] = useState<Treatment | null>(null);
   const [confirmCancel, setConfirmCancel] = useState<Treatment | null>(null);
@@ -131,7 +133,7 @@ export default function Treatments() {
   const revenueExpected = inProgress.reduce((s, t) => s + parseFloat(t.cost), 0);
   const revenueCompleted = completed.reduce((s, t) => s + parseFloat(t.cost), 0);
 
-  // Filter by search
+  // Filter by search + date range
   const filtered = [...treatments]
     .filter(t => {
       if (!search) return true;
@@ -140,6 +142,12 @@ export default function Treatments() {
         `${t.patient.name} ${t.patient.lastName}`.toLowerCase().includes(q) ||
         t.name.toLowerCase().includes(q)
       );
+    })
+    .filter(t => {
+      const d = t.startDate.substring(0, 10);
+      if (dateFrom && d < dateFrom) return false;
+      if (dateTo && d > dateTo) return false;
+      return true;
     })
     .sort((a, b) => {
       const va = sortKey === 'cost' ? parseFloat(a.cost) : sortKey === 'patient' ? `${a.patient.name} ${a.patient.lastName}` : a.startDate;
@@ -223,6 +231,42 @@ export default function Treatments() {
             </button>
           ))}
         </div>
+
+        {/* Date range */}
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
+              className="pl-8 pr-2 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white text-gray-700 w-[140px]"
+              title="Desde"
+            />
+          </div>
+          <span className="text-gray-400 text-sm">—</span>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={e => setDateTo(e.target.value)}
+            className="px-2 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white text-gray-700 w-[140px]"
+            title="Hasta"
+          />
+          {(dateFrom || dateTo) && (
+            <button
+              onClick={() => { setDateFrom(''); setDateTo(''); }}
+              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Limpiar fechas"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          )}
+        </div>
+
         <div className="relative flex-1 min-w-[180px] max-w-xs">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>

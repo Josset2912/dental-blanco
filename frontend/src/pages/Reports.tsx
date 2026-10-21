@@ -94,6 +94,10 @@ export default function Reports() {
   const now = new Date();
   const [balanceYear,  setBalanceYear]  = useState(now.getFullYear());
   const [balanceMonth, setBalanceMonth] = useState(now.getMonth() + 1);
+  const [balanceMethodFilter, setBalanceMethodFilter] = useState<string | null>(null);
+  const [balanceSearch, setBalanceSearch] = useState('');
+  const [balanceSortKey, setBalanceSortKey] = useState<'date' | 'amount' | 'patient' | 'method'>('date');
+  const [balanceSortDir, setBalanceSortDir] = useState<'asc' | 'desc'>('desc');
 
   const { data: overview,   isLoading: loadingOverview   } = useQuery({ queryKey: ['reports-overview'],   queryFn: getOverview });
   const { data: revenue,    isLoading: loadingRevenue    } = useQuery({ queryKey: ['reports-revenue'],    queryFn: getRevenue });
@@ -381,8 +385,93 @@ export default function Reports() {
       </div>
 
       {/* ── Balance mensual detallado ─────────────────────────── */}
+      {(() => {
+        const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        const isCurrentMonth = balanceMonth === now.getMonth() + 1 && balanceYear === now.getFullYear();
+
+        const prevMonth = () => {
+          if (balanceMonth === 1) { setBalanceMonth(12); setBalanceYear(y => y - 1); }
+          else setBalanceMonth(m => m - 1);
+        };
+        const nextMonth = () => {
+          if (balanceMonth === 12) { setBalanceMonth(1); setBalanceYear(y => y + 1); }
+          else setBalanceMonth(m => m + 1);
+        };
+        const goToNow = () => { setBalanceMonth(now.getMonth() + 1); setBalanceYear(now.getFullYear()); };
+
+        const exportBalancePDF = () => {
+          if (!balance?.payments?.length) return;
+          const doc = new jsPDF();
+          const monthLabel = `${MONTHS[balanceMonth - 1]} ${balanceYear}`;
+          doc.setFontSize(16); doc.setTextColor(0, 119, 182);
+          doc.text(`Balance mensual — ${monthLabel}`, 14, 18);
+          doc.setFontSize(9); doc.setTextColor(120, 120, 120);
+          doc.text(`Generado: ${new Date().toLocaleDateString('es-PE')}`, 14, 25);
+          doc.setFontSize(10); doc.setTextColor(30, 30, 30);
+          const kpis = [
+            ['Total ingresado', fmt(balance.total)],
+            ['Pagos realizados', String(balance.count)],
+            ['Promedio por pago', fmt(balance.average ?? 0)],
+            ['Mes anterior', fmt(balance.prevTotal ?? 0)],
+          ];
+          let y = 34;
+          for (const [label, val] of kpis) {
+            doc.setTextColor(90, 90, 90); doc.text(label + ':', 14, y);
+            doc.setTextColor(20, 20, 20); doc.setFont(undefined as any, 'bold'); doc.text(val, 80, y);
+            doc.setFont(undefined as any, 'normal'); y += 7;
+          }
+          y += 4;
+          doc.setFontSize(9); doc.setTextColor(90, 90, 90);
+          ['Fecha', 'Paciente', 'Método', 'Monto'].forEach((h, i) => doc.text(h, [14, 55, 105, 140, 170][i], y));
+          y += 4; doc.setDrawColor(200, 200, 200); doc.line(14, y, 196, y); y += 4;
+          doc.setTextColor(30, 30, 30);
+          for (const p of balance.payments) {
+            const fecha = new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+            const nombre = `${p.patient.name} ${p.patient.lastName}`.slice(0, 28);
+            const metodo = METHOD_LABEL_MAP[p.method] ?? p.method;
+            doc.text(fecha, 14, y); doc.text(nombre, 55, y);
+            doc.text(metodo, 105, y);
+            doc.setFont(undefined as any, 'bold'); doc.text(fmt(p.amount), 140, y);
+            doc.setFont(undefined as any, 'normal'); y += 6;
+            if (y > 270) { doc.addPage(); y = 20; }
+          }
+          y += 3; doc.line(14, y, 196, y); y += 5;
+          doc.setFont(undefined as any, 'bold'); doc.setTextColor(0, 119, 182);
+          doc.text('Total', 14, y); doc.text(fmt(balance.total), 140, y);
+          doc.save(`balance-${MONTHS[balanceMonth - 1].toLowerCase()}-${balanceYear}.pdf`);
+        };
+
+        const toggleSort = (key: typeof balanceSortKey) => {
+          if (balanceSortKey === key) setBalanceSortDir(d => d === 'asc' ? 'desc' : 'asc');
+          else { setBalanceSortKey(key); setBalanceSortDir('asc'); }
+        };
+
+        const filteredPayments = (balance?.payments ?? [])
+          .filter(p => !balanceMethodFilter || p.method === balanceMethodFilter)
+          .filter(p => {
+            if (!balanceSearch.trim()) return true;
+            const q = balanceSearch.toLowerCase();
+            return `${p.patient.name} ${p.patient.lastName}`.toLowerCase().includes(q);
+          })
+          .slice()
+          .sort((a, b) => {
+            let cmp = 0;
+            if (balanceSortKey === 'date')    cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            if (balanceSortKey === 'amount')  cmp = a.amount - b.amount;
+            if (balanceSortKey === 'patient') cmp = `${a.patient.name} ${a.patient.lastName}`.localeCompare(`${b.patient.name} ${b.patient.lastName}`);
+            if (balanceSortKey === 'method')  cmp = a.method.localeCompare(b.method);
+            return balanceSortDir === 'asc' ? cmp : -cmp;
+          });
+
+        const SortIcon = ({ col }: { col: typeof balanceSortKey }) => (
+          <svg className={`inline w-3 h-3 ml-1 transition-opacity ${balanceSortKey === col ? 'opacity-100' : 'opacity-30'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d={balanceSortKey === col && balanceSortDir === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} />
+          </svg>
+        );
+
+        return (
       <div className="bg-white rounded-xl border border-gray-100 shadow-card p-5">
-        {/* Header con selector */}
+        {/* Header con navegación de mes */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-4 rounded-full shrink-0" style={{ background: `linear-gradient(to bottom, ${BRAND}, ${BRAND_DARK})` }} />
@@ -392,33 +481,43 @@ export default function Reports() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative">
-              <select
-                value={balanceMonth}
-                onChange={e => setBalanceMonth(Number(e.target.value))}
-                className="pl-3 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white appearance-none cursor-pointer font-medium text-gray-700"
-              >
-                {['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
-                  .map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-              </select>
-              <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
-              </svg>
+            {/* Botón mes actual */}
+            {!isCurrentMonth && (
+              <button onClick={goToNow}
+                className="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-[#00AEEF] text-[#0077B6] bg-[#E6F7FD] hover:bg-[#b3e8fb] transition-colors">
+                Mes actual
+              </button>
+            )}
+            {/* Navegación ← mes → */}
+            <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg p-0.5">
+              <button onClick={prevMonth}
+                className="p-1.5 rounded-md text-gray-500 hover:bg-white hover:text-gray-800 hover:shadow-sm transition-all"
+                title="Mes anterior">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+              </button>
+              <span className="px-2 text-sm font-semibold text-gray-800 min-w-[120px] text-center select-none">
+                {MONTHS[balanceMonth - 1]} {balanceYear}
+              </span>
+              <button onClick={nextMonth}
+                className="p-1.5 rounded-md text-gray-500 hover:bg-white hover:text-gray-800 hover:shadow-sm transition-all"
+                title="Mes siguiente">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
             </div>
-            <div className="relative">
-              <select
-                value={balanceYear}
-                onChange={e => setBalanceYear(Number(e.target.value))}
-                className="pl-3 pr-7 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white appearance-none cursor-pointer font-medium text-gray-700"
-              >
-                {[now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1].map(y => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
-              <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </div>
+            {/* Exportar balance del mes */}
+            {balance?.payments?.length ? (
+              <button onClick={exportBalancePDF}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                <span className="hidden sm:inline">Exportar PDF</span>
+              </button>
+            ) : null}
           </div>
         </div>
 
@@ -534,6 +633,52 @@ export default function Reports() {
               );
             })()}
 
+            {/* Filtros: búsqueda + método */}
+            {balance?.payments?.length ? (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {/* Búsqueda */}
+                <div className="relative flex-1 min-w-[160px]">
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+                  <input
+                    type="search"
+                    value={balanceSearch}
+                    onChange={e => setBalanceSearch(e.target.value)}
+                    placeholder="Buscar paciente..."
+                    className="pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white w-full placeholder-gray-400"
+                  />
+                  {balanceSearch && (
+                    <button onClick={() => setBalanceSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                {/* Pills de método */}
+                <div className="flex gap-1.5">
+                  {[
+                    { key: null,       label: 'Todos',        cls: 'bg-gray-100 text-gray-600 border-gray-200' },
+                    { key: 'CASH',     label: 'Efectivo',     cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                    { key: 'CARD',     label: 'Tarjeta',      cls: 'bg-[#E6F7FD] text-[#0077B6] border-[#b3e8fb]' },
+                    { key: 'TRANSFER', label: 'Transferencia', cls: 'bg-violet-50 text-violet-700 border-violet-200' },
+                  ].map(({ key, label, cls }) => {
+                    const active = balanceMethodFilter === key;
+                    return (
+                      <button
+                        key={String(key)}
+                        onClick={() => setBalanceMethodFilter(key)}
+                        className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-all ${active ? cls + ' ring-2 ring-offset-1 ring-[#00AEEF]/40 shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'}`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+
             {/* Tabla de pagos */}
             {!balance?.payments?.length ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -545,59 +690,76 @@ export default function Reports() {
                 <p className="text-sm font-medium text-gray-600">Sin pagos en este mes</p>
                 <p className="text-xs text-gray-400 mt-0.5">Selecciona otro mes o registra pagos</p>
               </div>
+            ) : filteredPayments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <p className="text-sm font-medium text-gray-500">Sin resultados para los filtros aplicados</p>
+                <button onClick={() => { setBalanceSearch(''); setBalanceMethodFilter(null); }}
+                  className="mt-2 text-xs text-[#00AEEF] hover:underline">Limpiar filtros</button>
+              </div>
             ) : (
               <>
                 {/* Mobile: tarjetas */}
                 <div className="sm:hidden rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-100">
-                  {balance.payments.map((p, i) => {
+                  {filteredPayments.map((p, i) => {
                     const borderColor = p.method === 'CASH' ? '#10b981' : p.method === 'CARD' ? '#00AEEF' : p.method === 'TRANSFER' ? '#8b5cf6' : '#d1d5db';
                     return (
-                    <div key={p.id} className={`px-4 py-3.5 border-l-[3px] ${i % 2 === 1 ? 'bg-gray-50/40' : ''}`} style={{ borderLeftColor: borderColor }}>
-                      <div className="flex items-start justify-between gap-2 mb-0.5">
-                        <div className="min-w-0">
-                          <p className="font-semibold text-gray-900 text-sm truncate">{p.patient.name} {p.patient.lastName}</p>
-                          {p.treatment && <p className="text-xs text-gray-400 truncate">{p.treatment.name}</p>}
+                      <div key={p.id} className={`px-4 py-3.5 border-l-[3px] ${i % 2 === 1 ? 'bg-gray-50/40' : ''}`} style={{ borderLeftColor: borderColor }}>
+                        <div className="flex items-start justify-between gap-2 mb-0.5">
+                          <div className="min-w-0">
+                            <p className="font-semibold text-gray-900 text-sm truncate">{p.patient.name} {p.patient.lastName}</p>
+                            {p.treatment && <p className="text-xs text-gray-400 truncate">{p.treatment.name}</p>}
+                          </div>
+                          <span className="font-bold text-gray-900 shrink-0 text-sm">{fmt(p.amount)}</span>
                         </div>
-                        <span className="font-bold text-gray-900 shrink-0 text-sm">{fmt(p.amount)}</span>
+                        <p className="text-xs text-gray-500 truncate">{p.concept}</p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-medium ${METHOD_BADGE[p.method] ?? 'bg-gray-100 text-gray-600'}`}>
+                            {METHOD_LABEL_MAP[p.method] ?? p.method}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })} · {new Date(p.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-500 truncate">{p.concept}</p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-medium ${METHOD_BADGE[p.method] ?? 'bg-gray-100 text-gray-600'}`}>
-                          {METHOD_LABEL_MAP[p.method] ?? p.method}
-                        </span>
-                        <span className="text-xs text-gray-400">
-                          {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })} · {new Date(p.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                    </div>
                     );
                   })}
                   <div className="px-4 py-3 bg-gray-50 border-t-2 border-gray-200 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Total del mes</span>
-                    <span className="text-base font-bold" style={{ color: BRAND_DARK }}>{fmt(balance.total)}</span>
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      {filteredPayments.length < (balance?.payments?.length ?? 0) ? `Subtotal (${filteredPayments.length} de ${balance?.payments?.length})` : 'Total del mes'}
+                    </span>
+                    <span className="text-base font-bold" style={{ color: BRAND_DARK }}>
+                      {fmt(filteredPayments.reduce((s, p) => s + p.amount, 0))}
+                    </span>
                   </div>
                 </div>
 
-                {/* Desktop: tabla */}
+                {/* Desktop: tabla con sort */}
                 <div className="hidden sm:block overflow-x-auto rounded-xl border border-gray-100">
                   <table className="w-full text-sm border-collapse">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Paciente</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Concepto</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Método</th>
-                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Monto</th>
+                        {([
+                          { key: 'date',    label: 'Fecha',    align: 'left'  },
+                          { key: 'patient', label: 'Paciente', align: 'left'  },
+                          { key: null,      label: 'Concepto', align: 'left'  },
+                          { key: 'method',  label: 'Método',   align: 'left'  },
+                          { key: 'amount',  label: 'Monto',    align: 'right' },
+                        ] as const).map(({ key, label, align }) => (
+                          <th key={label}
+                            onClick={key ? () => toggleSort(key as any) : undefined}
+                            className={`px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-${align} ${key ? 'cursor-pointer hover:text-gray-700 select-none' : ''}`}>
+                            {label}
+                            {key && <SortIcon col={key as any} />}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {balance.payments.map((p, i) => (
+                      {filteredPayments.map((p, i) => (
                         <tr key={p.id} className={`border-b border-gray-50 last:border-0 hover:bg-[#E6F7FD]/40 transition-colors ${i % 2 === 1 ? 'bg-gray-50/30' : ''}`}>
                           <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
                             {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })}
-                            <span className="block text-gray-400">
-                              {new Date(p.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+                            <span className="block text-gray-400">{new Date(p.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}</span>
                           </td>
                           <td className="px-4 py-3">
                             <p className="font-medium text-gray-900">{p.patient.name} {p.patient.lastName}</p>
@@ -616,10 +778,12 @@ export default function Reports() {
                     <tfoot>
                       <tr className="border-t-2 border-gray-200 bg-gray-50">
                         <td colSpan={4} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                          Total del mes
+                          {filteredPayments.length < (balance?.payments?.length ?? 0)
+                            ? `Subtotal filtrado (${filteredPayments.length} de ${balance?.payments?.length} pagos)`
+                            : 'Total del mes'}
                         </td>
                         <td className="px-4 py-3 text-right text-base font-bold" style={{ color: BRAND_DARK }}>
-                          {fmt(balance.total)}
+                          {fmt(filteredPayments.reduce((s, p) => s + p.amount, 0))}
                         </td>
                       </tr>
                     </tfoot>
@@ -630,6 +794,8 @@ export default function Reports() {
           </>
         )}
       </div>
+        );
+      })()}
 
       {/* Payment methods — donut + tabla */}
       <ChartCard title="Ingresos por método de pago" loading={loadingTreatments}>

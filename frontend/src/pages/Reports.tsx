@@ -328,29 +328,31 @@ export default function Reports() {
         {/* Treatment status — donut con leyenda lateral */}
         <ChartCard title="Tratamientos por estado" loading={loadingTreatments}>
           {treatments?.byStatus?.length ? (
-            <div className="flex items-center gap-4">
-              <ResponsiveContainer width="55%" height={220}>
-                <PieChart>
-                  <Pie
-                    data={treatments.byStatus}
-                    dataKey="value"
-                    nameKey="label"
-                    cx="50%" cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={3}
-                    strokeWidth={0}
-                  >
-                    {treatments.byStatus.map((_, i) => (
-                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{ borderRadius: 10, fontSize: 12, border: '1px solid #e5e7eb' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex-1 space-y-3 min-w-0">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="w-full sm:w-[55%] shrink-0">
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie
+                      data={treatments.byStatus}
+                      dataKey="value"
+                      nameKey="label"
+                      cx="50%" cy="50%"
+                      innerRadius={55}
+                      outerRadius={85}
+                      paddingAngle={3}
+                      strokeWidth={0}
+                    >
+                      {treatments.byStatus.map((_, i) => (
+                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ borderRadius: 10, fontSize: 12, border: '1px solid #e5e7eb' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="w-full sm:flex-1 space-y-3 min-w-0">
                 {treatments.byStatus.map((s, i) => {
                   const total = treatments.byStatus.reduce((acc, x) => acc + x.value, 0);
                   const pct = total > 0 ? Math.round((s.value / total) * 100) : 0;
@@ -493,52 +495,83 @@ export default function Reports() {
                 <p className="text-xs text-gray-400 mt-0.5">Selecciona otro mes o registra pagos</p>
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-xl border border-gray-100">
-                <table className="w-full text-sm border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Paciente</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Concepto</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Método</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Monto</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {balance.payments.map((p, i) => (
-                      <tr key={p.id} className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/60 transition-colors ${i % 2 === 1 ? 'bg-gray-50/30' : ''}`}>
-                        <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
-                          {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })}
-                          <span className="block text-gray-400">
-                            {new Date(p.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <p className="font-medium text-gray-900">{p.patient.name} {p.patient.lastName}</p>
-                          {p.treatment && <p className="text-xs text-gray-400 truncate max-w-[140px]">{p.treatment.name}</p>}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{p.concept}</td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-medium ${METHOD_BADGE[p.method] ?? 'bg-gray-100 text-gray-600'}`}>
-                            {METHOD_LABEL_MAP[p.method] ?? p.method}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right font-bold text-gray-900">{fmt(p.amount)}</td>
+              <>
+                {/* Mobile: tarjetas */}
+                <div className="sm:hidden rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-100">
+                  {balance.payments.map((p, i) => (
+                    <div key={p.id} className={`px-4 py-3.5 ${i % 2 === 1 ? 'bg-gray-50/40' : ''}`}>
+                      <div className="flex items-start justify-between gap-2 mb-0.5">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-gray-900 text-sm truncate">{p.patient.name} {p.patient.lastName}</p>
+                          {p.treatment && <p className="text-xs text-gray-400 truncate">{p.treatment.name}</p>}
+                        </div>
+                        <span className="font-bold text-gray-900 shrink-0 text-sm">{fmt(p.amount)}</span>
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{p.concept}</p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-medium ${METHOD_BADGE[p.method] ?? 'bg-gray-100 text-gray-600'}`}>
+                          {METHOD_LABEL_MAP[p.method] ?? p.method}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })} · {new Date(p.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="px-4 py-3 bg-gray-50 border-t-2 border-gray-200 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Total del mes</span>
+                    <span className="text-base font-bold" style={{ color: BRAND_DARK }}>{fmt(balance.total)}</span>
+                  </div>
+                </div>
+
+                {/* Desktop: tabla */}
+                <div className="hidden sm:block overflow-x-auto rounded-xl border border-gray-100">
+                  <table className="w-full text-sm border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-200">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Paciente</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Concepto</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Método</th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Monto</th>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 border-gray-200 bg-gray-50">
-                      <td colSpan={4} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                        Total del mes
-                      </td>
-                      <td className="px-4 py-3 text-right text-base font-bold" style={{ color: BRAND_DARK }}>
-                        {fmt(balance.total)}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {balance.payments.map((p, i) => (
+                        <tr key={p.id} className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/60 transition-colors ${i % 2 === 1 ? 'bg-gray-50/30' : ''}`}>
+                          <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
+                            {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })}
+                            <span className="block text-gray-400">
+                              {new Date(p.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="font-medium text-gray-900">{p.patient.name} {p.patient.lastName}</p>
+                            {p.treatment && <p className="text-xs text-gray-400 truncate max-w-[140px]">{p.treatment.name}</p>}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{p.concept}</td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-medium ${METHOD_BADGE[p.method] ?? 'bg-gray-100 text-gray-600'}`}>
+                              {METHOD_LABEL_MAP[p.method] ?? p.method}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right font-bold text-gray-900">{fmt(p.amount)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 border-gray-200 bg-gray-50">
+                        <td colSpan={4} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                          Total del mes
+                        </td>
+                        <td className="px-4 py-3 text-right text-base font-bold" style={{ color: BRAND_DARK }}>
+                          {fmt(balance.total)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </>
             )}
           </>
         )}
@@ -582,7 +615,7 @@ export default function Reports() {
                     <th className="text-left text-xs font-semibold text-gray-500 pb-2.5 uppercase tracking-wide">Método</th>
                     <th className="text-right text-xs font-semibold text-gray-500 pb-2.5 uppercase tracking-wide">Pagos</th>
                     <th className="text-right text-xs font-semibold text-gray-500 pb-2.5 uppercase tracking-wide">Total</th>
-                    <th className="text-right text-xs font-semibold text-gray-500 pb-2.5 uppercase tracking-wide">%</th>
+                    <th className="hidden sm:table-cell text-right text-xs font-semibold text-gray-500 pb-2.5 uppercase tracking-wide">%</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -598,7 +631,7 @@ export default function Reports() {
                         </td>
                         <td className="py-3 text-right text-gray-600">{m.count}</td>
                         <td className="py-3 text-right font-semibold text-gray-900">{fmt(m.total)}</td>
-                        <td className="py-3 text-right text-gray-400 text-xs">
+                        <td className="hidden sm:table-cell py-3 text-right text-gray-400 text-xs">
                           {grandTotal > 0 ? `${Math.round((m.total / grandTotal) * 100)}%` : '—'}
                         </td>
                       </tr>
@@ -614,7 +647,7 @@ export default function Reports() {
                     <td className="pt-2.5 text-right text-sm font-bold text-gray-900">
                       {fmt(treatments.byMethod.reduce((s, m) => s + m.total, 0))}
                     </td>
-                    <td className="pt-2.5 text-right text-xs text-gray-400">100%</td>
+                    <td className="hidden sm:table-cell pt-2.5 text-right text-xs text-gray-400">100%</td>
                   </tr>
                 </tfoot>
               </table>

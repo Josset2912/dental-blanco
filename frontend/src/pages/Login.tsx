@@ -84,7 +84,7 @@ export default function Login() {
           <p className="text-xs text-gray-400 mt-0.5 tracking-widest uppercase">Creamos arte en tu sonrisa</p>
         </div>
 
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm bg-white lg:bg-transparent rounded-2xl lg:rounded-none shadow-card lg:shadow-none p-6 lg:p-0">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900">Bienvenido de nuevo</h2>
             <p className="text-sm text-gray-500 mt-1">Ingresa tus credenciales para continuar</p>

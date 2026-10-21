@@ -1,6 +1,7 @@
 ﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { getDashboard } from '../api/dashboard';
 import { getUser } from '../api/auth';
 import { updateAppointment } from '../api/appointments';
@@ -89,7 +90,10 @@ export default function Dashboard() {
   const statusMut = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       updateAppointment(id, { status: status as 'CONFIRMED' | 'COMPLETED' }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['dashboard'] }),
+    onSuccess: (_data, { status }) => {
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      toast.success(status === 'CONFIRMED' ? 'Cita confirmada' : 'Cita completada');
+    },
   });
 
   const now = new Date();

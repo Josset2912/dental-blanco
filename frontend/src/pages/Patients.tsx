@@ -292,6 +292,14 @@ export default function Patients() {
         </div>
       </div>
 
+      {/* Result counter */}
+      {(search.trim() !== '' || genderFilter !== 'TODOS') && !isLoading && (
+        <p className="text-xs text-gray-500 mb-3">
+          {patients.length} resultado{patients.length !== 1 ? 's' : ''} encontrado{patients.length !== 1 ? 's' : ''}
+          {search.trim() ? ` para "${search}"` : ''}
+        </p>
+      )}
+
       {/* MOBILE: lista de tarjetas */}
       <div className="md:hidden bg-white border border-gray-200 rounded-xl overflow-hidden">
         {isLoading ? (

@@ -35,6 +35,11 @@ const METHOD_COLORS: Record<string, string> = {
   CARD: 'bg-[#E6F7FD] text-blue-700',
   TRANSFER: 'bg-purple-50 text-purple-700',
 };
+const METHOD_BORDER: Record<string, string> = {
+  CASH: 'border-l-green-400',
+  CARD: 'border-l-[#00AEEF]',
+  TRANSFER: 'border-l-purple-400',
+};
 const METHOD_FILTERS = [
   { label: 'Todos', value: '' as MethodFilter },
   { label: 'Efectivo', value: 'CASH' as MethodFilter },
@@ -374,7 +379,7 @@ export default function Payments() {
         <div className="sm:hidden bg-white border border-gray-200 rounded-xl overflow-hidden">
           <ul className="divide-y divide-gray-100">
             {payments.map((p: Payment) => (
-              <li key={p.id} className="px-4 py-4">
+              <li key={p.id} className={`px-4 py-4 border-l-[3px] ${METHOD_BORDER[p.method] ?? 'border-l-gray-200'}`}>
                 {/* Fila 1: paciente + monto */}
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <button

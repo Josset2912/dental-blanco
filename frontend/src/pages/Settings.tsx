@@ -14,7 +14,7 @@ function CardSection({ icon, gradient, title, children }: {
   icon: string; gradient: string; title: string; children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-white border border-gray-100 rounded-2xl shadow-card overflow-hidden">
       <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
           style={{ background: gradient }}>
@@ -226,7 +226,7 @@ export default function Settings() {
       </div>
 
       {/* Sesión */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-card overflow-hidden">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: 'linear-gradient(135deg,#f43f5e,#e11d48)' }}>

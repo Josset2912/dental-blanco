@@ -190,9 +190,12 @@ export default function Treatments() {
   return (
     <>
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">Tratamientos</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{inProgress.length} en progreso · {treatments.length} total</p>
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#0077B6] rounded-full shrink-0" />
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Tratamientos</h2>
+            <p className="text-sm text-gray-500 mt-0.5">{inProgress.length} en progreso · {treatments.length} total</p>
+          </div>
         </div>
         <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2.5 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity" style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
           <PlusIcon /> Nuevo tratamiento
@@ -203,7 +206,7 @@ export default function Treatments() {
       {!isLoading && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
           {summaryCards.map(c => (
-            <div key={c.label} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm flex items-center gap-3">
+            <div key={c.label} className="bg-white border border-gray-100 rounded-xl p-4 shadow-card flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${c.color} flex items-center justify-center shrink-0`}>
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d={c.iconPath}/>
@@ -287,7 +290,7 @@ export default function Treatments() {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+      <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-card">
         {isLoading ? (
           <div className="animate-pulse">
             <div className="h-10 bg-gray-50 border-b border-gray-100 px-4 flex items-center gap-6">
@@ -338,7 +341,7 @@ export default function Treatments() {
             <div className="sm:hidden overflow-y-auto max-h-[calc(100svh-26rem)]">
             <ul className="divide-y divide-gray-100">
               {filtered.map(t => (
-                <li key={t.id} className="px-4 py-4 flex flex-col gap-3">
+                <li key={t.id} className="px-4 py-4 flex flex-col gap-3 border-l-[3px]" style={{ borderLeftColor: t.status === 'IN_PROGRESS' ? '#00AEEF' : t.status === 'COMPLETED' ? '#10b981' : '#ef4444' }}>
                   {/* Top row: patient + status */}
                   <div className="flex items-start justify-between gap-2">
                     <div>

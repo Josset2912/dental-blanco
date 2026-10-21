@@ -55,7 +55,7 @@ function StatCard({ item, index }: { item: StatItem; index: number }) {
       animate="show"
       whileHover={{ y: -3, transition: { duration: 0.2, ease: 'easeOut' } }}
       variants={cardVariants}
-      className="relative bg-white rounded-2xl border border-gray-100 p-4 md:p-5 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-default"
+      className="relative bg-white rounded-2xl border border-gray-100 p-4 md:p-5 overflow-hidden shadow-card hover:shadow-[0_4px_20px_rgba(0,174,239,0.18)] transition-shadow cursor-default"
     >
       <div
         className="absolute top-0 right-0 w-20 h-20 md:w-24 md:h-24 rounded-bl-full opacity-10"
@@ -286,7 +286,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.38, duration: 0.28 }}
-          className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+          className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden"
         >
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <div className="flex items-center gap-2.5">
@@ -391,7 +391,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.44, duration: 0.28 }}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+          className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden"
         >
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <div className="flex items-center gap-2.5">

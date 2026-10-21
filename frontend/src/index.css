@@ -37,7 +37,7 @@ button:not(:disabled):active {
   transform: scale(0.97);
 }
 
-/* Scrollbar fino y elegante */
+/* Scrollbar fino con tinte de marca */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -46,9 +46,14 @@ button:not(:disabled):active {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
+  background: rgba(0, 174, 239, 0.25);
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #d1d5db;
+  background: rgba(0, 174, 239, 0.50);
+}
+
+/* Sombra con tinte de marca para cards principales */
+.shadow-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 14px rgba(0, 174, 239, 0.09);
 }

@@ -177,9 +177,12 @@ export default function Payments() {
   return (
     <>
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">Pagos</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{total} registro{total !== 1 ? 's' : ''} en total</p>
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#0077B6] rounded-full shrink-0" />
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Pagos</h2>
+            <p className="text-sm text-gray-500 mt-0.5">{total} registro{total !== 1 ? 's' : ''} en total</p>
+          </div>
         </div>
         <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2 text-white transition-colors rounded-lg text-sm font-medium" style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
           <PlusIcon /> Registrar pago
@@ -190,7 +193,7 @@ export default function Payments() {
       {summaryCards.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
           {summaryCards.map(c => (
-            <div key={c.label} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm flex items-center gap-3">
+            <div key={c.label} className="bg-white border border-gray-100 rounded-xl p-4 shadow-card flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${c.color} flex items-center justify-center shrink-0`}>
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d={c.iconPath}/>

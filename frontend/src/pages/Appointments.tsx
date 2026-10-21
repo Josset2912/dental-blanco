@@ -29,6 +29,13 @@ const STATUS_CLASS: Record<string, string> = {
   CANCELLED: 'inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500',
 };
 
+const STATUS_BORDER: Record<string, string> = {
+  SCHEDULED: '#f59e0b',
+  CONFIRMED: '#00AEEF',
+  COMPLETED: '#10b981',
+  CANCELLED: '#d1d5db',
+};
+
 const STATUS_DOT: Record<string, string> = {
   SCHEDULED: 'bg-amber-400',
   CONFIRMED: 'bg-[#00AEEF]',
@@ -377,13 +384,16 @@ export default function Appointments() {
       {/* Header */}
       <div className="mb-5">
         <div className="flex items-start justify-between mb-3">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Citas</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {view === 'list'
-                ? `${active.length} cita${active.length !== 1 ? 's' : ''} para este día`
-                : `${MONTHS_ES[calMonth]} ${calYear}`}
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#0077B6] rounded-full shrink-0" />
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Citas</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                {view === 'list'
+                  ? `${active.length} cita${active.length !== 1 ? 's' : ''} para este día`
+                  : `${MONTHS_ES[calMonth]} ${calYear}`}
+              </p>
+            </div>
           </div>
           <div className="flex gap-2 shrink-0">
             {view === 'calendar' && (
@@ -571,7 +581,7 @@ export default function Appointments() {
             {/* Mobile cards */}
             <div className="sm:hidden divide-y divide-gray-50">
               {[...active, ...cancelled].map(a => (
-                <div key={a.id} className="p-4" style={{ opacity: a.status === 'CANCELLED' ? 0.55 : 1 }}>
+                <div key={a.id} className="p-4 border-l-[3px]" style={{ opacity: a.status === 'CANCELLED' ? 0.55 : 1, borderLeftColor: STATUS_BORDER[a.status] }}>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="min-w-0">
                       <p className="font-semibold text-gray-900 text-sm truncate">{a.patient.name} {a.patient.lastName}</p>
@@ -627,7 +637,7 @@ export default function Appointments() {
                   {[...active, ...cancelled].map((a, idx, arr) => (
                     <tr
                       key={a.id}
-                      className="hover:bg-gray-50"
+                      className="hover:bg-[#E6F7FD]/40 transition-colors"
                       style={{ opacity: a.status === 'CANCELLED' ? 0.55 : 1 }}
                     >
                       <td className={`px-4 py-3.5 text-sm ${idx < arr.length - 1 ? 'border-b border-gray-100' : ''}`}>

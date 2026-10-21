@@ -98,7 +98,7 @@ function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
 
 function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color: string }) {
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-sm">
+    <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-card">
       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
         <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>
@@ -216,11 +216,14 @@ export default function Patients() {
     <>
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-5">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">Pacientes</h2>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {total} paciente{total !== 1 ? 's' : ''} registrado{total !== 1 ? 's' : ''}
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#0077B6] rounded-full shrink-0" />
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Pacientes</h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              {total} paciente{total !== 1 ? 's' : ''} registrado{total !== 1 ? 's' : ''}
+            </p>
+          </div>
         </div>
         <button
           onClick={() => setShowForm(true)}

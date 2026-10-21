@@ -87,9 +87,12 @@ export default function Settings() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h2 className="text-xl font-bold text-gray-900">Configuración</h2>
-        <p className="text-sm text-gray-500 mt-0.5">Ajustes de cuenta y clínica</p>
+      <div className="flex items-center gap-3">
+        <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#0077B6] rounded-full shrink-0" />
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">Configuración</h2>
+          <p className="text-sm text-gray-500 mt-0.5">Ajustes de cuenta y clínica</p>
+        </div>
       </div>
 
       {/* Perfil de la clínica */}

@@ -417,7 +417,7 @@ export default function Layout() {
         </nav>
 
         {/* User + logout + collapse toggle */}
-        <div className="border-t border-gray-100 p-2">
+        <div className="border-t border-gray-100 p-2 bg-gradient-to-t from-[#E6F7FD]/40 to-transparent">
           {!collapsed && (
             <div className="flex items-center gap-2 px-2 py-2 mb-1">
               <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"

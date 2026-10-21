@@ -30,53 +30,110 @@ const METHOD_LABEL: Record<string, string> = {
   TRANSFER: 'Transferencia',
 };
 
-function line(doc: jsPDF, y: number, x1 = 20, x2 = 190) {
-  doc.setDrawColor(220, 220, 220);
+// Brand colors
+const BLUE_DARK  = [0,   119, 182] as const;  // #0077B6
+const BLUE_LIGHT = [0,   174, 239] as const;  // #00AEEF
+const ORANGE     = [249, 115,  22] as const;  // accent orange
+
+function divider(doc: jsPDF, y: number, x1 = 14, x2 = 134) {
+  doc.setDrawColor(220, 228, 236);
+  doc.setLineWidth(0.3);
   doc.line(x1, y, x2, y);
 }
 
 function sectionTitle(doc: jsPDF, text: string, y: number) {
-  doc.setFontSize(7.5);
-  doc.setTextColor(150, 150, 150);
+  doc.setFontSize(7);
+  doc.setTextColor(...BLUE_LIGHT);
   doc.setFont('helvetica', 'bold');
-  doc.text(text.toUpperCase(), 20, y);
+  doc.text(text.toUpperCase(), 14, y);
 }
 
 function row(doc: jsPDF, label: string, value: string, y: number, bold = false) {
-  doc.setFontSize(9.5);
-  doc.setTextColor(100, 100, 100);
+  doc.setFontSize(9);
+  doc.setTextColor(110, 120, 130);
   doc.setFont('helvetica', 'normal');
-  doc.text(label, 20, y);
+  doc.text(label, 14, y);
   doc.setFont('helvetica', bold ? 'bold' : 'normal');
-  doc.setTextColor(30, 30, 30);
-  doc.text(value, 190, y, { align: 'right' });
+  doc.setTextColor(25, 35, 50);
+  doc.text(value, 134, y, { align: 'right' });
 }
 
-export function generatePaymentReceipt(
+async function loadImageAsDataUrl(src: string): Promise<string | null> {
+  try {
+    const response = await fetch(src);
+    const blob = await response.blob();
+    return await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function generatePaymentReceipt(
   payment: ReceiptPayment,
   patient: ReceiptPatient,
   treatment?: ReceiptTreatment | null,
 ) {
   const doc = new jsPDF({ format: 'a5', unit: 'mm' });
   const W = 148;
-  let y = 18;
+  let y = 0;
 
-  // ── Header ──────────────────────────────────────────────
-  doc.setFillColor(0, 174, 239);
-  doc.rect(0, 0, W, 28, 'F');
+  // ── Header background ─────────────────────────────────────
+  // Dark blue top band
+  doc.setFillColor(...BLUE_DARK);
+  doc.rect(0, 0, W, 38, 'F');
 
+  // Lighter blue accent strip at bottom of header
+  doc.setFillColor(...BLUE_LIGHT);
+  doc.rect(0, 35, W, 3, 'F');
+
+  // Orange decorative corner accent
+  doc.setFillColor(...ORANGE);
+  doc.rect(0, 35, 8, 3, 'F');
+
+  // ── Logo ──────────────────────────────────────────────────
+  const logoUrl = '/logo.jpg';
+  const logoData = await loadImageAsDataUrl(logoUrl);
+  if (logoData) {
+    // Logo on the left, contained in a white rounded box
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(8, 4, 30, 28, 3, 3, 'F');
+    doc.addImage(logoData, 'JPEG', 8, 4, 30, 28);
+  } else {
+    // Fallback tooth icon if logo fails
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(8, 6, 24, 24, 3, 3, 'F');
+    doc.setFontSize(16);
+    doc.setTextColor(...BLUE_DARK);
+    doc.text('🦷', 13, 22);
+  }
+
+  // ── Clinic name & tagline ─────────────────────────────────
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
+  doc.setFontSize(15);
   doc.setTextColor(255, 255, 255);
-  doc.text('Blanco Dental', W / 2, 12, { align: 'center' });
+  doc.text('Blanco Dental', 44, 14);
 
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setFont('helvetica', 'normal');
-  doc.text('COMPROBANTE DE PAGO', W / 2, 20, { align: 'center' });
+  doc.setTextColor(179, 222, 244);   // light blue tint
+  doc.text('CREAMOS ARTE EN TU SONRISA', 44, 20);
 
-  y = 38;
+  // "Comprobante de pago" pill inside header
+  doc.setFillColor(...BLUE_LIGHT);
+  doc.roundedRect(44, 24, 62, 7, 1.5, 1.5, 'F');
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('COMPROBANTE DE PAGO', 75, 29, { align: 'center' });
 
-  // ── Número y fecha ───────────────────────────────────────
+  y = 46;
+
+  // ── Número y fecha ────────────────────────────────────────
   const receiptNum = payment.id.slice(-6).toUpperCase();
   const fecha = new Date(payment.createdAt).toLocaleDateString('es-PE', {
     day: '2-digit', month: 'long', year: 'numeric',
@@ -86,36 +143,37 @@ export function generatePaymentReceipt(
   });
 
   doc.setFontSize(8);
-  doc.setTextColor(100, 100, 100);
+  doc.setTextColor(130, 140, 155);
   doc.setFont('helvetica', 'normal');
-  doc.text(`N° ${receiptNum}`, 20, y);
-  doc.text(`${fecha}  ${hora}`, W - 20, y, { align: 'right' });
+  doc.text(`N° ${receiptNum}`, 14, y);
+  doc.setTextColor(80, 90, 105);
+  doc.text(`${fecha}  ${hora}`, 134, y, { align: 'right' });
 
-  y += 8;
-  line(doc, y);
+  y += 5;
+  divider(doc, y);
   y += 7;
 
-  // ── Paciente ─────────────────────────────────────────────
+  // ── Paciente ──────────────────────────────────────────────
   sectionTitle(doc, 'Paciente', y);
-  y += 5;
-  doc.setFontSize(10);
+  y += 5.5;
+  doc.setFontSize(10.5);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(30, 30, 30);
-  doc.text(`${patient.name} ${patient.lastName}`, 20, y);
-  y += 5;
+  doc.setTextColor(20, 30, 50);
+  doc.text(`${patient.name} ${patient.lastName}`, 14, y);
+  y += 5.5;
   doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text(patient.phone, 20, y);
+  doc.setTextColor(110, 120, 130);
+  doc.text(patient.phone, 14, y);
   if (patient.email) {
-    doc.text(patient.email, W - 20, y, { align: 'right' });
+    doc.text(patient.email, 134, y, { align: 'right' });
   }
 
   y += 9;
-  line(doc, y);
+  divider(doc, y);
   y += 7;
 
-  // ── Detalle del pago ─────────────────────────────────────
+  // ── Detalle del pago ──────────────────────────────────────
   sectionTitle(doc, 'Detalle del pago', y);
   y += 6;
 
@@ -133,32 +191,36 @@ export function generatePaymentReceipt(
   }
 
   y += 2;
-  line(doc, y);
-  y += 7;
+  divider(doc, y);
+  y += 6;
 
-  // ── Monto pagado (destacado) ─────────────────────────────
-  doc.setFillColor(240, 253, 244);
-  doc.roundedRect(16, y - 4, W - 32, 14, 2, 2, 'F');
+  // ── Monto pagado (destacado) ──────────────────────────────
+  // Green pill background
+  doc.setFillColor(236, 253, 245);
+  doc.roundedRect(14, y - 3, W - 28, 15, 3, 3, 'F');
+  // Left accent bar
+  doc.setFillColor(16, 185, 129);
+  doc.roundedRect(14, y - 3, 3, 15, 1, 1, 'F');
 
-  doc.setFontSize(9);
-  doc.setTextColor(22, 163, 74);
-  doc.setFont('helvetica', 'normal');
-  doc.text('MONTO PAGADO', 22, y + 3);
-
-  doc.setFontSize(14);
+  doc.setFontSize(8.5);
+  doc.setTextColor(16, 185, 129);
   doc.setFont('helvetica', 'bold');
+  doc.text('MONTO PAGADO', 22, y + 3.5);
+
+  doc.setFontSize(15);
+  doc.setTextColor(5, 150, 105);
   doc.text(
     `S/ ${parseFloat(payment.amount).toFixed(2)}`,
-    W - 22,
-    y + 4,
+    130,
+    y + 4.5,
     { align: 'right' },
   );
 
-  y += 18;
+  y += 20;
 
-  // ── Resumen del tratamiento ──────────────────────────────
+  // ── Resumen del tratamiento ───────────────────────────────
   if (treatment) {
-    line(doc, y);
+    divider(doc, y);
     y += 7;
     sectionTitle(doc, 'Resumen del tratamiento', y);
     y += 6;
@@ -171,30 +233,40 @@ export function generatePaymentReceipt(
     const isPaid = treatment.balance <= 0;
     doc.setFontSize(9.5);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(100, 100, 100);
-    doc.text('Saldo pendiente', 20, y);
+    doc.setTextColor(110, 120, 130);
+    doc.text('Saldo pendiente', 14, y);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(isPaid ? 22 : 217, isPaid ? 163 : 119, isPaid ? 74 : 6);
+    if (isPaid) {
+      doc.setTextColor(16, 185, 129);
+    } else {
+      doc.setTextColor(245, 158, 11);
+    }
     doc.text(
       isPaid ? 'PAGADO COMPLETAMENTE ✓' : `S/ ${treatment.balance.toFixed(2)}`,
-      W - 20,
+      134,
       y,
       { align: 'right' },
     );
     y += 10;
   }
 
-  // ── Footer ───────────────────────────────────────────────
-  line(doc, y);
-  y += 7;
-  doc.setFontSize(7.5);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(150, 150, 150);
-  doc.text('Gracias por su confianza en Blanco Dental', W / 2, y, { align: 'center' });
-  y += 5;
-  doc.text('Este documento es un comprobante interno de pago.', W / 2, y, { align: 'center' });
+  // ── Footer ────────────────────────────────────────────────
+  // Footer background band
+  const pageH = 210; // A5 height
+  doc.setFillColor(245, 248, 252);
+  doc.rect(0, pageH - 22, W, 22, 'F');
+  doc.setFillColor(...BLUE_LIGHT);
+  doc.rect(0, pageH - 22, W, 1.5, 'F');
 
-  // ── Guardar ──────────────────────────────────────────────
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...BLUE_DARK);
+  doc.text('Blanco Dental — Creamos arte en tu sonrisa', W / 2, pageH - 14, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(150, 160, 170);
+  doc.text('Este documento es un comprobante interno de pago.', W / 2, pageH - 8, { align: 'center' });
+
+  // ── Guardar ───────────────────────────────────────────────
   const fileName = `comprobante-${patient.lastName.toLowerCase()}-${receiptNum}.pdf`;
   doc.save(fileName);
 }

@@ -547,7 +547,7 @@ export default function Layout() {
                     <NavLink
                       key={to}
                       to={to}
-                      onClick={() => setShowMore(false)}
+                      onClick={(e) => { e.stopPropagation(); setShowMore(false); }}
                       className={`flex items-center gap-3 px-4 py-3.5 text-sm font-medium transition-colors ${isActive ? 'text-[#0077B6] bg-[#E6F7FD]' : 'text-gray-700'}`}
                     >
                       <span className={isActive ? 'text-[#00AEEF]' : 'text-gray-400'}>{navIcon}</span>

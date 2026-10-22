@@ -1,12 +1,11 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
 const rateLimit = require('express-rate-limit');
 const { validate, schemas } = require('../middleware/validate');
+const prisma = require('../lib/prisma');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Máximo 10 intentos de login por IP cada 15 minutos
 const loginLimiter = rateLimit({

@@ -1,11 +1,10 @@
 const express = require('express');
 const multer = require('multer');
 const { v2: cloudinary } = require('cloudinary');
-const { PrismaClient } = require('@prisma/client');
 const { authenticate } = require('../middleware/auth');
+const prisma = require('../lib/prisma');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
 cloudinary.config({

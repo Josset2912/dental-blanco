@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { login } from '../api/auth';
+import { logoBase64 } from '../utils/logoBase64';
 
 export default function Login() {
   const [email, setEmail]       = useState('doctor@dentalblanco.com');
@@ -44,23 +45,11 @@ export default function Login() {
           style={{ background: 'radial-gradient(circle, rgba(0,174,239,0.18) 0%, transparent 70%)' }} />
 
         <div className="relative z-10 text-center text-white max-w-xs">
-          {/* Logo — pieza central precisa */}
-          <div className="relative w-20 h-20 rounded-2xl mx-auto mb-8 flex items-center justify-center"
-            style={{
-              background: 'rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.14)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05) inset',
-            }}>
-            {/* Glow bajo el logo */}
-            <div className="absolute inset-0 rounded-2xl"
-              style={{ background: 'radial-gradient(circle at center, rgba(0,174,239,0.3) 0%, transparent 70%)' }} />
-            <svg className="w-11 h-11 text-white relative z-10" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
-            </svg>
+          {/* Logo */}
+          <div className="mb-8">
+            <img src={logoBase64} alt="Blanco Dental" className="h-24 w-auto object-contain mx-auto drop-shadow-2xl" />
           </div>
 
-          <h1 className="text-[2.25rem] font-black mb-1 tracking-tight leading-none">Blanco Dental</h1>
           <p className="text-white/40 text-xs tracking-[0.2em] uppercase mb-10 font-medium">Sistema de gestión clínica</p>
 
           {/* Features — estilo minimal, línea horizontal */}

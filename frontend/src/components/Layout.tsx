@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getUser, logout } from '../api/auth';
 import { getPatients } from '../api/patients';
 import { getDashboard } from '../api/dashboard';
+import { logoBase64 } from '../utils/logoBase64';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -375,25 +376,13 @@ export default function Layout() {
         {/* Brand + collapse toggle */}
         <div className={`flex items-center border-b border-black/[0.06] h-14 ${collapsed ? 'justify-center px-2' : 'px-4 gap-2'}`}>
           {!collapsed && (
-            <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-2.5 min-w-0 flex-1 hover:opacity-80 transition-opacity">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
-                style={{ background: 'linear-gradient(135deg,#00AEEF 0%,#005F8E 100%)' }}>
-                <svg className="w-[18px] h-[18px] text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
-                </svg>
-              </div>
-              <div className="min-w-0">
-                <p className="text-[13px] font-black leading-tight truncate tracking-tight" style={{ color: '#005F8E' }}>Blanco Dental</p>
-                <p className="text-[10px] text-gray-400 leading-tight truncate font-medium">Sistema clínico</p>
-              </div>
+            <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center min-w-0 flex-1 hover:opacity-80 transition-opacity">
+              <img src={logoBase64} alt="Blanco Dental" className="h-9 w-auto object-contain" />
             </button>
           )}
           {collapsed && (
-            <button type="button" onClick={() => navigate('/dashboard')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity shadow-sm"
-              style={{ background: 'linear-gradient(135deg,#00AEEF 0%,#005F8E 100%)' }}>
-              <svg className="w-[18px] h-[18px] text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
-              </svg>
+            <button type="button" onClick={() => navigate('/dashboard')} className="hover:opacity-80 transition-opacity">
+              <img src={logoBase64} alt="Blanco Dental" className="h-8 w-8 object-contain" />
             </button>
           )}
         </div>
@@ -458,14 +447,8 @@ export default function Layout() {
 
         {/* Mobile top bar */}
         <header className="md:hidden fixed top-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-sm border-b border-black/[0.06] px-4 h-14 flex items-center gap-3">
-          <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
-              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
-              </svg>
-            </div>
-            <span className="text-sm font-bold" style={{ color: '#005F8E' }}>Blanco Dental</span>
+          <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center hover:opacity-80 transition-opacity">
+            <img src={logoBase64} alt="Blanco Dental" className="h-8 w-auto object-contain" />
           </button>
           <span className="flex-1" />
           <button

@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import { LOGO_BASE64 } from './logoBase64';
+import { logoBase64 as LOGO_BASE64 } from './logoBase64';
 
 interface ReceiptPayment {
   id: string;

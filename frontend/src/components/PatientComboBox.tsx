@@ -75,9 +75,9 @@ export default function PatientComboBox({
         </svg>
         <Input
           placeholder="Buscar por nombre o teléfono..."
-          className="w-full pl-9 pr-9 py-2.5 border border-gray-200 rounded-xl text-sm outline-none
-            focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white transition-all
-            placeholder-gray-300"
+          className="w-full pl-9 pr-9 py-2.5 border border-black/[0.08] rounded-xl text-sm outline-none
+            focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all
+            placeholder-gray-400"
         />
         <Button className="absolute right-2.5 p-0.5 rounded text-gray-400 hover:text-gray-600 transition-colors outline-none focus:text-[#00AEEF]">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -108,7 +108,7 @@ export default function PatientComboBox({
                 `flex items-center justify-between px-4 py-2.5 cursor-pointer text-sm
                  border-b border-gray-50 last:border-b-0 outline-none transition-colors
                  ${isSelected
-                   ? 'bg-[#E6F7FD] text-[#0077B6]'
+                   ? 'bg-[#00AEEF]/[0.09] text-[#005F8E]'
                    : isFocused
                    ? 'bg-gray-50'
                    : 'hover:bg-gray-50'

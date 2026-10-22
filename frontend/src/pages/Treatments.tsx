@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: 'Anulado',
 };
 const STATUS_COLORS: Record<string, string> = {
-  IN_PROGRESS: 'bg-[#E6F7FD] text-[#0077B6]',
+  IN_PROGRESS: 'bg-[#00AEEF]/[0.09] text-[#005F8E]',
   COMPLETED: 'bg-green-50 text-green-600',
   CANCELLED: 'bg-red-50 text-red-400',
 };
@@ -163,7 +163,7 @@ export default function Treatments() {
       label: 'En curso',
       value: inProgress.length,
       sub: `S/ ${revenueExpected.toLocaleString('es-PE', { minimumFractionDigits: 0 })} esperado`,
-      color: 'from-[#00AEEF] to-[#0077B6]',
+      color: 'from-[#00AEEF] to-[#005F8E]',
       iconPath: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
     },
     {
@@ -193,13 +193,13 @@ export default function Treatments() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#0077B6] rounded-full shrink-0" />
+          <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#005F8E] rounded-full shrink-0" />
           <div>
             <h2 className="text-xl font-bold text-gray-900">Tratamientos</h2>
             <p className="text-sm text-gray-500 mt-0.5">{inProgress.length} en progreso · {treatments.length} total</p>
           </div>
         </div>
-        <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2.5 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity" style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+        <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2.5 text-white rounded-xl text-sm font-semibold hover:brightness-110 transition-all" style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
           <PlusIcon /> Nuevo tratamiento
         </button>
       </div>
@@ -247,7 +247,7 @@ export default function Treatments() {
               type="date"
               value={dateFrom}
               onChange={e => setDateFrom(e.target.value)}
-              className="pl-8 pr-2 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white text-gray-700 w-[140px]"
+              className="pl-8 pr-2 py-2 border border-black/[0.08] rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white text-gray-700 w-[140px] transition-all"
               title="Desde"
             />
           </div>
@@ -256,7 +256,7 @@ export default function Treatments() {
             type="date"
             value={dateTo}
             onChange={e => setDateTo(e.target.value)}
-            className="px-2 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white text-gray-700 w-[140px]"
+            className="px-2 py-2 border border-black/[0.08] rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white text-gray-700 w-[140px] transition-all"
             title="Hasta"
           />
           {(dateFrom || dateTo) && (
@@ -280,7 +280,7 @@ export default function Treatments() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar paciente o tratamiento..."
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white placeholder-gray-300"
+            className="w-full pl-9 pr-4 py-2.5 border border-black/[0.08] rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white placeholder-gray-400 transition-all"
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -339,7 +339,7 @@ export default function Treatments() {
               {search ? 'Intenta con otro nombre o tratamiento' : 'Crea el primero con el botón de arriba'}
             </p>
             {search && (
-              <button onClick={() => setSearch('')} className="mt-3 text-xs text-[#00AEEF] hover:text-[#0077B6] font-medium">
+              <button onClick={() => setSearch('')} className="mt-3 text-xs text-[#00AEEF] hover:text-[#005F8E] font-medium">
                 Limpiar búsqueda
               </button>
             )}
@@ -357,7 +357,7 @@ export default function Treatments() {
                       onClick={() => navigate(`/pacientes/${t.patient.id}`)}
                       className="text-left group"
                     >
-                      <p className="text-sm font-semibold text-gray-900 group-hover:text-[#0077B6] transition-colors">{t.patient.name} {t.patient.lastName}</p>
+                      <p className="text-sm font-semibold text-gray-900 group-hover:text-[#005F8E] transition-colors">{t.patient.name} {t.patient.lastName}</p>
                       <p className="text-xs text-gray-400">{t.patient.phone}</p>
                     </button>
                     <span className={`shrink-0 inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[t.status]}`}>
@@ -404,7 +404,7 @@ export default function Treatments() {
                       {t.status === 'COMPLETED' && t.endDate ? (
                         <span className="text-green-600 font-medium">{daysBetween(t.startDate, t.endDate)} días</span>
                       ) : t.status === 'IN_PROGRESS' ? (
-                        <span className="text-[#0077B6]">{daysBetween(t.startDate)} días</span>
+                        <span className="text-[#005F8E]">{daysBetween(t.startDate)} días</span>
                       ) : '—'}
                     </span>
                   </div>
@@ -500,7 +500,7 @@ export default function Treatments() {
                         {t.status === 'COMPLETED' && t.endDate ? (
                           <span className="text-green-600 font-medium">{daysBetween(t.startDate, t.endDate)} días</span>
                         ) : t.status === 'IN_PROGRESS' ? (
-                          <span className="text-[#0077B6]">{daysBetween(t.startDate)} días</span>
+                          <span className="text-[#005F8E]">{daysBetween(t.startDate)} días</span>
                         ) : (
                           <span className="text-gray-400">—</span>
                         )}

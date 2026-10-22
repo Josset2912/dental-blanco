@@ -32,7 +32,7 @@ const PlusIcon = () => (
 const METHOD_LABEL: Record<string, string> = { CASH: 'Efectivo', CARD: 'Tarjeta', TRANSFER: 'Transferencia' };
 const METHOD_COLORS: Record<string, string> = {
   CASH: 'bg-green-50 text-green-700',
-  CARD: 'bg-[#E6F7FD] text-blue-700',
+  CARD: 'bg-[#00AEEF]/[0.09] text-[#005F8E]',
   TRANSFER: 'bg-purple-50 text-purple-700',
 };
 const METHOD_BORDER: Record<string, string> = {
@@ -162,7 +162,7 @@ export default function Payments() {
     {
       label: 'Ingresos totales',
       value: fmt(summary.totalRevenue),
-      color: 'from-[#00AEEF] to-[#0077B6]',
+      color: 'from-[#00AEEF] to-[#005F8E]',
       iconPath: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
     },
     {
@@ -183,13 +183,13 @@ export default function Payments() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#0077B6] rounded-full shrink-0" />
+          <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#005F8E] rounded-full shrink-0" />
           <div>
             <h2 className="text-xl font-bold text-gray-900">Pagos</h2>
             <p className="text-sm text-gray-500 mt-0.5">{total} registro{total !== 1 ? 's' : ''} en total</p>
           </div>
         </div>
-        <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2 text-white transition-colors rounded-lg text-sm font-medium" style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+        <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 px-4 py-2 text-white rounded-lg text-sm font-semibold hover:brightness-110 transition-all" style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
           <PlusIcon /> Registrar pago
         </button>
       </div>
@@ -225,7 +225,7 @@ export default function Payments() {
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="Buscar paciente o concepto..."
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white placeholder-gray-300"
+            className="w-full pl-9 pr-4 py-2.5 border border-black/[0.08] rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white placeholder-gray-400 transition-all"
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -239,8 +239,8 @@ export default function Payments() {
           onClick={() => setShowDateFilters(v => !v)}
           className={`sm:hidden flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm font-medium transition-colors ${
             (dateFrom || dateTo)
-              ? 'bg-[#E6F7FD] border-[#00AEEF] text-[#0077B6]'
-              : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
+              ? 'bg-[#00AEEF]/[0.09] border-[#00AEEF] text-[#005F8E]'
+              : 'bg-white border-black/[0.08] text-gray-500 hover:border-gray-300'
           }`}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -257,7 +257,7 @@ export default function Payments() {
             className={`px-3 py-1.5 text-xs font-medium rounded-lg border whitespace-nowrap transition-all ${
               methodFilter === f.value
                 ? 'bg-[#00AEEF] border-[#00AEEF] text-white shadow-sm'
-                : 'bg-white border-gray-200 text-gray-500 hover:border-[#00AEEF] hover:text-[#00AEEF]'
+                : 'bg-white border-black/[0.08] text-gray-500 hover:border-[#00AEEF] hover:text-[#00AEEF]'
             }`}>
             {f.label}
           </button>
@@ -277,7 +277,7 @@ export default function Payments() {
           value={dateFrom ? parseDate(dateFrom) : null}
           onChange={(d: DateValue | null) => { setDateFrom(d?.toString() ?? ''); setPage(1); }}
           maxValue={dateTo ? parseDate(dateTo) : today(getLocalTimeZone())}
-          className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2 outline-none focus-within:border-[#00AEEF] focus-within:ring-2 focus-within:ring-[#E6F7FD] transition-all"
+          className="flex items-center gap-2 bg-[#F6F8FA] border border-black/[0.08] rounded-lg px-3 py-2 outline-none focus-within:border-[#00AEEF] focus-within:ring-2 focus-within:ring-[#00AEEF]/10 focus-within:bg-white transition-all"
         >
           <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -302,7 +302,7 @@ export default function Payments() {
           onChange={(d: DateValue | null) => { setDateTo(d?.toString() ?? ''); setPage(1); }}
           minValue={dateFrom ? parseDate(dateFrom) : undefined}
           maxValue={today(getLocalTimeZone())}
-          className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2 outline-none focus-within:border-[#00AEEF] focus-within:ring-2 focus-within:ring-[#E6F7FD] transition-all"
+          className="flex items-center gap-2 bg-[#F6F8FA] border border-black/[0.08] rounded-lg px-3 py-2 outline-none focus-within:border-[#00AEEF] focus-within:ring-2 focus-within:ring-[#00AEEF]/10 focus-within:bg-white transition-all"
         >
           <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -338,7 +338,7 @@ export default function Payments() {
             {hasFilters ? 'Prueba cambiando el método, la búsqueda o el rango de fechas' : 'Los pagos registrados aparecerán aquí'}
           </p>
           {hasFilters ? (
-            <button onClick={clearFilters} className="mt-3 text-xs text-[#00AEEF] hover:text-[#0077B6] font-medium transition-colors">
+            <button onClick={clearFilters} className="mt-3 text-xs text-[#00AEEF] hover:text-[#005F8E] font-medium transition-colors">
               Limpiar todos los filtros
             </button>
           ) : (
@@ -355,7 +355,7 @@ export default function Payments() {
 
       {/* ── MOBILE: skeleton ─────────────────────────────────────────── */}
       {isLoading && (
-        <div className="sm:hidden bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="sm:hidden bg-white shadow-card rounded-xl overflow-hidden">
           <ul className="animate-pulse divide-y divide-gray-100">
             {Array.from({ length: 5 }).map((_, i) => (
               <li key={i} className="px-4 py-4 space-y-2.5">
@@ -376,7 +376,7 @@ export default function Payments() {
 
       {/* ── MOBILE: tarjetas ──────────────────────────────────────────── */}
       {!isLoading && payments.length > 0 && (
-        <div className="sm:hidden bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="sm:hidden bg-white shadow-card rounded-xl overflow-hidden">
           <ul className="divide-y divide-gray-100">
             {payments.map((p: Payment) => (
               <li key={p.id} className={`px-4 py-4 border-l-[3px] ${METHOD_BORDER[p.method] ?? 'border-l-gray-200'}`}>
@@ -384,7 +384,7 @@ export default function Payments() {
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <button
                     onClick={() => navigate(`/pacientes/${p.patient.id}`)}
-                    className="text-sm font-bold text-gray-900 hover:text-[#0077B6] transition-colors text-left leading-tight"
+                    className="text-sm font-bold text-gray-900 hover:text-[#005F8E] transition-colors text-left leading-tight"
                   >
                     {p.patient.name} {p.patient.lastName}
                   </button>
@@ -433,7 +433,7 @@ export default function Payments() {
       )}
 
       {/* ── DESKTOP: tabla ────────────────────────────────────────────── */}
-      <div className={`hidden sm:block bg-white border border-gray-200 rounded-xl overflow-hidden ${isLoading || payments.length === 0 ? 'sm:hidden' : ''}`}>
+      <div className={`hidden sm:block bg-white shadow-card rounded-xl overflow-hidden ${isLoading || payments.length === 0 ? 'sm:hidden' : ''}`}>
         {isLoading ? (
           <div className="animate-pulse">
             <div className="h-10 bg-gray-50 border-b border-gray-100 px-4 flex items-center gap-4">
@@ -481,13 +481,13 @@ export default function Payments() {
               </thead>
               <tbody>
                 {payments.map((p: Payment, i) => (
-                  <tr key={p.id} className={`transition-colors hover:bg-[#E6F7FD]/40 border-b border-gray-100 last:border-0 ${i % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'}`}>
+                  <tr key={p.id} className={`transition-colors hover:bg-[#F6F8FA] border-b border-black/[0.04] last:border-0 ${i % 2 === 1 ? 'bg-gray-50/30' : 'bg-white'}`}>
                     <td className="px-4 py-3.5 text-sm text-gray-500 whitespace-nowrap">
                       {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </td>
                     <td className="px-4 py-3.5">
                       <button onClick={() => navigate(`/pacientes/${p.patient.id}`)}
-                        className="text-sm font-semibold text-gray-900 hover:text-[#0077B6] transition-colors text-left">
+                        className="text-sm font-semibold text-gray-900 hover:text-[#005F8E] transition-colors text-left">
                         {p.patient.name} {p.patient.lastName}
                       </button>
                     </td>

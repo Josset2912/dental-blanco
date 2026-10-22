@@ -57,7 +57,7 @@ function isNew(createdAt: string) {
 const GENDER_CONFIG = {
   MASCULINO: {
     badge: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-600',
-    avatar: 'from-[#00AEEF] to-[#0077B6]',
+    avatar: 'from-[#00AEEF] to-[#005F8E]',
     label: 'Masculino',
   },
   FEMENINO: {
@@ -74,7 +74,7 @@ const GENDER_CONFIG = {
 
 function PatientInitial({ name, gender }: { name: string; gender: Patient['gender'] }) {
   const letter = name.trim().charAt(0).toUpperCase();
-  const gradient = GENDER_CONFIG[gender]?.avatar ?? 'from-[#00AEEF] to-[#0077B6]';
+  const gradient = GENDER_CONFIG[gender]?.avatar ?? 'from-[#00AEEF] to-[#005F8E]';
   return (
     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 bg-gradient-to-br ${gradient}`}>
       {letter}
@@ -217,7 +217,7 @@ export default function Patients() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#0077B6] rounded-full shrink-0" />
+          <div className="w-[3px] h-8 bg-gradient-to-b from-[#00AEEF] to-[#005F8E] rounded-full shrink-0" />
           <div>
             <h2 className="text-xl font-bold text-gray-900">Pacientes</h2>
             <p className="text-sm text-gray-500 mt-0.5">
@@ -227,8 +227,8 @@ export default function Patients() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-white rounded-xl text-sm font-medium sm:w-auto transition-opacity hover:opacity-90"
-          style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-white rounded-xl text-sm font-semibold sm:w-auto transition-all hover:brightness-110 shadow-sm"
+          style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
         >
           <PlusIcon /> Nuevo paciente
         </button>
@@ -239,7 +239,7 @@ export default function Patients() {
         <StatCard
           label="Total pacientes"
           value={stats?.total ?? '—'}
-          color="bg-gradient-to-br from-[#00AEEF] to-[#0077B6]"
+          color="bg-gradient-to-br from-[#00AEEF] to-[#005F8E]"
         />
         <StatCard
           label="Nuevos este mes"
@@ -266,7 +266,7 @@ export default function Patients() {
             <SearchIcon />
           </span>
           <input
-            className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+            className="w-full pl-9 pr-3 py-2.5 border border-black/[0.08] rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all placeholder-gray-400"
             placeholder="Buscar por nombre o teléfono..."
             value={search}
             onChange={e => handleSearch(e.target.value)}

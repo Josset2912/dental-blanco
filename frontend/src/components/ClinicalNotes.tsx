@@ -42,14 +42,14 @@ export default function ClinicalNotes({ patientId }: { patientId: string }) {
           onChange={e => setContent(e.target.value)}
           placeholder="Escribe una nota de evolución clínica..."
           rows={3}
-          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg resize-none outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white placeholder-gray-400"
+          className="w-full px-3 py-2.5 text-sm border border-black/[0.08] rounded-lg resize-none outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white placeholder-gray-400 transition-all"
         />
         <div className="flex justify-end mt-2">
           <button
             onClick={() => createMut.mutate()}
             disabled={!content.trim() || createMut.isPending}
             className="inline-flex items-center gap-1.5 px-4 py-2 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-colors"
-            style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+            style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
           >
             {createMut.isPending ? 'Guardando...' : 'Agregar nota'}
           </button>
@@ -79,7 +79,7 @@ export default function ClinicalNotes({ patientId }: { patientId: string }) {
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div>
-                        <span className="text-xs font-semibold text-[#0077B6]">{note.doctor.name}</span>
+                        <span className="text-xs font-semibold text-[#005F8E]">{note.doctor.name}</span>
                         <span className="text-xs text-gray-400 ml-2">
                           {new Date(note.createdAt).toLocaleDateString('es-PE', {
                             day: 'numeric', month: 'short', year: 'numeric',

@@ -129,7 +129,7 @@ function GlobalSearch({ collapsed }: { collapsed: boolean }) {
   return (
     <div className="relative px-3 pt-3 pb-1">
       <div className="relative flex items-center">
-        <svg className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="absolute left-3 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
         <input
@@ -139,7 +139,7 @@ function GlobalSearch({ collapsed }: { collapsed: boolean }) {
           onChange={e => setQuery(e.target.value)}
           onFocus={() => { if (results.length > 0) setOpen(true); }}
           placeholder="Buscar paciente..."
-          className="pl-9 pr-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white placeholder-gray-400"
+          className="pl-8 pr-3 py-2 border border-black/[0.08] rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 w-full bg-[#F6F8FA] placeholder-gray-400 transition-all"
         />
         {loading && (
           <svg className="absolute right-3 w-4 h-4 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -149,24 +149,24 @@ function GlobalSearch({ collapsed }: { collapsed: boolean }) {
         )}
       </div>
       {open && results.length > 0 && (
-        <div ref={dropdownRef} className="absolute top-full left-3 right-3 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+        <div ref={dropdownRef} className="absolute top-full left-3 right-3 mt-1.5 bg-white rounded-xl shadow-popover z-50 overflow-hidden">
           {results.map(p => (
             <button key={p.id} onClick={() => { setQuery(''); setResults([]); setOpen(false); navigate(`/pacientes/${p.id}`); }}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-50 last:border-0">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+              className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F6F8FA] transition-colors text-left border-b border-black/[0.04] last:border-0">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+                style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
                 {(p.name[0] ?? '').toUpperCase()}{(p.lastName[0] ?? '').toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{p.name} {p.lastName}</p>
-                <p className="text-xs text-gray-500 truncate">{p.phone}</p>
+                <p className="text-sm font-semibold text-gray-900 truncate">{p.name} {p.lastName}</p>
+                <p className="text-xs text-gray-400 truncate">{p.phone}</p>
               </div>
             </button>
           ))}
         </div>
       )}
       {open && !loading && results.length === 0 && query.trim().length > 1 && (
-        <div ref={dropdownRef} className="absolute top-full left-3 right-3 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 px-4 py-3">
+        <div ref={dropdownRef} className="absolute top-full left-3 right-3 mt-1.5 bg-white rounded-xl shadow-popover z-50 px-4 py-3">
           <p className="text-sm text-gray-500">Sin resultados para "{query}"</p>
         </div>
       )}
@@ -214,7 +214,7 @@ function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Buscar paciente..."
-            className="pl-9 pr-9 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white placeholder-gray-400"
+            className="pl-9 pr-9 py-2.5 border border-black/[0.08] rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 w-full bg-[#F6F8FA] focus:bg-white placeholder-gray-400 transition-all"
           />
           {loading && (
             <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -223,7 +223,7 @@ function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
             </svg>
           )}
         </div>
-        <button onClick={onClose} className="text-sm font-semibold text-[#00AEEF] shrink-0 hover:text-[#0077B6] transition-colors">
+        <button onClick={onClose} className="text-sm font-semibold text-[#00AEEF] shrink-0 hover:text-[#005F8E] transition-colors">
           Cancelar
         </button>
       </div>
@@ -239,7 +239,7 @@ function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
                   className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors text-left"
                 >
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                    style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+                    style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
                     {(p.name[0] ?? '').toUpperCase()}{(p.lastName[0] ?? '').toUpperCase()}
                   </div>
                   <div className="min-w-0">
@@ -300,18 +300,18 @@ function SideNavItem({ to, icon, label, collapsed, onClick, badge }: {
       onClick={onClick}
       title={collapsed ? label : undefined}
       className={({ isActive }) =>
-        `relative flex items-center gap-2.5 rounded-lg text-sm font-medium transition-all group
+        `relative flex items-center gap-2.5 rounded-lg text-[13px] font-semibold transition-all group
         ${collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'}
         ${isActive
-          ? 'bg-[#E6F7FD] text-[#0077B6]'
-          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+          ? 'bg-[#00AEEF]/[0.09] text-[#005F8E]'
+          : 'text-gray-500 hover:bg-black/[0.04] hover:text-gray-800'
         }`
       }
     >
       {({ isActive }) => (
         <>
           {isActive && (
-            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#00AEEF] rounded-r-full" />
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[22px] bg-[#00AEEF] rounded-r-full" />
           )}
           <span className="relative shrink-0">
             {icon}
@@ -321,12 +321,12 @@ function SideNavItem({ to, icon, label, collapsed, onClick, badge }: {
           </span>
           {!collapsed && <span>{label}</span>}
           {!collapsed && badge != null && badge > 0 && (
-            <span className="ml-auto px-1.5 py-0.5 bg-[#00AEEF] text-white text-[10px] font-bold rounded-full min-w-[18px] text-center leading-[14px]">
+            <span className="ml-auto px-1.5 py-0.5 bg-[#00AEEF] text-white text-[10px] font-bold rounded-md min-w-[18px] text-center leading-[14px]">
               {badge > 99 ? '99+' : badge}
             </span>
           )}
           {collapsed && (
-            <span className="pointer-events-none absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+            <span className="pointer-events-none absolute left-full ml-2 px-2.5 py-1.5 text-xs font-semibold text-white bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-popover opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
               {label}
             </span>
           )}
@@ -366,32 +366,32 @@ export default function Layout() {
   const mainML  = collapsed ? 'md:ml-[60px]' : 'md:ml-60';
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-[#F6F8FA]">
       {showMobileSearch && <MobileSearchOverlay onClose={() => setShowMobileSearch(false)} />}
 
       {/* ── Desktop Sidebar ─────────────────────────────────── */}
-      <aside className={`hidden md:flex fixed left-0 top-0 h-full ${sidebarW} bg-white border-r border-gray-100 flex-col z-30 shadow-sm transition-all duration-200`}>
+      <aside className={`hidden md:flex fixed left-0 top-0 h-full ${sidebarW} bg-white flex-col z-30 shadow-sidebar transition-all duration-200`}>
 
         {/* Brand + collapse toggle */}
-        <div className={`flex items-center border-b border-gray-100 h-14 ${collapsed ? 'justify-center px-2' : 'px-4 gap-2'}`}>
+        <div className={`flex items-center border-b border-black/[0.06] h-14 ${collapsed ? 'justify-center px-2' : 'px-4 gap-2'}`}>
           {!collapsed && (
-            <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-80 transition-opacity">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-2.5 min-w-0 flex-1 hover:opacity-80 transition-opacity">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
+                style={{ background: 'linear-gradient(135deg,#00AEEF 0%,#005F8E 100%)' }}>
+                <svg className="w-[18px] h-[18px] text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
                 </svg>
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-bold leading-tight truncate" style={{ color: '#0077B6' }}>Blanco Dental</p>
-                <p className="text-[9px] text-gray-400 leading-tight truncate">Creamos arte en tu sonrisa</p>
+                <p className="text-[13px] font-black leading-tight truncate tracking-tight" style={{ color: '#005F8E' }}>Blanco Dental</p>
+                <p className="text-[10px] text-gray-400 leading-tight truncate font-medium">Sistema clínico</p>
               </div>
             </button>
           )}
           {collapsed && (
-            <button type="button" onClick={() => navigate('/dashboard')} className="w-7 h-7 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
-              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
-              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <button type="button" onClick={() => navigate('/dashboard')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity shadow-sm"
+              style={{ background: 'linear-gradient(135deg,#00AEEF 0%,#005F8E 100%)' }}>
+              <svg className="w-[18px] h-[18px] text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
               </svg>
             </button>
@@ -410,7 +410,7 @@ export default function Layout() {
           ))}
 
           {/* Separator */}
-          <div className={`my-2 ${collapsed ? 'mx-2' : 'mx-1'} border-t border-gray-100`} />
+          <div className={`my-2 ${collapsed ? 'mx-2' : 'mx-1'} border-t border-black/[0.05]`} />
 
           {secondaryNav.map(({ to, icon, label }) => (
             <SideNavItem key={to} to={to} icon={icon} label={label} collapsed={collapsed} />
@@ -418,16 +418,16 @@ export default function Layout() {
         </nav>
 
         {/* User + logout + collapse toggle */}
-        <div className="border-t border-gray-100 p-2 bg-gradient-to-t from-[#E6F7FD]/40 to-transparent">
+        <div className="border-t border-black/[0.06] p-2">
           {!collapsed && (
-            <div className="flex items-center gap-2 px-2 py-2 mb-1">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+            <div className="flex items-center gap-2.5 px-2 py-2 mb-0.5 rounded-lg hover:bg-black/[0.03] transition-colors cursor-default">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black text-white shrink-0"
+                style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
                 {initials}
               </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-gray-900 truncate">{user?.name}</p>
-                <p className="text-[10px] text-gray-400 truncate">
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-semibold text-gray-900 truncate leading-tight">{user?.name}</p>
+                <p className="text-[10px] text-gray-400 truncate font-medium">
                   {user?.role === 'DOCTOR' ? 'Doctor' : user?.role === 'ADMIN' ? 'Administrador' : 'Recepcionista'}
                 </p>
               </div>
@@ -436,7 +436,7 @@ export default function Layout() {
 
           {!collapsed && (
             <button onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-2 py-2 text-sm text-gray-500 rounded-lg hover:bg-gray-50 hover:text-red-500 transition-colors">
+              className="w-full flex items-center gap-2 px-2 py-2 text-[13px] text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors font-medium">
               {icons.logout} Cerrar sesión
             </button>
           )}
@@ -445,10 +445,10 @@ export default function Layout() {
           <button
             onClick={toggleCollapse}
             title={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
-            className={`mt-1 w-full flex items-center justify-center gap-1.5 px-2 py-2 text-xs text-gray-400 rounded-lg hover:bg-gray-100 hover:text-gray-600 transition-colors`}
+            className="mt-0.5 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs text-gray-300 rounded-lg hover:bg-black/[0.04] hover:text-gray-500 transition-colors"
           >
             {collapsed ? icons.chevronRight : icons.chevronLeft}
-            {!collapsed && <span>Colapsar</span>}
+            {!collapsed && <span className="font-medium">Colapsar</span>}
           </button>
         </div>
       </aside>
@@ -457,15 +457,15 @@ export default function Layout() {
       <div className={`flex-1 flex flex-col ${mainML} min-h-screen min-w-0 transition-all duration-200`}>
 
         {/* Mobile top bar */}
-        <header className="md:hidden fixed top-0 left-0 right-0 z-20 bg-white border-b border-gray-100 shadow-sm px-4 h-14 flex items-center gap-3">
+        <header className="md:hidden fixed top-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-sm border-b border-black/[0.06] px-4 h-14 flex items-center gap-3">
           <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+              style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
               <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
               </svg>
             </div>
-            <span className="text-sm font-bold" style={{ color: '#0077B6' }}>Blanco Dental</span>
+            <span className="text-sm font-bold" style={{ color: '#005F8E' }}>Blanco Dental</span>
           </button>
           <span className="flex-1" />
           <button
@@ -482,7 +482,7 @@ export default function Layout() {
           </button>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 overflow-x-hidden pb-24 md:pb-8 pt-[calc(3.5rem+1rem)] md:pt-8">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-x-hidden pb-24 md:pb-8 pt-[calc(3.5rem+1rem)] md:pt-8">
           <PageTransition>
             <Outlet />
           </PageTransition>
@@ -492,7 +492,7 @@ export default function Layout() {
         {showMore && (
           <div className="md:hidden fixed inset-0 z-20" onClick={() => setShowMore(false)} />
         )}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-30 flex safe-bottom">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-black/[0.06] z-30 flex safe-bottom">
           {bottomNav.map(({ to, icon, label }) => {
             const isActive = location.pathname === to || (to !== '/dashboard' && location.pathname.startsWith(to));
             const navBadge = to === '/citas' ? pendingToday : 0;
@@ -548,7 +548,7 @@ export default function Layout() {
                       key={to}
                       to={to}
                       onClick={(e) => { e.stopPropagation(); setShowMore(false); }}
-                      className={`flex items-center gap-3 px-4 py-3.5 text-sm font-medium transition-colors ${isActive ? 'text-[#0077B6] bg-[#E6F7FD]' : 'text-gray-700'}`}
+                      className={`flex items-center gap-3 px-4 py-3.5 text-sm font-medium transition-colors ${isActive ? 'text-[#005F8E] bg-[#00AEEF]/[0.09]' : 'text-gray-700'}`}
                     >
                       <span className={isActive ? 'text-[#00AEEF]' : 'text-gray-400'}>{navIcon}</span>
                       <span>{label}</span>

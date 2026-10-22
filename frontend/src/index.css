@@ -3,8 +3,8 @@
 @theme {
   --color-brand:       #00AEEF;
   --color-brand-dark:  #0090CC;
-  --color-brand-light: #E6F7FD;
-  --color-brand-navy:  #0077B6;
+  --color-brand-light: #EBF8FF;
+  --color-brand-navy:  #005F8E;
   --color-accent:      #F7941D;
   --color-accent-dark: #E07A0A;
   --color-accent-light:#FEF3E2;
@@ -12,48 +12,132 @@
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
+/* ── Base ──────────────────────────────────────────────────────────────────── */
+
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  background-color: #F6F8FA;
+  color: #0F172A;
 }
 
-/* Evita zoom automático de iOS Safari al tocar inputs */
+/* iOS Safari: evita zoom automático en inputs */
 @supports (-webkit-touch-callout: none) {
   input, textarea, select {
     font-size: 16px !important;
   }
 }
 
-/* Evita scroll horizontal en móvil */
 html, body {
   overflow-x: hidden;
   max-width: 100vw;
 }
 
-/* Micro-interacciones: feedback táctil en botones */
+/* ── Micro-interacciones ───────────────────────────────────────────────────── */
+
 button:not(:disabled):active {
   transform: scale(0.97);
 }
 
-/* Scrollbar fino con tinte de marca */
+/* Focus ring preciso — accesibilidad */
+:focus-visible {
+  outline: 2px solid rgba(0, 174, 239, 0.55);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 174, 239, 0.25);
+  background: rgba(0, 174, 239, 0.18);
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 174, 239, 0.50);
+  background: rgba(0, 174, 239, 0.42);
 }
 
-/* Sombra con tinte de marca para cards principales */
+/* ── Sistema de elevación ──────────────────────────────────────────────────── */
+
+/* Card: borde + sombra ambiental sutil */
 .shadow-card {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 14px rgba(0, 174, 239, 0.09);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.055),
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 3px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Card hover: tinte de marca */
+.shadow-card-hover {
+  box-shadow:
+    0 0 0 1px rgba(0, 174, 239, 0.14),
+    0 4px 20px rgba(0, 174, 239, 0.13),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Sidebar: solo sombra lateral derecha */
+.shadow-sidebar {
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.07);
+}
+
+/* Dropdown / flotante */
+.shadow-popover {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 4px 24px rgba(0, 0, 0, 0.10),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Patrones de fondo ─────────────────────────────────────────────────────── */
+
+/* Cuadrícula sutil para el hero */
+.bg-grid-white {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Puntos para fondos neutros */
+.bg-dots-brand {
+  background-image: radial-gradient(circle, rgba(0, 174, 239, 0.07) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* ── Page section headers — patrón consistente en todas las páginas ───────── */
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .page-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+/* ── Animaciones ───────────────────────────────────────────────────────────── */
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite linear;
 }

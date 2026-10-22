@@ -418,7 +418,7 @@ export default function Odontogram({ patientId }: { patientId: string }) {
             onClick={() => saveMut.mutate()}
             disabled={!dirty || saveMut.isPending}
             className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-white transition-colors rounded-lg text-xs font-medium disabled:opacity-50"
-            style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+            style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
           >
             {saveMut.isPending ? 'Guardando...' : 'Guardar'}
           </button>

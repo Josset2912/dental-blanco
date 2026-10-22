@@ -91,7 +91,7 @@ export default function AppointmentForm({ onClose, onSubmit, loading, defaultDat
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+                style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
@@ -198,7 +198,7 @@ export default function AppointmentForm({ onClose, onSubmit, loading, defaultDat
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-gray-700">Notas adicionales</label>
               <textarea
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white resize-none h-[72px] placeholder-gray-300"
+                className="px-3 py-2 border border-black/[0.08] rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 w-full bg-[#F6F8FA] focus:bg-white resize-none h-[72px] placeholder-gray-400 transition-all"
                 value={form.notes}
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                 placeholder="Observaciones, instrucciones especiales..."
@@ -223,7 +223,7 @@ export default function AppointmentForm({ onClose, onSubmit, loading, defaultDat
               type="submit"
               form="appt-form"
               className="px-5 py-2 text-sm font-semibold text-white rounded-xl disabled:opacity-60 transition-all flex items-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+              style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
               disabled={loading || !form.patientId || !form.reason}
             >
               {loading ? (

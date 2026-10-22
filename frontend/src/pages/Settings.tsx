@@ -82,13 +82,13 @@ export default function Settings() {
     navigate('/login');
   };
 
-  const inputClass = 'w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white transition-all';
+  const inputClass = 'w-full px-3 py-2.5 border border-black/[0.08] rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all';
   const initials = user?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() ?? '?';
 
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#0077B6] rounded-full shrink-0" />
+        <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#005F8E] rounded-full shrink-0" />
         <div>
           <h2 className="text-xl font-bold text-gray-900">Configuración</h2>
           <p className="text-sm text-gray-500 mt-0.5">Ajustes de cuenta y clínica</p>
@@ -98,7 +98,7 @@ export default function Settings() {
       {/* Perfil de la clínica */}
       <CardSection
         icon="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-        gradient="linear-gradient(135deg,#00AEEF,#0077B6)"
+        gradient="linear-gradient(135deg,#00AEEF,#005F8E)"
         title="Perfil de la clínica"
       >
         <form onSubmit={saveClinic} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -129,7 +129,7 @@ export default function Settings() {
           <div className="sm:col-span-2 flex justify-end pt-1">
             <button type="submit"
               className="px-5 py-2.5 text-sm font-semibold text-white rounded-xl transition-all flex items-center gap-2"
-              style={{ background: clinicSaved ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+              style={{ background: clinicSaved ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
               {clinicSaved ? (
                 <>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -153,14 +153,14 @@ export default function Settings() {
           <div className="flex items-center gap-4 mb-5">
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold text-white shrink-0 shadow-md"
-              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+              style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
             >
               {initials}
             </div>
             <div className="min-w-0">
               <p className="font-semibold text-gray-900 truncate">{user?.name}</p>
               <p className="text-sm text-gray-500 truncate">{user?.email}</p>
-              <span className="inline-block mt-1 px-2.5 py-0.5 bg-[#E6F7FD] text-[#0077B6] text-xs font-semibold rounded-full">
+              <span className="inline-block mt-1 px-2.5 py-0.5 bg-[#00AEEF]/[0.09] text-[#005F8E] text-xs font-semibold rounded-md">
                 {user?.role === 'DOCTOR' ? 'Doctor' : user?.role === 'ADMIN' ? 'Administrador' : 'Recepcionista'}
               </span>
             </div>
@@ -210,7 +210,7 @@ export default function Settings() {
             </div>
             <button type="submit" disabled={!canSubmit || changeMut.isPending}
               className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+              style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
               {changeMut.isPending ? (
                 <>
                   <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">

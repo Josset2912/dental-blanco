@@ -125,7 +125,7 @@ export default function PatientImages({ patientId, patientName }: Props) {
               onClick={() => fileInput.current?.click()}
               disabled={uploadMut.isPending}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-white rounded-lg text-xs font-medium disabled:opacity-60 transition-colors"
-              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+              style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -160,7 +160,7 @@ export default function PatientImages({ patientId, patientName }: Props) {
               onClick={() => fileInput.current?.click()}
               disabled={uploadMut.isPending}
               className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-white rounded-lg text-xs font-medium disabled:opacity-60 transition-colors"
-              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+              style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -233,7 +233,7 @@ export default function PatientImages({ patientId, patientName }: Props) {
                 <p className="text-xs text-gray-500">{TYPE_OPTIONS.find(t => t.value === preview.type)?.label} · {new Date(preview.createdAt).toLocaleDateString('es-PE')}</p>
               </div>
               <div className="flex items-center gap-2">
-                <a href={preview.url} target="_blank" rel="noreferrer" className="px-3 py-1.5 text-xs font-medium text-[#0077B6] border border-[#00AEEF] rounded-lg hover:bg-[#E6F7FD] transition-colors">
+                <a href={preview.url} target="_blank" rel="noreferrer" className="px-3 py-1.5 text-xs font-medium text-[#005F8E] border border-[#00AEEF] rounded-lg hover:bg-[#00AEEF]/[0.09] transition-colors">
                   Abrir original
                 </a>
                 <button

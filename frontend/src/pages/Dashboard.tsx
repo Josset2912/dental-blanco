@@ -55,26 +55,45 @@ function StatCard({ item, index, onNavigate }: { item: StatItem; index: number; 
       custom={index}
       initial="hidden"
       animate="show"
-      whileHover={{ y: -3, transition: { duration: 0.2, ease: 'easeOut' } }}
       variants={cardVariants}
       onClick={() => item.path && onNavigate(item.path)}
-      className={`relative bg-white rounded-2xl border border-gray-100 p-4 md:p-5 overflow-hidden shadow-card hover:shadow-[0_4px_20px_rgba(0,174,239,0.18)] transition-shadow ${item.path ? 'cursor-pointer' : 'cursor-default'}`}
+      className={`relative bg-white rounded-xl overflow-hidden shadow-card transition-all duration-200 group
+        ${item.path ? 'cursor-pointer hover:shadow-card-hover' : 'cursor-default'}`}
     >
-      <div
-        className="absolute top-0 right-0 w-20 h-20 md:w-24 md:h-24 rounded-bl-full opacity-10"
-        style={{ background: item.gradient }}
-      />
-      <div
-        className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center mb-2.5"
-        style={{ background: item.gradient }}
-      >
-        <svg className="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d={item.iconPath} />
-        </svg>
+      {/* Top accent line — el único elemento de color, preciso e intencional */}
+      <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: item.gradient }} />
+
+      <div className="p-4 md:p-5 pt-5 md:pt-6">
+        {/* Icon — pequeño, secundario */}
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center mb-3 opacity-90"
+          style={{ background: item.gradient }}
+        >
+          <svg className="w-[15px] h-[15px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d={item.iconPath} />
+          </svg>
+        </div>
+
+        {/* Número — el héroe visual */}
+        <p className="text-2xl md:text-[28px] font-black text-gray-900 leading-none tracking-tight tabular-nums">
+          {item.value}
+        </p>
+        <p className="text-[11px] text-gray-400 mt-1.5 leading-tight font-medium uppercase tracking-wide">
+          {item.label}
+        </p>
+        {item.sub && (
+          <p className="text-xs font-semibold mt-1" style={{ color: '#00AEEF' }}>{item.sub}</p>
+        )}
       </div>
-      <p className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">{item.value}</p>
-      <p className="text-[11px] md:text-xs text-gray-500 mt-1 leading-tight">{item.label}</p>
-      {item.sub && <p className="text-[11px] md:text-xs font-medium mt-1" style={{ color: '#00AEEF' }}>{item.sub}</p>}
+
+      {/* Hover arrow — feedback sutil de que es clickable */}
+      {item.path && (
+        <div className="absolute top-5 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+          <svg className="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -119,7 +138,7 @@ export default function Dashboard() {
         <button
           onClick={() => refetch()}
           className="mt-5 px-5 py-2.5 text-sm font-medium text-white rounded-xl transition-colors"
-          style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+          style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
         >
           Reintentar
         </button>
@@ -197,7 +216,7 @@ export default function Dashboard() {
     {
       label: 'Pacientes totales',
       value: stats.totalPatients,
-      gradient: 'linear-gradient(135deg,#00AEEF,#0077B6)',
+      gradient: 'linear-gradient(135deg,#00AEEF,#005F8E)',
       iconPath: 'M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z',
       path: '/pacientes',
     },
@@ -232,7 +251,7 @@ export default function Dashboard() {
   ];
 
   const quickActions = [
-    { label: 'Nueva cita', path: '/citas', gradient: 'linear-gradient(135deg,#00AEEF,#0077B6)', iconPath: 'M12 4v16m8-8H4' },
+    { label: 'Nueva cita', path: '/citas', gradient: 'linear-gradient(135deg,#00AEEF,#005F8E)', iconPath: 'M12 4v16m8-8H4' },
     { label: 'Nuevo paciente', path: '/pacientes', gradient: 'linear-gradient(135deg,#8b5cf6,#6d28d9)', iconPath: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
     { label: 'Registrar pago', path: '/pagos', gradient: 'linear-gradient(135deg,#10b981,#059669)', iconPath: 'M17 9V7a5 5 0 00-10 0v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2z' },
   ];
@@ -246,23 +265,27 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
         className="relative rounded-2xl overflow-hidden p-6 md:p-8"
-        style={{ background: 'linear-gradient(135deg,#00AEEF 0%,#0077B6 60%,#005a90 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #0090D4 0%, #006EA6 55%, #004F7A 100%)' }}
       >
-        {/* Decorative circles */}
-        <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/10" />
-        <div className="absolute -bottom-8 -right-2 w-48 h-48 rounded-full bg-white/5" />
-        <div className="absolute top-4 right-16 w-12 h-12 rounded-full bg-white/10" />
+        {/* Cuadrícula arquitectónica — deliberada, no aleatoria */}
+        <div className="absolute inset-0 bg-grid-white opacity-100" />
 
-        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Anillos concéntricos — punto focal, no blobs random */}
+        <div className="absolute -right-16 -top-16 w-72 h-72 rounded-full border border-white/[0.08]" />
+        <div className="absolute -right-8 -top-8 w-48 h-48 rounded-full border border-white/[0.10]" />
+        <div className="absolute right-8 top-8 w-20 h-20 rounded-full border border-white/[0.07]" />
+
+        {/* Glow accent abajo-izquierda */}
+        <div className="absolute -bottom-12 -left-8 w-40 h-40 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(0,174,239,0.25) 0%, transparent 70%)' }} />
+
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
           <div>
-            <p className="text-blue-100 text-sm font-medium">{greeting},</p>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mt-0.5 flex items-center gap-2">
+            <p className="text-[#93D4F0] text-sm font-semibold tracking-wide">{greeting}</p>
+            <h2 className="text-2xl md:text-3xl font-black text-white mt-1 leading-tight tracking-tight">
               {firstName}
-              <svg className="w-7 h-7 shrink-0 opacity-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} style={{ color: '#B3DEF4' }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"/>
-              </svg>
             </h2>
-            <p className="text-blue-200 text-sm mt-1">{todayCapitalized}</p>
+            <p className="text-white/50 text-sm mt-1.5 font-medium">{todayCapitalized}</p>
           </div>
 
           {/* Quick actions */}
@@ -271,9 +294,9 @@ export default function Dashboard() {
               <button
                 key={a.path}
                 onClick={() => navigate(a.path)}
-                className="flex items-center gap-1.5 px-3 py-2.5 sm:py-2 bg-white/20 hover:bg-white/30 text-white text-xs font-medium rounded-xl transition-colors backdrop-blur-sm border border-white/20 min-h-[40px] sm:min-h-0"
+                className="flex items-center gap-2 px-3.5 py-2.5 sm:py-2 bg-white/[0.12] hover:bg-white/[0.22] text-white text-xs font-semibold rounded-lg transition-all backdrop-blur-sm border border-white/[0.12] hover:border-white/[0.2] min-h-[40px] sm:min-h-0 shadow-sm"
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d={a.iconPath} />
                 </svg>
                 {a.label}
@@ -284,7 +307,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {statItems.map((item, i) => (
           <StatCard key={item.label} item={item} index={i} onNavigate={navigate} />
         ))}
@@ -298,21 +321,21 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.38, duration: 0.28 }}
-          className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden"
+          className="lg:col-span-2 bg-white rounded-xl shadow-card overflow-hidden"
         >
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.05]">
             <div className="flex items-center gap-2.5">
-              <div className="w-2 h-2 rounded-full bg-[#00AEEF]" />
-              <h3 className="text-sm font-semibold text-gray-900">Citas de hoy</h3>
+              <div className="w-1.5 h-1.5 rounded-full bg-[#00AEEF]" />
+              <h3 className="text-sm font-bold text-gray-900 tracking-tight">Citas de hoy</h3>
               {todayAppointments.length > 0 && (
-                <span className="px-2 py-0.5 bg-[#E6F7FD] text-[#0077B6] text-xs font-semibold rounded-full">
+                <span className="px-2 py-0.5 bg-[#00AEEF]/10 text-[#005F8E] text-[11px] font-bold rounded-md">
                   {todayAppointments.length}
                 </span>
               )}
             </div>
             <button
               onClick={() => navigate('/citas')}
-              className="text-xs font-medium text-[#00AEEF] hover:text-[#0077B6] transition-colors flex items-center gap-1"
+              className="text-xs font-semibold text-gray-400 hover:text-[#00AEEF] transition-colors flex items-center gap-1"
             >
               Ver todas
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -323,42 +346,42 @@ export default function Dashboard() {
 
           {todayAppointments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 text-center px-6">
-              <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-4">
-                <svg className="w-7 h-7 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="w-12 h-12 rounded-xl bg-[#F6F8FA] flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
               </div>
-              <p className="text-sm font-medium text-gray-700">Sin citas para hoy</p>
+              <p className="text-sm font-semibold text-gray-700">Sin citas para hoy</p>
               <p className="text-xs text-gray-400 mt-1">Disfruta el día libre</p>
               <button
                 onClick={() => navigate('/citas')}
-                className="mt-4 px-4 py-2 text-xs font-medium text-white rounded-xl"
-                style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+                className="mt-4 px-4 py-2 text-xs font-semibold text-white rounded-lg shadow-sm"
+                style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
               >
                 Agendar cita
               </button>
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-black/[0.04]">
               {todayAppointments.map((a) => (
-                <div key={a.id} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50/60 transition-colors">
+                <div key={a.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#F6F8FA]/80 transition-colors">
                   {/* Time column */}
                   <div className="w-12 shrink-0 text-center">
-                    <p className="text-sm font-bold text-gray-900">{formatTime(a.date)}</p>
-                    <p className="text-[10px] text-gray-400 mt-0.5">{a.duration}m</p>
+                    <p className="text-sm font-black text-gray-900 tabular-nums">{formatTime(a.date)}</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5 font-medium">{a.duration}m</p>
                   </div>
 
                   {/* Divider line + dot */}
                   <div className="flex flex-col items-center self-stretch py-1">
-                    <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${STATUS_DOT[a.status]}`} />
-                    <div className="w-px flex-1 bg-gray-100 mt-1" />
+                    <div className={`w-2 h-2 rounded-full shrink-0 ${STATUS_DOT[a.status]}`} />
+                    <div className="w-px flex-1 bg-black/[0.06] mt-1" />
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <button
                       onClick={() => navigate(`/pacientes/${a.patient.id}`)}
-                      className="text-sm font-semibold text-gray-900 truncate hover:text-[#0077B6] transition-colors text-left w-full"
+                      className="text-sm font-semibold text-gray-900 truncate hover:text-[#00AEEF] transition-colors text-left w-full"
                     >
                       {a.patient.name} {a.patient.lastName}
                     </button>
@@ -371,7 +394,7 @@ export default function Dashboard() {
                       <button
                         onClick={() => statusMut.mutate({ id: a.id, status: 'CONFIRMED' })}
                         disabled={statusMut.isPending}
-                        className="w-7 h-7 rounded-lg bg-[#E6F7FD] text-[#0077B6] hover:bg-[#00AEEF] hover:text-white transition-colors flex items-center justify-center shrink-0 disabled:opacity-50"
+                        className="w-7 h-7 rounded-lg bg-[#00AEEF]/10 text-[#005F8E] hover:bg-[#00AEEF] hover:text-white transition-all flex items-center justify-center shrink-0 disabled:opacity-50"
                         title="Confirmar cita"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -383,7 +406,7 @@ export default function Dashboard() {
                       <button
                         onClick={() => statusMut.mutate({ id: a.id, status: 'COMPLETED' })}
                         disabled={statusMut.isPending}
-                        className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-colors flex items-center justify-center shrink-0 disabled:opacity-50"
+                        className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center shrink-0 disabled:opacity-50"
                         title="Marcar como completada"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -391,7 +414,7 @@ export default function Dashboard() {
                         </svg>
                       </button>
                     )}
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg bg-gray-50 ${STATUS_TEXT[a.status]}`}>
+                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-md bg-black/[0.03] ${STATUS_TEXT[a.status]}`}>
                       {STATUS_LABEL[a.status]}
                     </span>
                   </div>
@@ -406,16 +429,16 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.44, duration: 0.28 }}
-          className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden"
+          className="bg-white rounded-xl shadow-card overflow-hidden"
         >
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.05]">
             <div className="flex items-center gap-2.5">
-              <div className="w-2 h-2 rounded-full bg-purple-400" />
-              <h3 className="text-sm font-semibold text-gray-900">Pacientes recientes</h3>
+              <div className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+              <h3 className="text-sm font-bold text-gray-900 tracking-tight">Pacientes recientes</h3>
             </div>
             <button
               onClick={() => navigate('/pacientes')}
-              className="text-xs font-medium text-[#00AEEF] hover:text-[#0077B6] transition-colors flex items-center gap-1"
+              className="text-xs font-semibold text-gray-400 hover:text-[#00AEEF] transition-colors flex items-center gap-1"
             >
               Ver todos
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -426,38 +449,43 @@ export default function Dashboard() {
 
           {recentPatients.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 px-6 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-4">
-                <svg className="w-7 h-7 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="w-12 h-12 rounded-xl bg-[#F6F8FA] flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>
                 </svg>
               </div>
-              <p className="text-sm text-gray-500">Sin pacientes registrados</p>
+              <p className="text-sm font-semibold text-gray-500">Sin pacientes registrados</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-black/[0.04]">
               {recentPatients.map((p) => {
                 const initials = `${p.name[0]}${p.lastName[0]}`.toUpperCase();
-                const colors = ['linear-gradient(135deg,#00AEEF,#0077B6)', 'linear-gradient(135deg,#8b5cf6,#6d28d9)', 'linear-gradient(135deg,#10b981,#059669)', 'linear-gradient(135deg,#f59e0b,#d97706)'];
+                const colors = [
+                  'linear-gradient(135deg,#00AEEF,#005F8E)',
+                  'linear-gradient(135deg,#8b5cf6,#6d28d9)',
+                  'linear-gradient(135deg,#10b981,#059669)',
+                  'linear-gradient(135deg,#f59e0b,#d97706)',
+                ];
                 const colorIdx = (p.name.charCodeAt(0) + p.lastName.charCodeAt(0)) % colors.length;
                 return (
                   <div
                     key={p.id}
                     onClick={() => navigate(`/pacientes/${p.id}`)}
-                    className="flex items-center gap-3 px-6 py-3.5 cursor-pointer hover:bg-gray-50/60 transition-colors group"
+                    className="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-[#F6F8FA]/80 transition-colors group"
                   >
                     <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black text-white shrink-0"
                       style={{ background: colors[colorIdx] }}
                     >
                       {initials}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#0077B6] transition-colors">
+                      <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#00AEEF] transition-colors">
                         {p.name} {p.lastName}
                       </p>
                       <p className="text-xs text-gray-400 truncate">{p.phone}</p>
                     </div>
-                    <svg className="w-4 h-4 text-gray-300 group-hover:text-[#00AEEF] transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-3.5 h-3.5 text-gray-200 group-hover:text-[#00AEEF] group-hover:translate-x-0.5 transition-all shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
                     </svg>
                   </div>

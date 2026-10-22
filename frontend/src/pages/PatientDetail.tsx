@@ -28,7 +28,7 @@ function fmtCost(s: string) {
 // ── Gender config ─────────────────────────────────────────────────────────────
 
 const GENDER_CONFIG = {
-  MASCULINO: { label: 'Masculino', avatar: 'from-[#00AEEF] to-[#0077B6]', badge: 'bg-blue-50 text-blue-600' },
+  MASCULINO: { label: 'Masculino', avatar: 'from-[#00AEEF] to-[#005F8E]', badge: 'bg-blue-50 text-blue-600' },
   FEMENINO:  { label: 'Femenino',  avatar: 'from-fuchsia-400 to-fuchsia-600', badge: 'bg-fuchsia-50 text-fuchsia-600' },
   OTRO:      { label: 'Otro',      avatar: 'from-gray-400 to-gray-500', badge: 'bg-gray-100 text-gray-600' },
 };
@@ -36,7 +36,7 @@ const GENDER_CONFIG = {
 // ── Status / method config ────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<string, string> = {
-  IN_PROGRESS: 'bg-[#E6F7FD] text-[#0077B6]',
+  IN_PROGRESS: 'bg-[#00AEEF]/[0.09] text-[#005F8E]',
   COMPLETED:   'bg-green-50 text-green-600',
   CANCELLED:   'bg-red-50 text-red-400',
 };
@@ -48,7 +48,7 @@ const STATUS_LABEL: Record<string, string> = {
 const METHOD_LABEL: Record<string, string>  = { CASH: 'Efectivo', CARD: 'Tarjeta', TRANSFER: 'Transferencia' };
 const METHOD_COLORS: Record<string, string> = {
   CASH: 'bg-green-50 text-green-700',
-  CARD: 'bg-[#E6F7FD] text-blue-700',
+  CARD: 'bg-[#00AEEF]/[0.09] text-[#005F8E]',
   TRANSFER: 'bg-purple-50 text-purple-700',
 };
 
@@ -257,7 +257,7 @@ export default function PatientDetail() {
       {/* ── Hero card ──────────────────────────────────────────────────── */}
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-5">
         {/* Accent bar */}
-        <div className="h-2 w-full bg-gradient-to-r from-[#00AEEF] to-[#0077B6]" />
+        <div className="h-[2px] w-full bg-gradient-to-r from-[#00AEEF] to-[#005F8E]" />
         <div className="px-5 py-5">
           <div className="flex items-center gap-4 mb-5">
             {/* Avatar */}
@@ -291,7 +291,7 @@ export default function PatientDetail() {
             <KpiCard
               label="Tratamientos activos"
               value={String(activeCount)}
-              colorClass={activeCount > 0 ? 'text-[#0077B6]' : 'text-gray-400'}
+              colorClass={activeCount > 0 ? 'text-[#005F8E]' : 'text-gray-400'}
             />
             <KpiCard
               label="Total pagado"
@@ -346,7 +346,7 @@ export default function PatientDetail() {
               {label}
               {badge !== undefined && badge > 0 && (
                 <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold ${
-                  tab === key ? 'bg-[#E6F7FD] text-[#0077B6]' : 'bg-gray-200 text-gray-500'
+                  tab === key ? 'bg-[#00AEEF]/[0.09] text-[#005F8E]' : 'bg-gray-100 text-gray-500'
                 }`}>
                   {badge}
                 </span>
@@ -390,7 +390,7 @@ export default function PatientDetail() {
                 action={
                   <a
                     href={`mailto:${patient.email}`}
-                    className="text-[#00AEEF] hover:text-[#0077B6] transition-colors shrink-0"
+                    className="text-[#00AEEF] hover:text-[#005F8E] transition-colors shrink-0"
                     title="Enviar email"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
@@ -447,8 +447,8 @@ export default function PatientDetail() {
             </div>
             <button
               onClick={() => setShowTreatmentForm(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-white rounded-lg text-xs font-medium transition-opacity hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-white rounded-lg text-xs font-semibold hover:brightness-110 transition-all"
+              style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
             >
               <PlusIcon /> Nuevo
             </button>
@@ -496,7 +496,7 @@ export default function PatientDetail() {
                           <span className="text-xs text-gray-400">{new Date(t.startDate).toLocaleDateString('es-PE')}</span>
                           {t.status === 'IN_PROGRESS' && (
                             <button onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
-                              className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors">
+                              className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#00AEEF]/[0.09] transition-colors">
                               <EditIcon />
                             </button>
                           )}
@@ -536,7 +536,7 @@ export default function PatientDetail() {
                       const pct  = cost > 0 ? Math.min(100, (t.totalPaid / cost) * 100) : 0;
                       const paid = pct >= 100;
                       return (
-                        <tr key={t.id} className={`group hover:bg-[#E6F7FD]/30 transition-colors ${i < treatments.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                        <tr key={t.id} className={`group hover:bg-[#F6F8FA] transition-colors ${i < treatments.length - 1 ? 'border-b border-gray-100' : ''}`}>
                           <td className="px-5 py-4">
                             <p className="text-sm font-semibold text-gray-900">{t.name}</p>
                             {t.description && <p className="text-xs text-gray-400 mt-0.5 max-w-[200px] truncate">{t.description}</p>}
@@ -562,13 +562,13 @@ export default function PatientDetail() {
                             <div className="flex items-center gap-1.5">
                               {t.status === 'IN_PROGRESS' && (
                                 <button onClick={() => { setEditTreatment(t); setEditTreatmentForm({ status: t.status, cost: t.cost, description: t.description ?? '', notes: t.notes ?? '' }); }}
-                                  className="p-1.5 rounded-lg text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors" title="Editar">
+                                  className="p-1.5 rounded-lg text-gray-400 hover:text-[#00AEEF] hover:bg-[#00AEEF]/[0.09] transition-colors" title="Editar">
                                   <EditIcon />
                                 </button>
                               )}
                               {!paid && t.status !== 'CANCELLED' && (
                                 <button onClick={() => { setPayTreatment(t); setPayForm({ amount: t.balance.toFixed(2), method: 'CASH', concept: 'Abono', notes: '' }); }}
-                                  className="px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg transition-opacity hover:opacity-90"
+                                  className="px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg hover:brightness-110 transition-all"
                                   style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
                                   Pagar
                                 </button>
@@ -625,7 +625,7 @@ export default function PatientDetail() {
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-sm font-bold text-emerald-600">{fmt(parseFloat(p.amount))}</span>
                         <button onClick={() => generatePaymentReceipt(p, patient, p.treatment ? treatments.find(t => t.id === p.treatment?.id) ?? null : null)}
-                          className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors" title="Comprobante">
+                          className="p-1.5 rounded-md text-gray-400 hover:text-[#00AEEF] hover:bg-[#00AEEF]/[0.09] transition-colors" title="Comprobante">
                           <PrintIcon />
                         </button>
                       </div>
@@ -654,7 +654,7 @@ export default function PatientDetail() {
                   </thead>
                   <tbody>
                     {payments.map((p, i) => (
-                      <tr key={p.id} className={`hover:bg-[#E6F7FD]/30 transition-colors ${i < payments.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                      <tr key={p.id} className={`hover:bg-[#F6F8FA] transition-colors ${i < payments.length - 1 ? 'border-b border-gray-100' : ''}`}>
                         <td className="px-5 py-3.5 text-sm text-gray-500 whitespace-nowrap">
                           {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </td>
@@ -668,7 +668,7 @@ export default function PatientDetail() {
                         <td className="px-5 py-3.5 text-sm font-bold text-emerald-600">{fmt(parseFloat(p.amount))}</td>
                         <td className="px-5 py-3.5">
                           <button onClick={() => generatePaymentReceipt(p, patient, p.treatment ? treatments.find(t => t.id === p.treatment?.id) ?? null : null)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-[#00AEEF] hover:bg-[#E6F7FD] transition-colors" title="Descargar comprobante">
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-[#00AEEF] hover:bg-[#00AEEF]/[0.09] transition-colors" title="Descargar comprobante">
                             <PrintIcon />
                           </button>
                         </td>
@@ -749,7 +749,7 @@ export default function PatientDetail() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Monto a pagar (S/)</label>
                 <input type="number" min="0.01" step="0.01" max={payTreatment.balance}
-                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all"
                   value={payForm.amount} onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))} />
               </div>
 
@@ -758,7 +758,7 @@ export default function PatientDetail() {
                 <div className="grid grid-cols-3 gap-1.5">
                   {([{ value: 'CASH', label: 'Efectivo' }, { value: 'CARD', label: 'Tarjeta' }, { value: 'TRANSFER', label: 'Transferencia' }] as const).map(m => (
                     <button key={m.value} type="button" onClick={() => setPayForm(f => ({ ...f, method: m.value }))}
-                      className={`py-2 rounded-lg text-xs font-semibold border-2 transition-all ${payForm.method === m.value ? 'bg-[#E6F7FD] text-[#0077B6] border-[#00AEEF]' : 'bg-white text-gray-400 border-gray-200'}`}>
+                      className={`py-2 rounded-lg text-xs font-semibold border-2 transition-all ${payForm.method === m.value ? 'bg-[#00AEEF]/[0.09] text-[#005F8E] border-[#00AEEF]' : 'bg-white text-gray-400 border-black/[0.1]'}`}>
                       {m.label}
                     </button>
                   ))}
@@ -770,7 +770,7 @@ export default function PatientDetail() {
                 <div className="grid grid-cols-3 gap-1.5">
                   {(['Pago inicial', 'Abono', 'Cancelación'] as const).map(c => (
                     <button key={c} type="button" onClick={() => setPayForm(f => ({ ...f, concept: c }))}
-                      className={`py-2 rounded-lg text-xs font-semibold border-2 transition-all ${payForm.concept === c ? 'bg-[#E6F7FD] text-[#0077B6] border-[#00AEEF]' : 'bg-white text-gray-400 border-gray-200'}`}>
+                      className={`py-2 rounded-lg text-xs font-semibold border-2 transition-all ${payForm.concept === c ? 'bg-[#00AEEF]/[0.09] text-[#005F8E] border-[#00AEEF]' : 'bg-white text-gray-400 border-black/[0.1]'}`}>
                       {c}
                     </button>
                   ))}
@@ -779,7 +779,7 @@ export default function PatientDetail() {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Notas (opcional)</label>
-                <input className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                <input className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all"
                   value={payForm.notes} onChange={e => setPayForm(f => ({ ...f, notes: e.target.value }))} placeholder="Observaciones opcionales..." />
               </div>
 
@@ -819,7 +819,7 @@ export default function PatientDetail() {
               <p className="text-sm text-gray-600 mb-5">¿Confirmas que este tratamiento ha sido completado? Se registrará la fecha de hoy como fecha de término.</p>
               <div className="flex justify-end gap-2">
                 <button className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-100" onClick={() => setConfirmComplete(null)}>Cancelar</button>
-                <button className="px-4 py-2 text-sm font-medium text-white rounded-xl hover:opacity-90 disabled:opacity-60"
+                <button className="px-4 py-2 text-sm font-medium text-white rounded-xl hover:brightness-110 disabled:opacity-60 transition-all"
                   style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
                   onClick={() => completeTreatmentMut.mutate(confirmComplete.id)} disabled={completeTreatmentMut.isPending} >
                   {completeTreatmentMut.isPending ? 'Guardando...' : 'Sí, completar'}
@@ -835,10 +835,10 @@ export default function PatientDetail() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
             <div className="px-6 py-5 relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%)' }}>
-              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20" style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }} />
+              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20" style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }} />
               <div className="flex items-center justify-between relative">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
                     <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                   </div>
                   <h3 className="text-base font-bold text-gray-900">Editar tratamiento</h3>
@@ -853,12 +853,12 @@ export default function PatientDetail() {
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</label>
                 <div className="grid grid-cols-3 gap-1.5">
                   {([
-                    { value: 'IN_PROGRESS', label: 'En curso',   color: 'bg-[#E6F7FD] text-[#0077B6] border-[#00AEEF]' },
+                    { value: 'IN_PROGRESS', label: 'En curso',   color: 'bg-[#00AEEF]/[0.09] text-[#005F8E] border-[#00AEEF]' },
                     { value: 'COMPLETED',   label: 'Completado', color: 'bg-green-50 text-green-700 border-green-400' },
                     { value: 'CANCELLED',   label: 'Anulado',    color: 'bg-red-50 text-red-500 border-red-400' },
                   ] as const).map(opt => (
                     <button key={opt.value} type="button" onClick={() => setEditTreatmentForm(f => ({ ...f, status: opt.value }))}
-                      className={`py-2 rounded-lg text-xs font-semibold border-2 transition-all ${editTreatmentForm.status === opt.value ? opt.color : 'bg-white text-gray-400 border-gray-200'}`}>
+                      className={`py-2 rounded-lg text-xs font-semibold border-2 transition-all ${editTreatmentForm.status === opt.value ? opt.color : 'bg-white text-gray-400 border-black/[0.1]'}`}>
                       {opt.label}
                     </button>
                   ))}
@@ -868,27 +868,27 @@ export default function PatientDetail() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Costo (S/)</label>
                 <input type="number" min="0" step="0.01"
-                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all"
                   value={editTreatmentForm.cost} onChange={e => setEditTreatmentForm(f => ({ ...f, cost: e.target.value }))} />
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Descripción</label>
-                <input className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white"
+                <input className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all"
                   value={editTreatmentForm.description} onChange={e => setEditTreatmentForm(f => ({ ...f, description: e.target.value }))} placeholder="Descripción del tratamiento..." />
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Notas</label>
                 <textarea rows={2}
-                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white resize-none"
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all resize-none"
                   value={editTreatmentForm.notes} onChange={e => setEditTreatmentForm(f => ({ ...f, notes: e.target.value }))} placeholder="Observaciones..." />
               </div>
 
               <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
                 <button className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-100" onClick={() => setEditTreatment(null)}>Cancelar</button>
                 <button className="px-4 py-2 text-sm font-medium text-white rounded-xl disabled:opacity-60"
-                  style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+                  style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
                   onClick={() => editTreatmentMut.mutate(editTreatment.id)}
                   disabled={editTreatmentMut.isPending || !editTreatmentForm.cost}>
                   {editTreatmentMut.isPending ? 'Guardando...' : 'Guardar cambios'}
@@ -929,7 +929,7 @@ export default function PatientDetail() {
               </p>
               <div className="flex justify-end gap-2">
                 <button className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-100" onClick={() => setConfirmDelete(false)}>Cancelar</button>
-                <button className="px-4 py-2 text-sm font-medium text-white rounded-xl hover:opacity-90 disabled:opacity-60"
+                <button className="px-4 py-2 text-sm font-medium text-white rounded-xl hover:brightness-110 disabled:opacity-60 transition-all"
                   style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)' }}
                   onClick={() => deleteMut.mutate()} disabled={deleteMut.isPending}>
                   {deleteMut.isPending ? 'Eliminando...' : 'Sí, eliminar'}

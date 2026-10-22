@@ -9,7 +9,7 @@ import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 
 const BRAND = '#00AEEF';
-const BRAND_DARK = '#0077B6';
+const BRAND_DARK = '#005F8E';
 const PIE_COLORS = [BRAND, '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 const METHOD_COLORS: Record<string, string> = {
   Efectivo: '#10b981',
@@ -24,7 +24,7 @@ const KPI_DEFS = [
   {
     key: 'totalPatients',
     label: 'Pacientes totales',
-    color: 'from-[#00AEEF] to-[#0077B6]',
+    color: 'from-[#00AEEF] to-[#005F8E]',
     iconPath: 'M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z',
   },
   {
@@ -83,7 +83,7 @@ function ChartCard({ title, children, loading }: { title: string; children: Reac
 
 const METHOD_BADGE: Record<string, string> = {
   CASH: 'bg-emerald-50 text-emerald-700',
-  CARD: 'bg-[#E6F7FD] text-[#0077B6]',
+  CARD: 'bg-[#00AEEF]/[0.09] text-[#005F8E]',
   TRANSFER: 'bg-violet-50 text-violet-700',
 };
 const METHOD_LABEL_MAP: Record<string, string> = {
@@ -228,7 +228,7 @@ export default function Reports() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#0077B6] rounded-full shrink-0" />
+          <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#005F8E] rounded-full shrink-0" />
           <div>
             <h1 className="text-xl font-bold text-gray-900">Reportes y estadísticas</h1>
             <p className="text-sm text-gray-400 mt-0.5">{generatedCapitalized}</p>
@@ -527,7 +527,7 @@ export default function Reports() {
             {/* Botón mes actual */}
             {!isCurrentMonth && (
               <button onClick={goToNow}
-                className="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-[#00AEEF] text-[#0077B6] bg-[#E6F7FD] hover:bg-[#b3e8fb] transition-colors">
+                className="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-[#00AEEF] text-[#005F8E] bg-[#00AEEF]/[0.09] hover:bg-[#00AEEF]/[0.15] transition-colors">
                 Mes actual
               </button>
             )}
@@ -604,7 +604,7 @@ export default function Reports() {
                   </div>
                   {/* Pagos realizados */}
                   <div className="bg-white border border-gray-100 shadow-card rounded-xl p-4 flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00AEEF] to-[#0077B6] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00AEEF] to-[#005F8E] flex items-center justify-center shrink-0">
                       <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                       </svg>
@@ -650,7 +650,7 @@ export default function Reports() {
               const methodTotal = balance.byMethod.reduce((s, m) => s + m.total, 0);
               const methodColors: Record<string, { bg: string; bar: string; text: string }> = {
                 CASH:     { bg: 'bg-emerald-50 border-emerald-100',  bar: '#10b981', text: 'text-emerald-700' },
-                CARD:     { bg: 'bg-[#E6F7FD] border-[#b3e8fb]',    bar: '#00AEEF', text: 'text-[#0077B6]'  },
+                CARD:     { bg: 'bg-[#00AEEF]/[0.07] border-[#00AEEF]/[0.15]', bar: '#00AEEF', text: 'text-[#005F8E]' },
                 TRANSFER: { bg: 'bg-violet-50 border-violet-100',    bar: '#8b5cf6', text: 'text-violet-700' },
               };
               return (
@@ -689,7 +689,7 @@ export default function Reports() {
                     value={balanceSearch}
                     onChange={e => setBalanceSearch(e.target.value)}
                     placeholder="Buscar paciente..."
-                    className="pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white w-full placeholder-gray-400"
+                    className="pl-8 pr-3 py-1.5 text-sm border border-black/[0.08] rounded-lg outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white w-full placeholder-gray-400 transition-all"
                   />
                   {balanceSearch && (
                     <button onClick={() => setBalanceSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -704,7 +704,7 @@ export default function Reports() {
                   {[
                     { key: null,       label: 'Todos',        cls: 'bg-gray-100 text-gray-600 border-gray-200' },
                     { key: 'CASH',     label: 'Efectivo',     cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-                    { key: 'CARD',     label: 'Tarjeta',      cls: 'bg-[#E6F7FD] text-[#0077B6] border-[#b3e8fb]' },
+                    { key: 'CARD',     label: 'Tarjeta',      cls: 'bg-[#00AEEF]/[0.09] text-[#005F8E] border-[#00AEEF]/[0.2]' },
                     { key: 'TRANSFER', label: 'Transferencia', cls: 'bg-violet-50 text-violet-700 border-violet-200' },
                   ].map(({ key, label, cls }) => {
                     const active = balanceMethodFilter === key;
@@ -799,7 +799,7 @@ export default function Reports() {
                     </thead>
                     <tbody>
                       {filteredPayments.map((p, i) => (
-                        <tr key={p.id} className={`border-b border-gray-50 last:border-0 hover:bg-[#E6F7FD]/40 transition-colors ${i % 2 === 1 ? 'bg-gray-50/30' : ''}`}>
+                        <tr key={p.id} className={`border-b border-gray-50 last:border-0 hover:bg-[#F6F8FA] transition-colors ${i % 2 === 1 ? 'bg-gray-50/30' : ''}`}>
                           <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
                             {new Date(p.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })}
                             <span className="block text-gray-400">{new Date(p.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}</span>

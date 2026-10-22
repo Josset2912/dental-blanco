@@ -25,7 +25,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const STATUS_CLASS: Record<string, string> = {
   SCHEDULED: 'inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-600',
-  CONFIRMED: 'inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#E6F7FD] text-[#0077B6]',
+  CONFIRMED: 'inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#00AEEF]/[0.09] text-[#005F8E]',
   COMPLETED: 'inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-600',
   CANCELLED: 'inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500',
 };
@@ -104,7 +104,7 @@ function BlockSlotModal({
               value={date}
               onChange={e => setDate(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD]"
+              className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -115,7 +115,7 @@ function BlockSlotModal({
                 value={startTime}
                 onChange={e => setStartTime(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD]"
+                className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all"
               />
             </div>
             <div>
@@ -125,7 +125,7 @@ function BlockSlotModal({
                 value={endTime}
                 onChange={e => setEndTime(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD]"
+                className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all"
               />
             </div>
           </div>
@@ -136,7 +136,7 @@ function BlockSlotModal({
               value={reason}
               onChange={e => setReason(e.target.value)}
               placeholder="Ej: Vacaciones, reunión, descanso..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD]"
+              className="w-full px-3 py-2 border border-black/[0.08] rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all"
             />
           </div>
           <div className="flex justify-end gap-2 pt-1">
@@ -151,7 +151,7 @@ function BlockSlotModal({
               type="submit"
               disabled={loading}
               className="px-4 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-60 transition-colors"
-              style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+              style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
             >
               {loading ? 'Guardando...' : 'Bloquear'}
             </button>
@@ -199,7 +199,7 @@ function CalendarView({
   while (cells.length % 7 !== 0) cells.push(null);
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-card overflow-hidden">
       <div className="grid grid-cols-7 border-b border-gray-100">
         {DAYS.map((d, i) => (
           <div key={d} className="py-2 text-center text-xs font-semibold text-gray-400 uppercase">
@@ -223,7 +223,7 @@ function CalendarView({
             <div
               key={key}
               className={`min-h-[46px] md:min-h-[90px] border-b border-r border-gray-100 last:border-r-0 p-1 md:p-1.5 cursor-pointer hover:bg-gray-50 transition-colors ${
-                isToday ? 'bg-[#E6F7FD]/60' : hasBlocked ? 'bg-red-50/40' : ''
+                isToday ? 'bg-[#00AEEF]/[0.07]' : hasBlocked ? 'bg-red-50/40' : ''
               }`}
               onClick={() => onDayClick(key)}
             >
@@ -389,7 +389,7 @@ export default function Appointments() {
       <div className="mb-5">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#0077B6] rounded-full shrink-0" />
+            <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#005F8E] rounded-full shrink-0" />
             <div>
               <h2 className="text-xl font-bold text-gray-900">Citas</h2>
               <p className="text-sm text-gray-500 mt-0.5">
@@ -414,7 +414,7 @@ export default function Appointments() {
             )}
             <button
               onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 md:px-4 text-white transition-colors rounded-lg text-sm font-medium" style={{ background: "linear-gradient(135deg,#00AEEF,#0077B6)" }}>
+              className="inline-flex items-center gap-1.5 px-3 py-2 md:px-4 text-white rounded-lg text-sm font-semibold hover:brightness-110 transition-all" style={{ background: "linear-gradient(135deg,#00AEEF,#005F8E)" }}>
               <PlusIcon /> <span className="hidden sm:inline">Nueva cita</span><span className="sm:hidden">Nueva</span>
             </button>
           </div>
@@ -443,12 +443,12 @@ export default function Appointments() {
                 type="date"
                 value={date}
                 onChange={e => setDate(e.target.value)}
-                className="flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD]"
+                className="flex-1 min-w-0 px-3 py-2 border border-black/[0.08] rounded-lg text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all"
               />
               {date !== todayStr && (
                 <button
                   onClick={() => setDate(todayStr)}
-                  className="px-3 py-2 text-xs font-medium rounded-lg border border-[#00AEEF] text-[#00AEEF] hover:bg-[#E6F7FD] whitespace-nowrap transition-all"
+                  className="px-3 py-2 text-xs font-medium rounded-lg border border-[#00AEEF] text-[#00AEEF] hover:bg-[#00AEEF]/[0.09] whitespace-nowrap transition-all"
                 >
                   Hoy
                 </button>
@@ -610,7 +610,7 @@ export default function Appointments() {
               <button
                 onClick={() => setShowForm(true)}
                 className="mt-4 px-4 py-2 text-xs font-semibold text-white rounded-xl"
-                style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+                style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
               >
                 Agendar cita
               </button>
@@ -623,7 +623,7 @@ export default function Appointments() {
                 <div key={a.id} className="p-4 border-l-[3px]" style={{ opacity: a.status === 'CANCELLED' ? 0.55 : 1, borderLeftColor: STATUS_BORDER[a.status] }}>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <button onClick={() => navigate(`/pacientes/${a.patient.id}`)} className="text-left min-w-0 group">
-                      <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-[#0077B6] transition-colors">{a.patient.name} {a.patient.lastName}</p>
+                      <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-[#005F8E] transition-colors">{a.patient.name} {a.patient.lastName}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{a.patient.phone}</p>
                     </button>
                     <span className={`${STATUS_CLASS[a.status]} shrink-0`}>{STATUS_LABEL[a.status]}</span>
@@ -676,7 +676,7 @@ export default function Appointments() {
                   {[...active, ...cancelled].map((a, idx, arr) => (
                     <tr
                       key={a.id}
-                      className="hover:bg-[#E6F7FD]/40 transition-colors"
+                      className="hover:bg-[#F6F8FA] transition-colors"
                       style={{ opacity: a.status === 'CANCELLED' ? 0.55 : 1 }}
                     >
                       <td className={`px-4 py-3.5 text-sm ${idx < arr.length - 1 ? 'border-b border-gray-100' : ''}`}>
@@ -685,7 +685,7 @@ export default function Appointments() {
                       </td>
                       <td className={`px-4 py-3.5 text-sm ${idx < arr.length - 1 ? 'border-b border-gray-100' : ''}`}>
                         <button onClick={() => navigate(`/pacientes/${a.patient.id}`)} className="text-left group">
-                          <div className="font-medium text-gray-900 group-hover:text-[#0077B6] transition-colors">{a.patient.name} {a.patient.lastName}</div>
+                          <div className="font-medium text-gray-900 group-hover:text-[#005F8E] transition-colors">{a.patient.name} {a.patient.lastName}</div>
                           <div className="text-xs text-gray-500 mt-0.5">{a.patient.phone}</div>
                         </button>
                       </td>

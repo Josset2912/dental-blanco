@@ -28,41 +28,57 @@ export default function Login() {
 
       {/* ── Panel izquierdo (branding) — solo desktop ─────────── */}
       <div
-        className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center relative overflow-hidden p-12"
-        style={{ background: 'linear-gradient(145deg, #0077B6 0%, #00AEEF 60%, #48CAE4 100%)' }}
+        className="hidden lg:flex lg:w-[52%] flex-col items-center justify-center relative overflow-hidden p-12"
+        style={{ background: 'linear-gradient(160deg, #003A5C 0%, #005F8E 45%, #0090D4 100%)' }}
       >
-        {/* Círculos decorativos */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full opacity-10" style={{ background: 'white' }} />
-        <div className="absolute -bottom-32 -right-20 w-[500px] h-[500px] rounded-full opacity-10" style={{ background: 'white' }} />
-        <div className="absolute top-1/2 -right-16 w-48 h-48 rounded-full opacity-10" style={{ background: 'white' }} />
+        {/* Cuadrícula arquitectónica — deliberada */}
+        <div className="absolute inset-0 bg-grid-white" />
 
-        <div className="relative z-10 text-center text-white max-w-sm">
-          {/* Logo grande */}
-          <div className="w-24 h-24 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-2xl"
-            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.25)' }}>
-            <svg className="w-14 h-14 text-white" fill="currentColor" viewBox="0 0 24 24">
+        {/* Anillos concéntricos centrados — elemento focal único */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[480px] rounded-full border border-white/[0.07]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full border border-white/[0.09]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] rounded-full border border-white/[0.10]" />
+
+        {/* Glow sutil centrado */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(0,174,239,0.18) 0%, transparent 70%)' }} />
+
+        <div className="relative z-10 text-center text-white max-w-xs">
+          {/* Logo — pieza central precisa */}
+          <div className="relative w-20 h-20 rounded-2xl mx-auto mb-8 flex items-center justify-center"
+            style={{
+              background: 'rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.14)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05) inset',
+            }}>
+            {/* Glow bajo el logo */}
+            <div className="absolute inset-0 rounded-2xl"
+              style={{ background: 'radial-gradient(circle at center, rgba(0,174,239,0.3) 0%, transparent 70%)' }} />
+            <svg className="w-11 h-11 text-white relative z-10" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
             </svg>
           </div>
 
-          <h1 className="text-4xl font-bold mb-2 tracking-tight">Blanco Dental</h1>
-          <p className="text-blue-100 text-sm tracking-widest uppercase mb-10">Creamos arte en tu sonrisa</p>
+          <h1 className="text-[2.25rem] font-black mb-1 tracking-tight leading-none">Blanco Dental</h1>
+          <p className="text-white/40 text-xs tracking-[0.2em] uppercase mb-10 font-medium">Sistema de gestión clínica</p>
 
-          {/* Feature list */}
-          <div className="flex flex-col gap-4 text-left">
+          {/* Features — estilo minimal, línea horizontal */}
+          <div className="flex flex-col gap-3 text-left">
             {[
               { icon: 'M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z', label: 'Gestión de pacientes' },
               { icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', label: 'Control de citas' },
               { icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4', label: 'Tratamientos y pagos' },
             ].map(f => (
-              <div key={f.label} className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(255,255,255,0.15)' }}>
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <div key={f.label} className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: 'rgba(0,174,239,0.2)' }}>
+                  <svg className="w-4 h-4 text-[#7DCFEE]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d={f.icon}/>
                   </svg>
                 </div>
-                <span className="text-sm text-blue-50 font-medium">{f.label}</span>
+                <span className="text-[13px] text-white/75 font-medium">{f.label}</span>
               </div>
             ))}
           </div>
@@ -70,33 +86,33 @@ export default function Login() {
       </div>
 
       {/* ── Panel derecho (formulario) ─────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-gray-50 lg:bg-white">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-white">
 
         {/* Logo mobile */}
-        <div className="lg:hidden text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl mx-auto mb-3 flex items-center justify-center shadow-lg"
-            style={{ background: 'linear-gradient(135deg, #00AEEF, #0077B6)' }}>
-            <svg className="w-9 h-9 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div className="lg:hidden text-center mb-10">
+          <div className="w-14 h-14 rounded-xl mx-auto mb-3 flex items-center justify-center shadow-card"
+            style={{ background: 'linear-gradient(135deg, #00AEEF, #005F8E)' }}>
+            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5 5.5 3.5 3.5 2 2 3c-2 1.5-1.5 5 0 7l4 9c.5 1 1.5 1.5 2.5 1 .5-.3 1-.8 1.2-1.5l.8-3a1.5 1.5 0 013 0l.8 3c.2.7.7 1.2 1.2 1.5 1 .5 2 0 2.5-1l4-9c1.5-2 2-5.5 0-7-1.5-1-3.5.5-4.5 2.5C14.5 3.5 12.5 2 12 2z"/>
             </svg>
           </div>
-          <h1 className="text-xl font-bold" style={{ color: '#0077B6' }}>Blanco Dental</h1>
-          <p className="text-xs text-gray-400 mt-0.5 tracking-widest uppercase">Creamos arte en tu sonrisa</p>
+          <h1 className="text-lg font-black" style={{ color: '#005F8E' }}>Blanco Dental</h1>
+          <p className="text-[11px] text-gray-400 mt-0.5 tracking-[0.15em] uppercase font-medium">Sistema clínico</p>
         </div>
 
-        <div className="w-full max-w-sm bg-white lg:bg-transparent rounded-2xl lg:rounded-none shadow-card lg:shadow-none p-6 lg:p-0">
+        <div className="w-full max-w-[360px]">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Bienvenido de nuevo</h2>
-            <p className="text-sm text-gray-500 mt-1">Ingresa tus credenciales para continuar</p>
+            <h2 className="text-[1.75rem] font-black text-gray-900 tracking-tight leading-tight">Bienvenido</h2>
+            <p className="text-sm text-gray-400 mt-1.5 font-medium">Ingresa tus credenciales para continuar</p>
           </div>
 
           <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
 
             {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Correo electrónico</label>
+              <label className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Correo electrónico</label>
               <div className="relative">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                   </svg>
@@ -107,16 +123,16 @@ export default function Login() {
                   onChange={e => setEmail(e.target.value)}
                   required
                   placeholder="correo@ejemplo.com"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm outline-none bg-gray-50 transition-all focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] focus:bg-white"
+                  className="w-full pl-10 pr-4 py-3 border border-black/[0.1] rounded-xl text-sm outline-none bg-[#F6F8FA] transition-all focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 focus:bg-white placeholder-gray-300"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Contraseña</label>
+              <label className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Contraseña</label>
               <div className="relative">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                   </svg>
@@ -127,7 +143,7 @@ export default function Login() {
                   onChange={e => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-11 py-3 border border-gray-200 rounded-xl text-sm outline-none bg-gray-50 transition-all focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] focus:bg-white"
+                  className="w-full pl-10 pr-11 py-3 border border-black/[0.1] rounded-xl text-sm outline-none bg-[#F6F8FA] transition-all focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 focus:bg-white placeholder-gray-300"
                 />
                 <button
                   type="button"
@@ -153,8 +169,8 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-1 py-3 text-white font-semibold rounded-xl text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg active:scale-[0.99]"
-              style={{ background: 'linear-gradient(135deg, #00AEEF, #0077B6)' }}
+              className="mt-1 py-3.5 text-white font-bold rounded-xl text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md hover:brightness-110 active:scale-[0.99]"
+              style={{ background: 'linear-gradient(135deg, #00AEEF, #005F8E)' }}
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -168,8 +184,8 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-[11px] text-gray-300 mt-8">
-            Sistema de gestión clínica · v1.0
+          <p className="text-center text-[11px] text-gray-300 mt-8 font-medium tracking-wide">
+            Blanco Dental · Sistema clínico
           </p>
         </div>
       </div>

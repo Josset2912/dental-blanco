@@ -18,15 +18,15 @@ interface Props {
 }
 
 const AVATAR_GRADIENTS = [
-  'linear-gradient(135deg,#00AEEF,#0077B6)',
+  'linear-gradient(135deg,#00AEEF,#005F8E)',
   'linear-gradient(135deg,#8b5cf6,#6d28d9)',
   'linear-gradient(135deg,#10b981,#059669)',
   'linear-gradient(135deg,#f59e0b,#d97706)',
 ];
 
 const inputClass =
-  'px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none transition-all ' +
-  'focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] w-full bg-white placeholder-gray-300';
+  'px-3 py-2.5 border border-black/[0.08] rounded-xl text-sm outline-none transition-all ' +
+  'focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 w-full bg-[#F6F8FA] focus:bg-white placeholder-gray-400';
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -129,7 +129,7 @@ export default function PatientForm({
           <div className="relative overflow-hidden px-6 pt-6 pb-5"
             style={{ background: 'linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%)' }}>
             <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-[#00AEEF]/10" />
-            <div className="absolute bottom-0 right-12 w-16 h-16 rounded-full bg-[#0077B6]/10" />
+            <div className="absolute bottom-0 right-12 w-16 h-16 rounded-full bg-[#005F8E]/10" />
 
             <div className="relative flex items-center gap-4">
               {/* Avatar preview */}
@@ -320,7 +320,7 @@ export default function PatientForm({
                 form="patient-form"
                 disabled={loading}
                 className="px-5 py-2 text-sm font-semibold text-white rounded-xl disabled:opacity-60 transition-all flex items-center gap-2"
-                style={{ background: 'linear-gradient(135deg,#00AEEF,#0077B6)' }}
+                style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
               >
                 {loading ? (
                   <>

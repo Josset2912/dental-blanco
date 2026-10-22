@@ -19,7 +19,7 @@ const TREATMENT_NAMES = [
   'Implante dental', 'Puente dental', 'Cirugía periodontal', 'Otro',
 ];
 
-const inputClass = 'w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#E6F7FD] bg-white transition-all';
+const inputClass = 'w-full px-3 py-2.5 border border-black/[0.08] rounded-xl text-sm outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 bg-[#F6F8FA] focus:bg-white transition-all';
 
 export default function TreatmentForm({ onClose, onSubmit, loading, initial, fixedPatientId }: Props) {
   useEffect(() => {

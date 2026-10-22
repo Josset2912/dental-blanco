@@ -15,7 +15,7 @@ export interface DashboardData {
     duration: number;
     reason: string;
     status: 'SCHEDULED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
-    patient: { name: string; lastName: string; phone: string };
+    patient: { id: string; name: string; lastName: string; phone: string };
   }[];
   recentPatients: {
     id: string;

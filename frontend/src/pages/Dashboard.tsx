@@ -28,7 +28,7 @@ const STATUS_TEXT: Record<string, string> = {
 };
 
 function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+  return new Date(dateStr).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Lima' });
 }
 
 function fmt(v: number) {

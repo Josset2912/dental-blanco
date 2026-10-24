@@ -56,7 +56,7 @@ export default function AppointmentForm({ onClose, onSubmit, loading, defaultDat
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const datetime = `${form.date}T${form.time}:00`;
+    const datetime = `${form.date}T${form.time}:00-05:00`;
     onSubmit({
       patientId: form.patientId,
       doctorId: form.doctorId,

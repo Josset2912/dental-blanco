@@ -14,6 +14,7 @@ const reportsRoutes = require('./routes/reports');
 const imagesRoutes = require('./routes/images');
 const clinicalNotesRoutes = require('./routes/clinical-notes');
 const blockedSlotsRoutes = require('./routes/blocked-slots');
+const clinicProfileRoutes = require('./routes/clinic-profile');
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use('/api/reports', reportsRoutes);
 app.use('/api/images', imagesRoutes);
 app.use('/api/clinical-notes', clinicalNotesRoutes);
 app.use('/api/blocked-slots', blockedSlotsRoutes);
+app.use('/api/clinic-profile', clinicProfileRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

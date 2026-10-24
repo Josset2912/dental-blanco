@@ -91,6 +91,17 @@ model Specialty {
   createdAt   DateTime @default(now())
 }
 
+model ClinicProfile {
+  id        String   @id @default(uuid())
+  name      String   @default("Blanco Dental")
+  phone     String   @default("")
+  email     String   @default("")
+  address   String   @default("")
+  city      String   @default("")
+  schedule  String   @default("Lun–Vie 8:00–18:00")
+  updatedAt DateTime @updatedAt
+}
+
 model Appointment {
   id          String            @id @default(uuid())
   patientId   String

@@ -52,11 +52,11 @@ const MONTHS_ES = [
 ];
 
 function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+  return new Date(dateStr).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Lima' });
 }
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('es-PE', { weekday: 'short', day: 'numeric', month: 'short' });
+  return new Date(dateStr).toLocaleDateString('es-PE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'America/Lima' });
 }
 
 function toMonthStr(y: number, m: number) {
@@ -183,7 +183,7 @@ function CalendarView({
 
   const byDay: Record<string, Appointment[]> = {};
   for (const a of appointments) {
-    const key = new Date(a.date).toISOString().slice(0, 10);
+    const key = new Date(a.date).toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
     (byDay[key] ??= []).push(a);
   }
 

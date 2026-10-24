@@ -1,14 +1,10 @@
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { getUser, changePassword } from '../api/auth';
-
-function loadClinic() {
-  try {
-    return JSON.parse(localStorage.getItem('clinic_profile') ?? '{}');
-  } catch { return {}; }
-}
+import { getClinicProfile, updateClinicProfile } from '../api/clinic-profile';
+import type { ClinicProfile } from '../api/clinic-profile';
 
 function CardSection({ icon, gradient, title, children }: {
   icon: string; gradient: string; title: string; children: React.ReactNode;
@@ -32,25 +28,40 @@ function CardSection({ icon, gradient, title, children }: {
 export default function Settings() {
   const user = getUser();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
-  interface ClinicProfile { name: string; phone: string; email: string; address: string; city: string; schedule: string; }
-  const [clinic, setClinic] = useState<ClinicProfile>({
+  const [clinic, setClinic] = useState<Omit<ClinicProfile, 'id'>>({
     name: 'Blanco Dental',
     phone: '',
     email: '',
     address: '',
     city: '',
     schedule: 'Lun–Vie 8:00–18:00',
-    ...loadClinic(),
   });
-  const [clinicSaved, setClinicSaved] = useState(false);
+
+  const { data: clinicData } = useQuery({
+    queryKey: ['clinic-profile'],
+    queryFn: getClinicProfile,
+  });
+
+  useEffect(() => {
+    if (clinicData) {
+      setClinic({ name: clinicData.name, phone: clinicData.phone, email: clinicData.email, address: clinicData.address, city: clinicData.city, schedule: clinicData.schedule });
+    }
+  }, [clinicData]);
+
+  const saveClinicMut = useMutation({
+    mutationFn: () => updateClinicProfile(clinic),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clinic-profile'] });
+      toast.success('Perfil de clínica guardado');
+    },
+    onError: () => toast.error('Error al guardar el perfil'),
+  });
 
   const saveClinic = (e: React.FormEvent) => {
     e.preventDefault();
-    try { localStorage.setItem('clinic_profile', JSON.stringify(clinic)); } catch {}
-    setClinicSaved(true);
-    setTimeout(() => setClinicSaved(false), 2000);
-    toast.success('Perfil de clínica guardado');
+    saveClinicMut.mutate();
   };
 
   const changeMut = useMutation({
@@ -127,17 +138,10 @@ export default function Settings() {
             <input className={inputClass} value={clinic.city} onChange={e => setClinic(c => ({ ...c, city: e.target.value }))} placeholder="Lima" />
           </div>
           <div className="sm:col-span-2 flex justify-end pt-1">
-            <button type="submit"
-              className="px-5 py-2.5 text-sm font-semibold text-white rounded-xl transition-all flex items-center gap-2"
-              style={{ background: clinicSaved ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
-              {clinicSaved ? (
-                <>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
-                  </svg>
-                  Guardado
-                </>
-              ) : 'Guardar cambios'}
+            <button type="submit" disabled={saveClinicMut.isPending}
+              className="px-5 py-2.5 text-sm font-semibold text-white rounded-xl transition-all flex items-center gap-2 disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
+              {saveClinicMut.isPending ? 'Guardando...' : 'Guardar cambios'}
             </button>
           </div>
         </form>

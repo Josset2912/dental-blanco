@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { getOverview, getRevenue, getPatientsReport, getTreatments, getMonthlyBalance } from '../api/reports';
 import jsPDF from 'jspdf';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 const BRAND = '#00AEEF';
 const BRAND_DARK = '#005F8E';
@@ -196,30 +196,44 @@ export default function Reports() {
     doc.save(`reporte-blanco-dental-${now.replace(/\//g, '-')}.pdf`);
   };
 
-  const exportExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const kpiData = [
+  const exportExcel = async () => {
+    const wb = new ExcelJS.Workbook();
+
+    const addSheet = (name: string, rows: (string | number)[][]) => {
+      const ws = wb.addWorksheet(name);
+      ws.addRows(rows);
+      ws.getRow(1).font = { bold: true };
+    };
+
+    addSheet('Resumen', [
       ['Indicador', 'Valor'],
       ['Pacientes totales', overview?.totalPatients ?? 0],
       ['Nuevos este mes', overview?.newPatientsMonth ?? 0],
       ['Citas este mes', overview?.appointmentsMonth ?? 0],
       ['Ingresos este mes (S/)', overview?.revenueMonth ?? 0],
       ['Tratamientos en curso', overview?.pendingTreatments ?? 0],
-    ];
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(kpiData), 'Resumen');
+    ]);
     if (revenue?.length) {
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Mes', 'Total (S/)'], ...revenue.map(r => [r.label, r.total])]), 'Ingresos Mensuales');
+      addSheet('Ingresos Mensuales', [['Mes', 'Total (S/)'], ...revenue.map(r => [r.label, r.total])]);
     }
     if (patients?.length) {
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Mes', 'Nuevos Pacientes'], ...patients.map(p => [p.label, p.count])]), 'Nuevos Pacientes');
+      addSheet('Nuevos Pacientes', [['Mes', 'Nuevos Pacientes'], ...patients.map(p => [p.label, p.count])]);
     }
     if (treatments?.byMethod?.length) {
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Método', 'Cantidad', 'Total (S/)'], ...treatments.byMethod.map(m => [m.label, m.count, m.total])]), 'Métodos de Pago');
+      addSheet('Métodos de Pago', [['Método', 'Cantidad', 'Total (S/)'], ...treatments.byMethod.map(m => [m.label, m.count, m.total])]);
     }
     if (treatments?.byStatus?.length) {
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Estado', 'Cantidad'], ...treatments.byStatus.map(s => [s.label, s.value])]), 'Estado Tratamientos');
+      addSheet('Estado Tratamientos', [['Estado', 'Cantidad'], ...treatments.byStatus.map(s => [s.label, s.value])]);
     }
-    XLSX.writeFile(wb, `reporte-blanco-dental-${new Date().toLocaleDateString('es-PE').replace(/\//g, '-')}.xlsx`);
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reporte-blanco-dental-${new Date().toLocaleDateString('es-PE').replace(/\//g, '-')}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (

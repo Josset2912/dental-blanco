@@ -205,6 +205,16 @@ export default function Dashboard() {
 
   const { stats, todayAppointments, recentPatients } = data!;
 
+  // Próxima cita: la más cercana que no está cancelada ni completada
+  const upcomingAppt = todayAppointments
+    .filter(a => a.status === 'SCHEDULED' || a.status === 'CONFIRMED')
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0] ?? null;
+
+  // Progreso del día
+  const totalToday = todayAppointments.length;
+  const completedToday = todayAppointments.filter(a => a.status === 'COMPLETED').length;
+  const progressPct = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
+
   const statItems: StatItem[] = [
     {
       label: 'Ingresos este mes',
@@ -305,6 +315,73 @@ export default function Dashboard() {
           </div>
         </div>
       </motion.div>
+
+      {/* Próxima cita + progreso del día */}
+      {totalToday > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.28 }}
+          className="flex flex-col sm:flex-row gap-3"
+        >
+          {/* Próxima cita */}
+          {upcomingAppt ? (
+            <div
+              onClick={() => navigate(`/pacientes/${upcomingAppt.patient.id}`)}
+              className="flex-1 bg-white rounded-xl shadow-card px-5 py-4 flex items-center gap-4 cursor-pointer hover:shadow-card-hover transition-all group"
+            >
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
+                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Próxima cita</p>
+                <p className="text-sm font-bold text-gray-900 truncate group-hover:text-[#00AEEF] transition-colors">
+                  {upcomingAppt.patient.name} {upcomingAppt.patient.lastName}
+                </p>
+                <p className="text-xs text-gray-400 truncate">{upcomingAppt.reason}</p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-lg font-black text-gray-900 tabular-nums">{formatTime(upcomingAppt.date)}</p>
+                <p className="text-[11px] font-medium text-gray-400">{upcomingAppt.duration} min</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 bg-green-50 rounded-xl px-5 py-4 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center shrink-0">
+                <svg className="w-4.5 h-4.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-green-700">Todas las citas atendidas</p>
+                <p className="text-xs text-green-600">Sin citas pendientes por hoy</p>
+              </div>
+            </div>
+          )}
+
+          {/* Progreso del día */}
+          <div className="sm:w-56 bg-white rounded-xl shadow-card px-5 py-4 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Progreso del día</p>
+              <span className="text-xs font-black text-gray-900 tabular-nums">{completedToday}/{totalToday}</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPct}%` }}
+                transition={{ delay: 0.4, duration: 0.6, ease: 'easeOut' }}
+                className="h-full rounded-full"
+                style={{ background: progressPct === 100 ? 'linear-gradient(90deg,#10b981,#059669)' : 'linear-gradient(90deg,#00AEEF,#005F8E)' }}
+              />
+            </div>
+            <p className="text-[11px] text-gray-400 mt-1.5">
+              {progressPct === 100 ? '¡Día completado!' : `${progressPct}% completado`}
+            </p>
+          </div>
+        </motion.div>
+      )}
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

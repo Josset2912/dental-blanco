@@ -16,9 +16,6 @@ const CONDITIONS: { id: ToothCondition; label: string; color: string }[] = [
   { id: 'IMPLANTE',   label: 'Implante',    color: '#059669' },
 ];
 
-const UPPER = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
-const LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
-
 const UPPER_Q1 = [18, 17, 16, 15, 14, 13, 12, 11];
 const UPPER_Q2 = [21, 22, 23, 24, 25, 26, 27, 28];
 const LOWER_Q4 = [48, 47, 46, 45, 44, 43, 42, 41];
@@ -365,55 +362,6 @@ export default function Odontogram({ patientId }: { patientId: string }) {
     });
     setDirty(true);
   }, [activeCond]);
-
-  function renderRow(teeth: number[], isUpper: boolean) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: isUpper ? 'flex-end' : 'flex-start', gap: 2 }}>
-        {teeth.map(n => (
-          <Tooth
-            key={n} num={n} state={getState(n)} isUpper={isUpper}
-            activeCond={activeCond} onClick={handleClick}
-            onHover={handleHover} onLeave={handleLeave}
-          />
-        ))}
-      </div>
-    );
-  }
-
-  function renderNumbers(teeth: number[], isUpper: boolean) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-        {teeth.map(n => (
-          <div
-            key={n}
-            style={{
-              width: getToothWidth(n),
-              textAlign: 'center',
-              fontSize: 9,
-              color: isUpper ? '#9ca3af' : '#9ca3af',
-              lineHeight: 1.4,
-              userSelect: 'none',
-            }}
-          >
-            {n}
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  function renderCircles(teeth: number[], isUpper: boolean) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-        {teeth.map(n => (
-          <SurfaceCircle
-            key={n} num={n} state={getState(n)} isUpper={isUpper}
-            onClick={handleClick} onHover={handleHover} onLeave={handleLeave}
-          />
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden" style={{ position: 'relative' }}>

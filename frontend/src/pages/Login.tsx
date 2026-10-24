@@ -224,7 +224,7 @@ export default function Login() {
   // Animation variants
   const panelLeft = {
     hidden:  { opacity: 0, x: reduced ? 0 : -28 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: 'easeOut' } },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
   };
   const panelRight = {
     hidden:  { opacity: 0 },
@@ -236,7 +236,7 @@ export default function Login() {
   };
   const formItem = {
     hidden:  { opacity: 0, y: reduced ? 0 : 14 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
   };
 
   return (

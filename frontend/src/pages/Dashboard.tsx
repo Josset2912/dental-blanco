@@ -13,116 +13,99 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: 'Cancelada',
 };
 
-const STATUS_DOT: Record<string, string> = {
-  SCHEDULED: 'bg-amber-400',
-  CONFIRMED: 'bg-[#00AEEF]',
-  COMPLETED: 'bg-emerald-400',
-  CANCELLED: 'bg-gray-300',
-};
-
-const STATUS_TEXT: Record<string, string> = {
-  SCHEDULED: 'text-amber-600',
-  CONFIRMED: 'text-[#005F8E]',
-  COMPLETED: 'text-emerald-600',
-  CANCELLED: 'text-gray-400',
-};
-
-const STATUS_BG: Record<string, string> = {
-  SCHEDULED: 'bg-amber-50',
-  CONFIRMED: 'bg-[#00AEEF]/[0.09]',
-  COMPLETED: 'bg-emerald-50',
-  CANCELLED: 'bg-gray-50',
+const STATUS_COLOR: Record<string, { text: string; bg: string; dot: string }> = {
+  SCHEDULED: { text: '#B45309', bg: '#FFFBEB', dot: '#F59E0B' },
+  CONFIRMED: { text: '#005F8E', bg: '#E0F6FE', dot: '#00AEEF' },
+  COMPLETED: { text: '#047857', bg: '#ECFDF5', dot: '#10B981' },
+  CANCELLED:  { text: '#6B7280', bg: '#F9FAFB', dot: '#D1D5DB' },
 };
 
 function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Lima' });
+  return new Date(dateStr).toLocaleTimeString('es-PE', {
+    hour: '2-digit', minute: '2-digit', timeZone: 'America/Lima',
+  });
 }
 
 function fmt(v: number) {
-  return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 }).format(v);
+  return new Intl.NumberFormat('es-PE', {
+    style: 'currency', currency: 'PEN', maximumFractionDigits: 0,
+  }).format(v);
 }
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 16 },
-  show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.28, ease: 'easeOut' as const } }),
-};
+const AVATAR_PALETTES = [
+  { bg: '#EEF6FF', text: '#005F8E' },
+  { bg: '#F5F0FF', text: '#6D28D9' },
+  { bg: '#ECFDF5', text: '#047857' },
+  { bg: '#FFFBEB', text: '#B45309' },
+  { bg: '#FFF1F2', text: '#BE123C' },
+];
 
-// Mini SVG tooth for hero accent
-function ToothAccent() {
-  return (
-    <svg viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      <defs>
-        <linearGradient id="da-tb" x1="30" y1="0" x2="30" y2="70" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.22)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0.04)" />
-        </linearGradient>
-      </defs>
-      {/* Main tooth body */}
-      <path
-        d="M12 18C12 10 18 4 30 4C42 4 48 10 48 18C48 26 44 38 42 50C40 60 36 66 30 66C24 66 20 60 18 50C16 38 12 26 12 18Z"
-        fill="url(#da-tb)" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5"
-      />
-      {/* Root divider */}
-      <path d="M24 50 Q30 54 36 50" stroke="rgba(255,255,255,0.14)" strokeWidth="1.2" fill="none" />
-      {/* Top highlight */}
-      <path d="M22 12 Q30 8 38 12" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-    </svg>
-  );
+function avatarPalette(name: string, lastName: string) {
+  return AVATAR_PALETTES[(name.charCodeAt(0) + lastName.charCodeAt(0)) % AVATAR_PALETTES.length];
+}
+
+function initials(name: string, lastName: string) {
+  return `${name[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
 }
 
 interface StatItem {
   label: string;
   value: string | number;
   sub?: string;
-  gradient: string;
+  accent: string;
   iconPath: string;
   path?: string;
-  accent: string;
 }
 
-function StatCard({ item, index, onNavigate }: { item: StatItem; index: number; onNavigate: (path: string) => void }) {
+function StatCard({ item, index, onNavigate }: { item: StatItem; index: number; onNavigate: (p: string) => void }) {
   return (
     <motion.div
-      custom={index}
-      initial="hidden"
-      animate="show"
-      variants={cardVariants}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.06, duration: 0.26, ease: 'easeOut' as const }}
       onClick={() => item.path && onNavigate(item.path)}
-      className={`relative bg-white rounded-2xl overflow-hidden border border-black/[0.04]
-        shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200 group
-        ${item.path ? 'cursor-pointer hover:shadow-[0_6px_24px_rgba(0,0,0,0.10)] hover:-translate-y-0.5' : 'cursor-default'}`}
+      className={`relative bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden
+        transition-all duration-200 group
+        ${item.path ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''}`}
     >
-      <div className="p-4 md:p-5">
-        {/* Icon badge */}
+      <div className="p-5">
+        {/* Icon */}
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center mb-3.5 shadow-sm"
-          style={{ background: item.gradient }}
+          className="w-9 h-9 rounded-xl flex items-center justify-center mb-4"
+          style={{ background: `${item.accent}18` }}
         >
-          <svg className="w-[18px] h-[18px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <svg
+            className="w-[17px] h-[17px]"
+            style={{ color: item.accent }}
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.9}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d={item.iconPath} />
           </svg>
         </div>
 
-        {/* Value */}
-        <p className="text-[22px] md:text-[26px] font-black text-gray-900 leading-none tracking-tight tabular-nums">
+        {/* Number */}
+        <p className="text-[26px] font-black text-gray-900 leading-none tabular-nums tracking-tight">
           {item.value}
         </p>
-        <p className="text-[10.5px] text-gray-400 mt-1.5 font-semibold uppercase tracking-wide leading-tight">
+        <p className="text-[11px] text-gray-400 mt-2 font-semibold uppercase tracking-wide leading-tight">
           {item.label}
         </p>
         {item.sub && (
-          <p className="text-xs font-semibold mt-1" style={{ color: item.accent }}>{item.sub}</p>
+          <p className="text-xs font-semibold mt-1.5" style={{ color: item.accent }}>{item.sub}</p>
         )}
       </div>
 
-      {/* Bottom accent bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ background: item.gradient }} />
+      {/* Accent bottom bar */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[3px]"
+        style={{ background: item.accent }}
+      />
 
-      {/* Hover arrow */}
+      {/* Arrow on hover */}
       {item.path && (
-        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-          <svg className="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-60 transition-opacity">
+          <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </div>
       )}
@@ -134,6 +117,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const user = getUser();
   const qc = useQueryClient();
+
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['dashboard'],
     queryFn: getDashboard,
@@ -153,24 +137,26 @@ export default function Dashboard() {
   const hour = now.getHours();
   const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';
   const firstName = user?.name?.split(' ')[0] ?? 'Doctor';
-
-  const today = now.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const today = now.toLocaleDateString('es-PE', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
   const todayCapitalized = today.charAt(0).toUpperCase() + today.slice(1);
 
+  /* ── Error state ── */
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
-          <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-4">
+          <svg className="w-7 h-7 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
           </svg>
         </div>
-        <p className="text-base font-semibold text-gray-900">Error al cargar el dashboard</p>
-        <p className="text-sm text-gray-500 mt-1">Verifica tu conexión e intenta nuevamente</p>
+        <p className="text-base font-bold text-gray-800">Error al cargar el dashboard</p>
+        <p className="text-sm text-gray-400 mt-1">Verifica tu conexión e intenta nuevamente</p>
         <button
           onClick={() => refetch()}
-          className="mt-5 px-5 py-2.5 text-sm font-medium text-white rounded-xl transition-colors"
-          style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
+          className="mt-5 px-5 py-2.5 text-sm font-semibold text-white rounded-xl"
+          style={{ background: '#00AEEF' }}
         >
           Reintentar
         </button>
@@ -178,55 +164,26 @@ export default function Dashboard() {
     );
   }
 
+  /* ── Loading skeleton ── */
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="rounded-2xl h-32 bg-gradient-to-r from-gray-200 to-gray-100" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+      <div className="space-y-5 animate-pulse">
+        {/* Hero skeleton */}
+        <div className="h-[88px] rounded-2xl bg-gray-100" />
+        {/* Stats skeleton */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-              <div className="w-10 h-10 rounded-xl bg-gray-100 mb-3" />
+            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 h-[110px]">
+              <div className="w-9 h-9 rounded-xl bg-gray-100 mb-4" />
               <div className="h-6 bg-gray-200 rounded w-3/4 mb-2" />
               <div className="h-3 bg-gray-100 rounded w-1/2" />
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex gap-3 items-center">
-              <div className="w-2 h-2 rounded-full bg-gray-200" />
-              <div className="h-3.5 bg-gray-200 rounded w-28" />
-            </div>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-gray-50 last:border-0">
-                <div className="w-12 space-y-1.5">
-                  <div className="h-4 bg-gray-200 rounded" />
-                  <div className="h-2.5 bg-gray-100 rounded w-3/4 mx-auto" />
-                </div>
-                <div className="w-8 h-8 rounded-lg bg-gray-200 shrink-0" />
-                <div className="flex-1 space-y-1.5">
-                  <div className="h-3.5 bg-gray-200 rounded w-2/5" />
-                  <div className="h-2.5 bg-gray-100 rounded w-1/3" />
-                </div>
-                <div className="h-6 bg-gray-100 rounded-lg w-20" />
-              </div>
-            ))}
-          </div>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex gap-3 items-center">
-              <div className="w-2 h-2 rounded-full bg-gray-200" />
-              <div className="h-3.5 bg-gray-200 rounded w-36" />
-            </div>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 px-6 py-3.5 border-b border-gray-50 last:border-0">
-                <div className="w-9 h-9 rounded-xl bg-gray-200 shrink-0" />
-                <div className="flex-1 space-y-1.5">
-                  <div className="h-3.5 bg-gray-200 rounded w-3/4" />
-                  <div className="h-2.5 bg-gray-100 rounded w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Bottom skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 h-72" />
+          <div className="bg-white rounded-2xl border border-gray-100 h-72" />
         </div>
       </div>
     );
@@ -244,239 +201,206 @@ export default function Dashboard() {
 
   const statItems: StatItem[] = [
     {
-      label: 'Ingresos este mes',
+      label: 'Ingresos del mes',
       value: fmt(stats.monthRevenue),
-      gradient: 'linear-gradient(135deg,#10b981,#059669)',
+      accent: '#10B981',
       iconPath: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
       path: '/pagos',
-      accent: '#059669',
     },
     {
       label: 'Pacientes totales',
       value: stats.totalPatients,
-      gradient: 'linear-gradient(135deg,#00AEEF,#005F8E)',
+      accent: '#00AEEF',
       iconPath: 'M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z',
       path: '/pacientes',
-      accent: '#005F8E',
     },
     {
       label: 'Citas hoy',
       value: stats.appointmentsToday,
-      gradient: 'linear-gradient(135deg,#8b5cf6,#6d28d9)',
+      accent: '#8B5CF6',
       iconPath: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
       path: '/citas',
-      accent: '#6d28d9',
     },
     {
       label: 'Pendientes',
       value: stats.appointmentsPending,
-      gradient: 'linear-gradient(135deg,#f59e0b,#d97706)',
+      accent: '#F59E0B',
       iconPath: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
       path: '/citas',
-      accent: '#d97706',
     },
     {
       label: 'Completadas este mes',
       value: stats.completedThisMonth,
-      gradient: 'linear-gradient(135deg,#10b981,#0d9488)',
+      accent: '#0D9488',
       iconPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
       path: '/citas',
-      accent: '#0d9488',
     },
     {
       label: 'Tratamientos activos',
       value: stats.treatmentsInProgress,
-      gradient: 'linear-gradient(135deg,#f43f5e,#e11d48)',
+      accent: '#F43F5E',
       iconPath: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
       path: '/tratamientos',
-      accent: '#e11d48',
     },
   ];
-
-  const quickActions = [
-    { label: 'Nueva cita', path: '/citas', iconPath: 'M12 4v16m8-8H4' },
-    { label: 'Nuevo paciente', path: '/pacientes', iconPath: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
-    { label: 'Registrar pago', path: '/pagos', iconPath: 'M17 9V7a5 5 0 00-10 0v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2z' },
-  ];
-
-  // Patient avatar color mapping
-  const avatarColors = [
-    'linear-gradient(135deg,#00AEEF,#005F8E)',
-    'linear-gradient(135deg,#8b5cf6,#6d28d9)',
-    'linear-gradient(135deg,#10b981,#059669)',
-    'linear-gradient(135deg,#f59e0b,#d97706)',
-    'linear-gradient(135deg,#f43f5e,#e11d48)',
-  ];
-  function patientColor(name: string, lastName: string) {
-    return avatarColors[(name.charCodeAt(0) + lastName.charCodeAt(0)) % avatarColors.length];
-  }
-  function initials(name: string, lastName: string) {
-    return `${name[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
-  }
 
   return (
     <div className="space-y-5">
 
-      {/* ── Hero ──────────────────────────────────────── */}
+      {/* ── Hero: minimal strip ─────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.32 }}
-        className="relative rounded-2xl overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #0D1B2E 0%, #003A5C 50%, #005F8E 100%)' }}
+        transition={{ duration: 0.28 }}
+        className="bg-white border border-gray-100 rounded-2xl shadow-sm px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
-        {/* Subtle dot-grid texture */}
-        <div className="absolute inset-0"
-          style={{
-            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
-            backgroundSize: '20px 20px',
-          }}
-        />
-
-        {/* Glow orbs */}
-        <div className="absolute -top-10 right-24 w-48 h-48 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(0,174,239,0.18) 0%, transparent 70%)' }} />
-        <div className="absolute -bottom-8 left-1/3 w-32 h-32 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(0,174,239,0.10) 0%, transparent 70%)' }} />
-
-        {/* Decorative rings */}
-        <div className="absolute -right-12 -top-12 w-64 h-64 rounded-full border border-white/[0.06] pointer-events-none" />
-        <div className="absolute -right-4 -top-4 w-40 h-40 rounded-full border border-white/[0.08] pointer-events-none" />
-
-        {/* Tooth accent — decorative right side */}
-        <div className="hidden lg:block absolute right-6 bottom-0 w-16 h-20 opacity-20 pointer-events-none">
-          <ToothAccent />
+        <div className="flex items-center gap-4">
+          {/* Avatar */}
+          <div
+            className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-white font-black text-lg"
+            style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
+          >
+            {firstName[0]}
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">{greeting}</p>
+            <h2 className="text-xl font-black text-gray-900 leading-tight">Dr. {firstName}</h2>
+            <p className="text-xs text-gray-400 mt-0.5">{todayCapitalized}</p>
+          </div>
         </div>
 
-        <div className="relative px-6 md:px-8 py-6 md:py-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#00AEEF] animate-pulse" />
-              <p className="text-[#5BC8F0] text-xs font-semibold tracking-widest uppercase">{greeting}</p>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-black text-white leading-tight tracking-tight">
-              {firstName}
-            </h2>
-            <p className="text-white/40 text-sm mt-1 font-medium">{todayCapitalized}</p>
-          </div>
-
-          {/* Quick actions */}
-          <div className="flex gap-2 flex-wrap">
-            {quickActions.map(a => (
-              <button
-                key={a.path}
-                onClick={() => navigate(a.path)}
-                className="flex items-center gap-2 px-3.5 py-2 text-white text-xs font-semibold rounded-xl transition-all
-                  backdrop-blur-sm border border-white/[0.14] hover:border-white/[0.28]
-                  shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-                style={{ background: 'rgba(255,255,255,0.08)' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.16)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-              >
-                <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d={a.iconPath} />
-                </svg>
-                {a.label}
-              </button>
-            ))}
-          </div>
+        {/* Quick actions */}
+        <div className="flex gap-2 flex-wrap">
+          {[
+            { label: 'Nueva cita', path: '/citas', accent: '#00AEEF', iconPath: 'M12 4v16m8-8H4' },
+            { label: 'Nuevo paciente', path: '/pacientes', accent: '#8B5CF6', iconPath: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
+            { label: 'Registrar pago', path: '/pagos', accent: '#10B981', iconPath: 'M17 9V7a5 5 0 00-10 0v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2z' },
+          ].map(a => (
+            <button
+              key={a.path}
+              onClick={() => navigate(a.path)}
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-gray-200 text-gray-600 transition-all hover:border-transparent hover:text-white"
+              onMouseEnter={e => {
+                e.currentTarget.style.background = a.accent;
+                e.currentTarget.style.color = '#fff';
+                e.currentTarget.style.borderColor = 'transparent';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = '';
+                e.currentTarget.style.color = '';
+                e.currentTarget.style.borderColor = '';
+              }}
+            >
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d={a.iconPath} />
+              </svg>
+              {a.label}
+            </button>
+          ))}
         </div>
       </motion.div>
 
-      {/* ── Próxima cita + progreso ────────────────────── */}
+      {/* ── Próxima cita + progreso ─────────────────────── */}
       {totalToday > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12, duration: 0.28 }}
+          transition={{ delay: 0.1, duration: 0.26 }}
           className="flex flex-col sm:flex-row gap-3"
         >
           {upcomingAppt ? (
             <div
               onClick={() => navigate(`/pacientes/${upcomingAppt.patient.id}`)}
-              className="flex-1 bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.06)]
-                px-5 py-4 flex items-center gap-4 cursor-pointer
-                hover:shadow-[0_6px_24px_rgba(0,0,0,0.10)] hover:-translate-y-0.5 transition-all group"
+              className="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm px-5 py-4
+                flex items-center gap-4 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all group"
             >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
-                style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+              {/* Time block */}
+              <div
+                className="shrink-0 w-14 h-14 rounded-xl flex flex-col items-center justify-center"
+                style={{ background: '#E0F6FE' }}
+              >
+                <span className="text-[15px] font-black leading-none" style={{ color: '#005F8E' }}>
+                  {formatTime(upcomingAppt.date)}
+                </span>
+                <span className="text-[9px] font-bold mt-0.5" style={{ color: '#00AEEF' }}>PRÓXIMA</span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Próxima cita</p>
-                <p className="text-sm font-bold text-gray-900 truncate group-hover:text-[#00AEEF] transition-colors mt-0.5">
+                <p className="text-sm font-bold text-gray-900 truncate group-hover:text-[#00AEEF] transition-colors">
                   {upcomingAppt.patient.name} {upcomingAppt.patient.lastName}
                 </p>
                 <p className="text-xs text-gray-400 truncate mt-0.5">{upcomingAppt.reason}</p>
+                <p className="text-[11px] text-gray-300 mt-1">{upcomingAppt.duration} min</p>
               </div>
-              <div className="shrink-0 text-right">
-                <p className="text-xl font-black text-gray-900 tabular-nums">{formatTime(upcomingAppt.date)}</p>
-                <p className="text-[11px] font-medium text-gray-400 mt-0.5">{upcomingAppt.duration} min</p>
-              </div>
+              <svg className="w-4 h-4 text-gray-300 group-hover:text-[#00AEEF] group-hover:translate-x-0.5 transition-all shrink-0"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </div>
           ) : (
             <div className="flex-1 bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 border border-emerald-100">
+                <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
                 <p className="text-sm font-bold text-emerald-700">Todas las citas atendidas</p>
-                <p className="text-xs text-emerald-600 mt-0.5">Sin citas pendientes por hoy</p>
+                <p className="text-xs text-emerald-500 mt-0.5">Sin citas pendientes por hoy</p>
               </div>
             </div>
           )}
 
           {/* Day progress */}
-          <div className="sm:w-60 bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.06)] px-5 py-4 flex flex-col justify-between">
+          <div className="sm:w-56 bg-white border border-gray-100 rounded-2xl shadow-sm px-5 py-4 flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Progreso del día</p>
-              <span className="text-sm font-black text-gray-900 tabular-nums">{completedToday}/{totalToday}</span>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Progreso</p>
+              <span className="text-base font-black text-gray-900 tabular-nums">{completedToday}/{totalToday}</span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPct}%` }}
-                transition={{ delay: 0.4, duration: 0.7, ease: 'easeOut' as const }}
+                transition={{ delay: 0.5, duration: 0.7, ease: 'easeOut' as const }}
                 className="h-full rounded-full"
-                style={{ background: progressPct === 100
-                  ? 'linear-gradient(90deg,#10b981,#059669)'
-                  : 'linear-gradient(90deg,#00AEEF,#005F8E)' }}
+                style={{ background: progressPct === 100 ? '#10B981' : '#00AEEF' }}
               />
             </div>
             <p className="text-[11px] text-gray-400 mt-2 font-medium">
-              {progressPct === 100 ? '¡Día completado! 🎉' : `${progressPct}% completado`}
+              {progressPct === 100 ? '¡Día completado!' : `${progressPct}% completado`}
             </p>
           </div>
         </motion.div>
       )}
 
-      {/* ── Stats grid ────────────────────────────────── */}
+      {/* ── Stats grid ─────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {statItems.map((item, i) => (
           <StatCard key={item.label} item={item} index={i} onNavigate={navigate} />
         ))}
       </div>
 
-      {/* ── Bottom grid ───────────────────────────────── */}
+      {/* ── Bottom: agenda + pacientes ──────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-        {/* Today's appointments */}
+        {/* Agenda del día */}
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.28 }}
-          className="lg:col-span-2 bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden"
+          transition={{ delay: 0.32, duration: 0.26 }}
+          className="lg:col-span-2 bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden"
         >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.04]">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div className="flex items-center gap-2.5">
-              <div className="w-2 h-2 rounded-full bg-[#00AEEF]" />
-              <h3 className="text-sm font-bold text-gray-900 tracking-tight">Citas de hoy</h3>
+              <span
+                className="inline-block w-2 h-2 rounded-full"
+                style={{ background: '#00AEEF' }}
+              />
+              <h3 className="text-sm font-bold text-gray-900">Agenda del día</h3>
               {todayAppointments.length > 0 && (
-                <span className="px-2 py-0.5 bg-[#00AEEF]/[0.09] text-[#005F8E] text-[11px] font-bold rounded-lg">
+                <span
+                  className="text-[11px] font-bold px-2 py-0.5 rounded-lg"
+                  style={{ background: '#E0F6FE', color: '#005F8E' }}
+                >
                   {todayAppointments.length}
                 </span>
               )}
@@ -487,110 +411,124 @@ export default function Dashboard() {
             >
               Ver todas
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>
 
           {todayAppointments.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-14 text-center px-6">
-              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center mb-4 border border-gray-100">
+            <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
                 <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <p className="text-sm font-semibold text-gray-700">Sin citas para hoy</p>
+              <p className="text-sm font-bold text-gray-700">Sin citas para hoy</p>
               <p className="text-xs text-gray-400 mt-1">Disfruta el día libre</p>
               <button
                 onClick={() => navigate('/citas')}
-                className="mt-4 px-4 py-2 text-xs font-semibold text-white rounded-xl shadow-sm"
-                style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
+                className="mt-4 px-4 py-2 text-xs font-semibold text-white rounded-xl"
+                style={{ background: '#00AEEF' }}
               >
                 Agendar cita
               </button>
             </div>
           ) : (
-            <div className="divide-y divide-black/[0.04]">
-              {todayAppointments.map((a) => (
-                <div key={a.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/80 transition-colors">
-                  {/* Time */}
-                  <div className="w-11 shrink-0 text-center">
-                    <p className="text-sm font-black text-gray-900 tabular-nums">{formatTime(a.date)}</p>
-                    <p className="text-[10px] text-gray-400 mt-0.5 font-medium">{a.duration}m</p>
-                  </div>
+            <div className="divide-y divide-gray-50">
+              {todayAppointments.map((a) => {
+                const sc = STATUS_COLOR[a.status] ?? STATUS_COLOR.SCHEDULED;
+                const av = avatarPalette(a.patient.name, a.patient.lastName);
+                return (
+                  <div key={a.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/70 transition-colors">
 
-                  {/* Timeline line + dot */}
-                  <div className="flex flex-col items-center self-stretch py-1 w-4">
-                    <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${STATUS_DOT[a.status]}`} />
-                    <div className="w-px flex-1 bg-black/[0.06] mt-1" />
-                  </div>
+                    {/* Time */}
+                    <div className="w-12 shrink-0 text-center">
+                      <p className="text-sm font-black text-gray-900 tabular-nums">{formatTime(a.date)}</p>
+                      <p className="text-[10px] text-gray-400 font-medium mt-0.5">{a.duration}m</p>
+                    </div>
 
-                  {/* Patient avatar */}
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black text-white shrink-0"
-                    style={{ background: patientColor(a.patient.name, a.patient.lastName) }}
-                  >
-                    {initials(a.patient.name, a.patient.lastName)}
-                  </div>
+                    {/* Status dot + line */}
+                    <div className="flex flex-col items-center self-stretch py-1 w-3">
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: sc.dot }} />
+                      <div className="w-px flex-1 bg-gray-100 mt-1" />
+                    </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <button
-                      onClick={() => navigate(`/pacientes/${a.patient.id}`)}
-                      className="text-sm font-semibold text-gray-900 truncate hover:text-[#00AEEF] transition-colors text-left block w-full"
+                    {/* Patient avatar */}
+                    <div
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-black shrink-0"
+                      style={{ background: av.bg, color: av.text }}
                     >
-                      {a.patient.name} {a.patient.lastName}
-                    </button>
-                    <p className="text-xs text-gray-400 mt-0.5 truncate">{a.reason}</p>
-                  </div>
+                      {initials(a.patient.name, a.patient.lastName)}
+                    </div>
 
-                  {/* Actions + status */}
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {a.status === 'SCHEDULED' && (
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
                       <button
-                        onClick={() => statusMut.mutate({ id: a.id, status: 'CONFIRMED' })}
-                        disabled={statusMut.isPending}
-                        className="w-7 h-7 rounded-lg bg-[#00AEEF]/[0.09] text-[#005F8E] hover:bg-[#00AEEF] hover:text-white transition-all flex items-center justify-center shrink-0 disabled:opacity-50"
-                        title="Confirmar cita"
+                        onClick={() => navigate(`/pacientes/${a.patient.id}`)}
+                        className="text-sm font-semibold text-gray-900 truncate hover:text-[#00AEEF] transition-colors text-left block w-full"
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4"/>
-                        </svg>
+                        {a.patient.name} {a.patient.lastName}
                       </button>
-                    )}
-                    {(a.status === 'SCHEDULED' || a.status === 'CONFIRMED') && (
-                      <button
-                        onClick={() => statusMut.mutate({ id: a.id, status: 'COMPLETED' })}
-                        disabled={statusMut.isPending}
-                        className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center shrink-0 disabled:opacity-50"
-                        title="Marcar como completada"
+                      <p className="text-xs text-gray-400 truncate mt-0.5">{a.reason}</p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {a.status === 'SCHEDULED' && (
+                        <button
+                          onClick={() => statusMut.mutate({ id: a.id, status: 'CONFIRMED' })}
+                          disabled={statusMut.isPending}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all disabled:opacity-50"
+                          style={{ background: '#E0F6FE', color: '#005F8E' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = '#00AEEF'; e.currentTarget.style.color = '#fff'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = '#E0F6FE'; e.currentTarget.style.color = '#005F8E'; }}
+                          title="Confirmar cita"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+                          </svg>
+                        </button>
+                      )}
+                      {(a.status === 'SCHEDULED' || a.status === 'CONFIRMED') && (
+                        <button
+                          onClick={() => statusMut.mutate({ id: a.id, status: 'COMPLETED' })}
+                          disabled={statusMut.isPending}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all disabled:opacity-50"
+                          style={{ background: '#ECFDF5', color: '#047857' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = '#10B981'; e.currentTarget.style.color = '#fff'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = '#ECFDF5'; e.currentTarget.style.color = '#047857'; }}
+                          title="Marcar completada"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </button>
+                      )}
+                      <span
+                        className="text-[11px] font-semibold px-2.5 py-1 rounded-lg"
+                        style={{ background: sc.bg, color: sc.text }}
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
-                        </svg>
-                      </button>
-                    )}
-                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg ${STATUS_BG[a.status]} ${STATUS_TEXT[a.status]}`}>
-                      {STATUS_LABEL[a.status]}
-                    </span>
+                        {STATUS_LABEL[a.status]}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </motion.div>
 
-        {/* Recent patients */}
+        {/* Pacientes recientes */}
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.42, duration: 0.28 }}
-          className="bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden"
+          transition={{ delay: 0.4, duration: 0.26 }}
+          className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden"
         >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.04]">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div className="flex items-center gap-2.5">
-              <div className="w-2 h-2 rounded-full bg-violet-400" />
-              <h3 className="text-sm font-bold text-gray-900 tracking-tight">Pacientes recientes</h3>
+              <span className="inline-block w-2 h-2 rounded-full bg-violet-400" />
+              <h3 className="text-sm font-bold text-gray-900">Pacientes recientes</h3>
             </div>
             <button
               onClick={() => navigate('/pacientes')}
@@ -598,46 +536,51 @@ export default function Dashboard() {
             >
               Ver todos
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>
 
           {recentPatients.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-14 px-6 text-center">
-              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center mb-4 border border-gray-100">
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
                 <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z" />
                 </svg>
               </div>
-              <p className="text-sm font-semibold text-gray-500">Sin pacientes registrados</p>
+              <p className="text-sm font-bold text-gray-500">Sin pacientes registrados</p>
             </div>
           ) : (
-            <div className="divide-y divide-black/[0.04]">
-              {recentPatients.map((p) => (
-                <div
-                  key={p.id}
-                  onClick={() => navigate(`/pacientes/${p.id}`)}
-                  className="flex items-center gap-3.5 px-5 py-3.5 cursor-pointer hover:bg-gray-50/80 transition-colors group"
-                >
+            <div className="divide-y divide-gray-50">
+              {recentPatients.map((p) => {
+                const av = avatarPalette(p.name, p.lastName);
+                return (
                   <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-[12px] font-black text-white shrink-0 shadow-sm"
-                    style={{ background: patientColor(p.name, p.lastName) }}
+                    key={p.id}
+                    onClick={() => navigate(`/pacientes/${p.id}`)}
+                    className="flex items-center gap-3.5 px-5 py-3.5 cursor-pointer hover:bg-gray-50/70 transition-colors group"
                   >
-                    {initials(p.name, p.lastName)}
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center text-[12px] font-black shrink-0"
+                      style={{ background: av.bg, color: av.text }}
+                    >
+                      {initials(p.name, p.lastName)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#00AEEF] transition-colors">
+                        {p.name} {p.lastName}
+                      </p>
+                      <p className="text-xs text-gray-400 truncate mt-0.5">{p.phone}</p>
+                    </div>
+                    <svg
+                      className="w-3.5 h-3.5 text-gray-200 group-hover:text-[#00AEEF] group-hover:translate-x-0.5 transition-all shrink-0"
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#00AEEF] transition-colors">
-                      {p.name} {p.lastName}
-                    </p>
-                    <p className="text-xs text-gray-400 truncate mt-0.5">{p.phone}</p>
-                  </div>
-                  <svg className="w-3.5 h-3.5 text-gray-200 group-hover:text-[#00AEEF] group-hover:translate-x-0.5 transition-all shrink-0"
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </motion.div>

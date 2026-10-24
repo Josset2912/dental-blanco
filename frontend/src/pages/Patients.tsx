@@ -56,27 +56,30 @@ function isNew(createdAt: string) {
 
 const GENDER_CONFIG = {
   MASCULINO: {
-    badge: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-600',
-    avatar: 'from-[#00AEEF] to-[#005F8E]',
+    badge: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#EEF6FF] text-[#005F8E]',
+    palette: { bg: '#EEF6FF', text: '#005F8E' },
     label: 'Masculino',
   },
   FEMENINO: {
-    badge: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-fuchsia-50 text-fuchsia-600',
-    avatar: 'from-fuchsia-400 to-fuchsia-600',
+    badge: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#FDF4FF] text-[#9333EA]',
+    palette: { bg: '#FDF4FF', text: '#9333EA' },
     label: 'Femenino',
   },
   OTRO: {
     badge: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600',
-    avatar: 'from-gray-400 to-gray-500',
+    palette: { bg: '#F3F4F6', text: '#6B7280' },
     label: 'Otro',
   },
 };
 
 function PatientInitial({ name, gender }: { name: string; gender: Patient['gender'] }) {
   const letter = name.trim().charAt(0).toUpperCase();
-  const gradient = GENDER_CONFIG[gender]?.avatar ?? 'from-[#00AEEF] to-[#005F8E]';
+  const { bg, text } = GENDER_CONFIG[gender]?.palette ?? { bg: '#EEF6FF', text: '#005F8E' };
   return (
-    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 bg-gradient-to-br ${gradient}`}>
+    <div
+      className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
+      style={{ background: bg, color: text }}
+    >
       {letter}
     </div>
   );
@@ -96,19 +99,25 @@ function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
 
 // ── Stats bar ─────────────────────────────────────────────────────────────────
 
-function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color: string }) {
+function StatCard({ label, value, sub, accent, iconPath }: {
+  label: string; value: string | number; sub?: string; accent: string; iconPath: string;
+}) {
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-card">
-      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
-        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>
-        </svg>
+    <div className="relative bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+      <div className="p-5">
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center mb-4"
+          style={{ background: `${accent}18` }}
+        >
+          <svg className="w-[17px] h-[17px]" style={{ color: accent }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.9}>
+            <path strokeLinecap="round" strokeLinejoin="round" d={iconPath} />
+          </svg>
+        </div>
+        <p className="text-[26px] font-black text-gray-900 leading-none tabular-nums tracking-tight">{value}</p>
+        <p className="text-[11px] text-gray-400 mt-2 font-semibold uppercase tracking-wide leading-tight">{label}</p>
+        {sub && <p className="text-xs font-semibold mt-1.5" style={{ color: accent }}>{sub}</p>}
       </div>
-      <div className="min-w-0">
-        <div className="text-xl font-bold text-gray-900 leading-none">{value}</div>
-        <div className="text-xs text-gray-500 mt-0.5 truncate">{label}</div>
-        {sub && <div className="text-xs font-medium text-emerald-600 mt-0.5">{sub}</div>}
-      </div>
+      <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ background: accent }} />
     </div>
   );
 }
@@ -217,7 +226,7 @@ export default function Patients() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-[3px] h-8 bg-gradient-to-b from-[#00AEEF] to-[#005F8E] rounded-full shrink-0" />
+          <div className="w-[3px] h-8 rounded-full shrink-0" style={{ background: '#00AEEF' }} />
           <div>
             <h2 className="text-xl font-bold text-gray-900">Pacientes</h2>
             <p className="text-sm text-gray-500 mt-0.5">
@@ -228,7 +237,7 @@ export default function Patients() {
         <button
           onClick={() => setShowForm(true)}
           className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-white rounded-xl text-sm font-semibold sm:w-auto transition-all hover:brightness-110 shadow-sm"
-          style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
+          style={{ background: '#00AEEF' }}
         >
           <PlusIcon /> Nuevo paciente
         </button>
@@ -239,23 +248,27 @@ export default function Patients() {
         <StatCard
           label="Total pacientes"
           value={stats?.total ?? '—'}
-          color="bg-gradient-to-br from-[#00AEEF] to-[#005F8E]"
+          accent="#00AEEF"
+          iconPath="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"
         />
         <StatCard
           label="Nuevos este mes"
           value={stats?.newThisMonth ?? '—'}
-          sub={stats?.newThisMonth ? `+${stats.newThisMonth} ingresaron` : undefined}
-          color="bg-gradient-to-br from-emerald-400 to-emerald-600"
+          sub={stats?.newThisMonth ? `+${stats.newThisMonth} este mes` : undefined}
+          accent="#10B981"
+          iconPath="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
         />
         <StatCard
           label="Masculino"
           value={stats?.byGender.MASCULINO ?? '—'}
-          color="bg-gradient-to-br from-blue-400 to-blue-600"
+          accent="#005F8E"
+          iconPath="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
         />
         <StatCard
           label="Femenino"
           value={stats?.byGender.FEMENINO ?? '—'}
-          color="bg-gradient-to-br from-fuchsia-400 to-fuchsia-600"
+          accent="#9333EA"
+          iconPath="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
         />
       </div>
 

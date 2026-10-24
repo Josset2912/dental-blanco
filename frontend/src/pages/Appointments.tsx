@@ -389,7 +389,7 @@ export default function Appointments() {
       <div className="mb-5">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className="w-1 h-8 bg-gradient-to-b from-[#00AEEF] to-[#005F8E] rounded-full shrink-0" />
+            <div className="w-1 h-8 rounded-full shrink-0" style={{ background: '#00AEEF' }} />
             <div>
               <h2 className="text-xl font-bold text-gray-900">Citas</h2>
               <p className="text-sm text-gray-500 mt-0.5">
@@ -414,7 +414,7 @@ export default function Appointments() {
             )}
             <button
               onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 md:px-4 text-white rounded-lg text-sm font-semibold hover:brightness-110 transition-all" style={{ background: "linear-gradient(135deg,#00AEEF,#005F8E)" }}>
+              className="inline-flex items-center gap-1.5 px-3 py-2 md:px-4 text-white rounded-xl text-sm font-semibold hover:brightness-110 transition-all" style={{ background: '#00AEEF' }}>
               <PlusIcon /> <span className="hidden sm:inline">Nueva cita</span><span className="sm:hidden">Nueva</span>
             </button>
           </div>

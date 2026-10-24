@@ -42,7 +42,7 @@ function LeftPanelDecor() {
 }
 
 export default function Login() {
-  const [email, setEmail]       = useState('doctor@dentalblanco.com');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [remember, setRemember] = useState(false);

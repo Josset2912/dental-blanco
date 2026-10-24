@@ -409,16 +409,16 @@ export default function Layout() {
         {/* User + logout + collapse toggle */}
         <div className="border-t border-black/[0.06] p-2">
           {!collapsed && (
-            <div className="flex items-center gap-2.5 px-2 py-2 mb-0.5 rounded-lg hover:bg-black/[0.03] transition-colors cursor-default">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black text-white shrink-0"
+            <div className="flex items-center gap-3 px-2 py-2.5 mb-0.5 rounded-xl hover:bg-black/[0.03] transition-colors cursor-default">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0 shadow-sm"
                 style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
                 {initials}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-semibold text-gray-900 truncate leading-tight">{user?.name}</p>
-                <p className="text-[10px] text-gray-400 truncate font-medium">
+                <span className="inline-block mt-1 px-2 py-0.5 bg-[#00AEEF]/[0.09] text-[#005F8E] text-[10px] font-semibold rounded-md">
                   {user?.role === 'DOCTOR' ? 'Doctor' : user?.role === 'ADMIN' ? 'Administrador' : 'Recepcionista'}
-                </p>
+                </span>
               </div>
             </div>
           )}

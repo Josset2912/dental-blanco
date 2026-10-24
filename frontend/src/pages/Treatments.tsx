@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: 'Anulado',
 };
 const STATUS_COLORS: Record<string, string> = {
-  IN_PROGRESS: 'bg-[#00AEEF]/[0.09] text-[#005F8E]',
+  IN_PROGRESS: 'bg-amber-50 text-amber-600',
   COMPLETED: 'bg-green-50 text-green-600',
   CANCELLED: 'bg-red-50 text-red-400',
 };
@@ -350,7 +350,7 @@ export default function Treatments() {
             <div className="sm:hidden overflow-y-auto max-h-[calc(100svh-26rem)]">
             <ul className="divide-y divide-gray-100">
               {filtered.map(t => (
-                <li key={t.id} className="px-4 py-4 flex flex-col gap-3 border-l-[3px]" style={{ borderLeftColor: t.status === 'IN_PROGRESS' ? '#00AEEF' : t.status === 'COMPLETED' ? '#10b981' : '#ef4444' }}>
+                <li key={t.id} className="px-4 py-4 flex flex-col gap-3 border-l-[3px]" style={{ borderLeftColor: t.status === 'IN_PROGRESS' ? '#f59e0b' : t.status === 'COMPLETED' ? '#10b981' : '#ef4444' }}>
                   {/* Top row: patient + status */}
                   <div className="flex items-start justify-between gap-2">
                     <button

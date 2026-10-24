@@ -19,6 +19,18 @@ const CONDITIONS: { id: ToothCondition; label: string; color: string }[] = [
 const UPPER = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
 const LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
 
+const UPPER_Q1 = [18, 17, 16, 15, 14, 13, 12, 11];
+const UPPER_Q2 = [21, 22, 23, 24, 25, 26, 27, 28];
+const LOWER_Q4 = [48, 47, 46, 45, 44, 43, 42, 41];
+const LOWER_Q3 = [31, 32, 33, 34, 35, 36, 37, 38];
+
+const QUADS: Record<number, { label: string; short: string; color: string; bg: string }> = {
+  1: { label: 'Sup. Derecho',   short: 'Q1', color: '#b45309', bg: '#fffbeb' },
+  2: { label: 'Sup. Izquierdo', short: 'Q2', color: '#1d4ed8', bg: '#eff6ff' },
+  3: { label: 'Inf. Izquierdo', short: 'Q3', color: '#166534', bg: '#f0fdf4' },
+  4: { label: 'Inf. Derecho',   short: 'Q4', color: '#7e22ce', bg: '#faf5ff' },
+};
+
 
 // SVG paths anatomicos (viewBox 0 0 40 88, corona abajo, raices arriba)
 const PATHS: Record<string, string> = {
@@ -228,6 +240,9 @@ function SurfaceCircle({
   const ri = R * 0.33;
 
   const [topKey, botKey] = isUpper ? ['v', 'l'] : ['l', 'v'];
+  // Right quadrants (11-18, 41-48): midline is to the right on screen, so mesial = right sector
+  const isRightQuadrant = (num >= 11 && num <= 18) || (num >= 41 && num <= 48);
+  const [rightKey, leftKey] = isRightQuadrant ? ['m', 'd'] : ['d', 'm'];
 
   function sector(a1Deg: number, a2Deg: number): string {
     const toRad = (d: number) => (d - 90) * Math.PI / 180;
@@ -246,10 +261,10 @@ function SurfaceCircle({
   }
 
   const segments = [
-    { key: topKey, d: sector(-45, 45)  },
-    { key: 'd',    d: sector(45, 135)  },
-    { key: botKey, d: sector(135, 225) },
-    { key: 'm',    d: sector(225, 315) },
+    { key: topKey,   d: sector(-45, 45)  },
+    { key: rightKey, d: sector(45, 135)  },
+    { key: botKey,   d: sector(135, 225) },
+    { key: leftKey,  d: sector(225, 315) },
   ];
 
   return (
@@ -425,35 +440,123 @@ export default function Odontogram({ patientId }: { patientId: string }) {
         </div>
       </div>
 
-      {/* Canvas — scroll horizontal en mobile para mantener tamaño interactivo */}
+      {/* Canvas */}
       <div ref={containerRef} style={{ borderBottom: '1px solid #e5e7eb', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-      <div
-        style={{
-          background: '#f8fafc',
-          padding: '14px 10px',
-          userSelect: 'none',
-          minWidth: 'max-content',
-        }}
-      >
-        {/* Maxilar Superior */}
-        {renderNumbers(UPPER, true)}
-        {renderRow(UPPER, true)}
-        <div style={{ marginTop: 4 }}>{renderCircles(UPPER, true)}</div>
+      <div style={{ background: '#f8fafc', padding: '14px 10px', userSelect: 'none', minWidth: 'max-content' }}>
 
-        {/* Divisor */}
-        <div style={{ height: 1, background: '#e5e7eb', margin: '4px auto', width: '90%', position: 'relative' }}>
-          <span style={{
-            position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)',
-            background: '#f8fafc', color: '#d1d5db', fontSize: 8, padding: '0 4px', whiteSpace: 'nowrap',
-          }}>
-            ——— linea media ———
-          </span>
+        {/* ─── Etiquetas superiores ─── */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 14, marginBottom: 4 }}>
+          {[1, 2].map(q => (
+            <div key={q} style={{
+              flex: 1, textAlign: 'center', fontSize: 8, fontWeight: 600,
+              color: QUADS[q].color, background: QUADS[q].bg,
+              borderRadius: 4, padding: '3px 0',
+              border: `1px solid ${QUADS[q].color}44`,
+              letterSpacing: '0.03em',
+            }}>
+              {QUADS[q].short} · {QUADS[q].label}
+            </div>
+          ))}
         </div>
 
-        {/* Mandibula Inferior */}
-        <div style={{ marginBottom: 4 }}>{renderCircles(LOWER, false)}</div>
-        {renderRow(LOWER, false)}
-        {renderNumbers(LOWER, false)}
+        {/* Números superiores */}
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 2 }}>
+            {UPPER_Q1.map(n => <div key={n} style={{ width: getToothWidth(n), textAlign: 'center', fontSize: 9, color: QUADS[1].color, lineHeight: 1.4, userSelect: 'none' }}>{n}</div>)}
+          </div>
+          <div style={{ width: 14 }}/>
+          <div style={{ display: 'flex', gap: 2 }}>
+            {UPPER_Q2.map(n => <div key={n} style={{ width: getToothWidth(n), textAlign: 'center', fontSize: 9, color: QUADS[2].color, lineHeight: 1.4, userSelect: 'none' }}>{n}</div>)}
+          </div>
+        </div>
+
+        {/* Dientes superiores */}
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
+            {UPPER_Q1.map(n => <Tooth key={n} num={n} state={getState(n)} isUpper={true} activeCond={activeCond} onClick={handleClick} onHover={handleHover} onLeave={handleLeave}/>)}
+          </div>
+          <div style={{ width: 14, alignSelf: 'stretch', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: 1, height: '100%', background: '#d1d5db' }}/>
+          </div>
+          <div style={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
+            {UPPER_Q2.map(n => <Tooth key={n} num={n} state={getState(n)} isUpper={true} activeCond={activeCond} onClick={handleClick} onHover={handleHover} onLeave={handleLeave}/>)}
+          </div>
+        </div>
+
+        {/* Círculos superiores */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 4 }}>
+          <div style={{ display: 'flex', gap: 2 }}>
+            {UPPER_Q1.map(n => <SurfaceCircle key={n} num={n} state={getState(n)} isUpper={true} onClick={handleClick} onHover={handleHover} onLeave={handleLeave}/>)}
+          </div>
+          <div style={{ width: 14, alignSelf: 'stretch', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: 1, height: '100%', background: '#d1d5db' }}/>
+          </div>
+          <div style={{ display: 'flex', gap: 2 }}>
+            {UPPER_Q2.map(n => <SurfaceCircle key={n} num={n} state={getState(n)} isUpper={true} onClick={handleClick} onHover={handleHover} onLeave={handleLeave}/>)}
+          </div>
+        </div>
+
+        {/* ─── Línea media ─── */}
+        <div style={{ display: 'flex', alignItems: 'center', margin: '6px 0' }}>
+          <div style={{ flex: 1, height: 1, background: '#e5e7eb' }}/>
+          <span style={{ background: '#f8fafc', color: '#9ca3af', fontSize: 8, padding: '0 8px', whiteSpace: 'nowrap', userSelect: 'none' }}>
+            ——— Línea media ———
+          </span>
+          <div style={{ flex: 1, height: 1, background: '#e5e7eb' }}/>
+        </div>
+
+        {/* Círculos inferiores */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+          <div style={{ display: 'flex', gap: 2 }}>
+            {LOWER_Q4.map(n => <SurfaceCircle key={n} num={n} state={getState(n)} isUpper={false} onClick={handleClick} onHover={handleHover} onLeave={handleLeave}/>)}
+          </div>
+          <div style={{ width: 14, alignSelf: 'stretch', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: 1, height: '100%', background: '#d1d5db' }}/>
+          </div>
+          <div style={{ display: 'flex', gap: 2 }}>
+            {LOWER_Q3.map(n => <SurfaceCircle key={n} num={n} state={getState(n)} isUpper={false} onClick={handleClick} onHover={handleHover} onLeave={handleLeave}/>)}
+          </div>
+        </div>
+
+        {/* Dientes inferiores */}
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+            {LOWER_Q4.map(n => <Tooth key={n} num={n} state={getState(n)} isUpper={false} activeCond={activeCond} onClick={handleClick} onHover={handleHover} onLeave={handleLeave}/>)}
+          </div>
+          <div style={{ width: 14, alignSelf: 'stretch', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: 1, height: '100%', background: '#d1d5db' }}/>
+          </div>
+          <div style={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+            {LOWER_Q3.map(n => <Tooth key={n} num={n} state={getState(n)} isUpper={false} activeCond={activeCond} onClick={handleClick} onHover={handleHover} onLeave={handleLeave}/>)}
+          </div>
+        </div>
+
+        {/* Números inferiores */}
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 2 }}>
+            {LOWER_Q4.map(n => <div key={n} style={{ width: getToothWidth(n), textAlign: 'center', fontSize: 9, color: QUADS[4].color, lineHeight: 1.4, userSelect: 'none' }}>{n}</div>)}
+          </div>
+          <div style={{ width: 14 }}/>
+          <div style={{ display: 'flex', gap: 2 }}>
+            {LOWER_Q3.map(n => <div key={n} style={{ width: getToothWidth(n), textAlign: 'center', fontSize: 9, color: QUADS[3].color, lineHeight: 1.4, userSelect: 'none' }}>{n}</div>)}
+          </div>
+        </div>
+
+        {/* ─── Etiquetas inferiores ─── */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 14, marginTop: 4 }}>
+          {[4, 3].map(q => (
+            <div key={q} style={{
+              flex: 1, textAlign: 'center', fontSize: 8, fontWeight: 600,
+              color: QUADS[q].color, background: QUADS[q].bg,
+              borderRadius: 4, padding: '3px 0',
+              border: `1px solid ${QUADS[q].color}44`,
+              letterSpacing: '0.03em',
+            }}>
+              {QUADS[q].short} · {QUADS[q].label}
+            </div>
+          ))}
+        </div>
+
       </div>
       </div>
 

@@ -15,16 +15,23 @@ const STATUS_LABEL: Record<string, string> = {
 
 const STATUS_DOT: Record<string, string> = {
   SCHEDULED: 'bg-amber-400',
-  CONFIRMED: 'bg-blue-400',
-  COMPLETED: 'bg-green-400',
+  CONFIRMED: 'bg-[#00AEEF]',
+  COMPLETED: 'bg-emerald-400',
   CANCELLED: 'bg-gray-300',
 };
 
 const STATUS_TEXT: Record<string, string> = {
   SCHEDULED: 'text-amber-600',
-  CONFIRMED: 'text-blue-600',
-  COMPLETED: 'text-green-600',
+  CONFIRMED: 'text-[#005F8E]',
+  COMPLETED: 'text-emerald-600',
   CANCELLED: 'text-gray-400',
+};
+
+const STATUS_BG: Record<string, string> = {
+  SCHEDULED: 'bg-amber-50',
+  CONFIRMED: 'bg-[#00AEEF]/[0.09]',
+  COMPLETED: 'bg-emerald-50',
+  CANCELLED: 'bg-gray-50',
 };
 
 function formatTime(dateStr: string) {
@@ -40,6 +47,29 @@ const cardVariants = {
   show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.28, ease: 'easeOut' as const } }),
 };
 
+// Mini SVG tooth for hero accent
+function ToothAccent() {
+  return (
+    <svg viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        <linearGradient id="da-tb" x1="30" y1="0" x2="30" y2="70" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.22)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0.04)" />
+        </linearGradient>
+      </defs>
+      {/* Main tooth body */}
+      <path
+        d="M12 18C12 10 18 4 30 4C42 4 48 10 48 18C48 26 44 38 42 50C40 60 36 66 30 66C24 66 20 60 18 50C16 38 12 26 12 18Z"
+        fill="url(#da-tb)" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5"
+      />
+      {/* Root divider */}
+      <path d="M24 50 Q30 54 36 50" stroke="rgba(255,255,255,0.14)" strokeWidth="1.2" fill="none" />
+      {/* Top highlight */}
+      <path d="M22 12 Q30 8 38 12" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 interface StatItem {
   label: string;
   value: string | number;
@@ -47,6 +77,7 @@ interface StatItem {
   gradient: string;
   iconPath: string;
   path?: string;
+  accent: string;
 }
 
 function StatCard({ item, index, onNavigate }: { item: StatItem; index: number; onNavigate: (path: string) => void }) {
@@ -57,38 +88,39 @@ function StatCard({ item, index, onNavigate }: { item: StatItem; index: number; 
       animate="show"
       variants={cardVariants}
       onClick={() => item.path && onNavigate(item.path)}
-      className={`relative bg-white rounded-xl overflow-hidden shadow-card transition-all duration-200 group
-        ${item.path ? 'cursor-pointer hover:shadow-card-hover' : 'cursor-default'}`}
+      className={`relative bg-white rounded-2xl overflow-hidden border border-black/[0.04]
+        shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200 group
+        ${item.path ? 'cursor-pointer hover:shadow-[0_6px_24px_rgba(0,0,0,0.10)] hover:-translate-y-0.5' : 'cursor-default'}`}
     >
-      {/* Top accent line — el único elemento de color, preciso e intencional */}
-      <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: item.gradient }} />
-
-      <div className="p-4 md:p-5 pt-5 md:pt-6">
-        {/* Icon — pequeño, secundario */}
+      <div className="p-4 md:p-5">
+        {/* Icon badge */}
         <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center mb-3 opacity-90"
+          className="w-10 h-10 rounded-xl flex items-center justify-center mb-3.5 shadow-sm"
           style={{ background: item.gradient }}
         >
-          <svg className="w-[15px] h-[15px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <svg className="w-[18px] h-[18px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d={item.iconPath} />
           </svg>
         </div>
 
-        {/* Número — el héroe visual */}
-        <p className="text-2xl md:text-[28px] font-black text-gray-900 leading-none tracking-tight tabular-nums">
+        {/* Value */}
+        <p className="text-[22px] md:text-[26px] font-black text-gray-900 leading-none tracking-tight tabular-nums">
           {item.value}
         </p>
-        <p className="text-[11px] text-gray-400 mt-1.5 leading-tight font-medium uppercase tracking-wide">
+        <p className="text-[10.5px] text-gray-400 mt-1.5 font-semibold uppercase tracking-wide leading-tight">
           {item.label}
         </p>
         {item.sub && (
-          <p className="text-xs font-semibold mt-1" style={{ color: '#00AEEF' }}>{item.sub}</p>
+          <p className="text-xs font-semibold mt-1" style={{ color: item.accent }}>{item.sub}</p>
         )}
       </div>
 
-      {/* Hover arrow — feedback sutil de que es clickable */}
+      {/* Bottom accent bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ background: item.gradient }} />
+
+      {/* Hover arrow */}
       {item.path && (
-        <div className="absolute top-5 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
           <svg className="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
           </svg>
@@ -149,9 +181,7 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="space-y-6 animate-pulse">
-        {/* Hero skeleton */}
-        <div className="rounded-2xl h-28 bg-gradient-to-r from-gray-200 to-gray-100" />
-        {/* Stat cards skeleton */}
+        <div className="rounded-2xl h-32 bg-gradient-to-r from-gray-200 to-gray-100" />
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
@@ -161,7 +191,6 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
-        {/* Bottom grid skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex gap-3 items-center">
@@ -174,7 +203,7 @@ export default function Dashboard() {
                   <div className="h-4 bg-gray-200 rounded" />
                   <div className="h-2.5 bg-gray-100 rounded w-3/4 mx-auto" />
                 </div>
-                <div className="w-2.5 h-2.5 rounded-full bg-gray-200 shrink-0" />
+                <div className="w-8 h-8 rounded-lg bg-gray-200 shrink-0" />
                 <div className="flex-1 space-y-1.5">
                   <div className="h-3.5 bg-gray-200 rounded w-2/5" />
                   <div className="h-2.5 bg-gray-100 rounded w-1/3" />
@@ -205,12 +234,10 @@ export default function Dashboard() {
 
   const { stats, todayAppointments, recentPatients } = data!;
 
-  // Próxima cita: la más cercana que no está cancelada ni completada
   const upcomingAppt = todayAppointments
     .filter(a => a.status === 'SCHEDULED' || a.status === 'CONFIRMED')
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0] ?? null;
 
-  // Progreso del día
   const totalToday = todayAppointments.length;
   const completedToday = todayAppointments.filter(a => a.status === 'COMPLETED').length;
   const progressPct = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
@@ -222,6 +249,7 @@ export default function Dashboard() {
       gradient: 'linear-gradient(135deg,#10b981,#059669)',
       iconPath: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
       path: '/pagos',
+      accent: '#059669',
     },
     {
       label: 'Pacientes totales',
@@ -229,6 +257,7 @@ export default function Dashboard() {
       gradient: 'linear-gradient(135deg,#00AEEF,#005F8E)',
       iconPath: 'M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z',
       path: '/pacientes',
+      accent: '#005F8E',
     },
     {
       label: 'Citas hoy',
@@ -236,6 +265,7 @@ export default function Dashboard() {
       gradient: 'linear-gradient(135deg,#8b5cf6,#6d28d9)',
       iconPath: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
       path: '/citas',
+      accent: '#6d28d9',
     },
     {
       label: 'Pendientes',
@@ -243,6 +273,7 @@ export default function Dashboard() {
       gradient: 'linear-gradient(135deg,#f59e0b,#d97706)',
       iconPath: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
       path: '/citas',
+      accent: '#d97706',
     },
     {
       label: 'Completadas este mes',
@@ -250,52 +281,83 @@ export default function Dashboard() {
       gradient: 'linear-gradient(135deg,#10b981,#0d9488)',
       iconPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
       path: '/citas',
+      accent: '#0d9488',
     },
     {
-      label: 'Tratamientos en curso',
+      label: 'Tratamientos activos',
       value: stats.treatmentsInProgress,
       gradient: 'linear-gradient(135deg,#f43f5e,#e11d48)',
       iconPath: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
       path: '/tratamientos',
+      accent: '#e11d48',
     },
   ];
 
   const quickActions = [
-    { label: 'Nueva cita', path: '/citas', gradient: 'linear-gradient(135deg,#00AEEF,#005F8E)', iconPath: 'M12 4v16m8-8H4' },
-    { label: 'Nuevo paciente', path: '/pacientes', gradient: 'linear-gradient(135deg,#8b5cf6,#6d28d9)', iconPath: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
-    { label: 'Registrar pago', path: '/pagos', gradient: 'linear-gradient(135deg,#10b981,#059669)', iconPath: 'M17 9V7a5 5 0 00-10 0v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2z' },
+    { label: 'Nueva cita', path: '/citas', iconPath: 'M12 4v16m8-8H4' },
+    { label: 'Nuevo paciente', path: '/pacientes', iconPath: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
+    { label: 'Registrar pago', path: '/pagos', iconPath: 'M17 9V7a5 5 0 00-10 0v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2z' },
   ];
 
-  return (
-    <div className="space-y-6">
+  // Patient avatar color mapping
+  const avatarColors = [
+    'linear-gradient(135deg,#00AEEF,#005F8E)',
+    'linear-gradient(135deg,#8b5cf6,#6d28d9)',
+    'linear-gradient(135deg,#10b981,#059669)',
+    'linear-gradient(135deg,#f59e0b,#d97706)',
+    'linear-gradient(135deg,#f43f5e,#e11d48)',
+  ];
+  function patientColor(name: string, lastName: string) {
+    return avatarColors[(name.charCodeAt(0) + lastName.charCodeAt(0)) % avatarColors.length];
+  }
+  function initials(name: string, lastName: string) {
+    return `${name[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
+  }
 
-      {/* Hero header */}
+  return (
+    <div className="space-y-5">
+
+      {/* ── Hero ──────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="relative rounded-2xl overflow-hidden p-6 md:p-8"
-        style={{ background: 'linear-gradient(135deg, #0090D4 0%, #006EA6 55%, #004F7A 100%)' }}
+        transition={{ duration: 0.32 }}
+        className="relative rounded-2xl overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #0D1B2E 0%, #003A5C 50%, #005F8E 100%)' }}
       >
-        {/* Cuadrícula arquitectónica — deliberada, no aleatoria */}
-        <div className="absolute inset-0 bg-grid-white opacity-100" />
+        {/* Subtle dot-grid texture */}
+        <div className="absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
+            backgroundSize: '20px 20px',
+          }}
+        />
 
-        {/* Anillos concéntricos — punto focal, no blobs random */}
-        <div className="absolute -right-16 -top-16 w-72 h-72 rounded-full border border-white/[0.08]" />
-        <div className="absolute -right-8 -top-8 w-48 h-48 rounded-full border border-white/[0.10]" />
-        <div className="absolute right-8 top-8 w-20 h-20 rounded-full border border-white/[0.07]" />
+        {/* Glow orbs */}
+        <div className="absolute -top-10 right-24 w-48 h-48 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(0,174,239,0.18) 0%, transparent 70%)' }} />
+        <div className="absolute -bottom-8 left-1/3 w-32 h-32 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(0,174,239,0.10) 0%, transparent 70%)' }} />
 
-        {/* Glow accent abajo-izquierda */}
-        <div className="absolute -bottom-12 -left-8 w-40 h-40 rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(0,174,239,0.25) 0%, transparent 70%)' }} />
+        {/* Decorative rings */}
+        <div className="absolute -right-12 -top-12 w-64 h-64 rounded-full border border-white/[0.06] pointer-events-none" />
+        <div className="absolute -right-4 -top-4 w-40 h-40 rounded-full border border-white/[0.08] pointer-events-none" />
 
-        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+        {/* Tooth accent — decorative right side */}
+        <div className="hidden lg:block absolute right-6 bottom-0 w-16 h-20 opacity-20 pointer-events-none">
+          <ToothAccent />
+        </div>
+
+        <div className="relative px-6 md:px-8 py-6 md:py-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
           <div>
-            <p className="text-[#93D4F0] text-sm font-semibold tracking-wide">{greeting}</p>
-            <h2 className="text-2xl md:text-3xl font-black text-white mt-1 leading-tight tracking-tight">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#00AEEF] animate-pulse" />
+              <p className="text-[#5BC8F0] text-xs font-semibold tracking-widest uppercase">{greeting}</p>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-black text-white leading-tight tracking-tight">
               {firstName}
             </h2>
-            <p className="text-white/50 text-sm mt-1.5 font-medium">{todayCapitalized}</p>
+            <p className="text-white/40 text-sm mt-1 font-medium">{todayCapitalized}</p>
           </div>
 
           {/* Quick actions */}
@@ -304,7 +366,12 @@ export default function Dashboard() {
               <button
                 key={a.path}
                 onClick={() => navigate(a.path)}
-                className="flex items-center gap-2 px-3.5 py-2.5 sm:py-2 bg-white/[0.12] hover:bg-white/[0.22] text-white text-xs font-semibold rounded-lg transition-all backdrop-blur-sm border border-white/[0.12] hover:border-white/[0.2] min-h-[40px] sm:min-h-0 shadow-sm"
+                className="flex items-center gap-2 px-3.5 py-2 text-white text-xs font-semibold rounded-xl transition-all
+                  backdrop-blur-sm border border-white/[0.14] hover:border-white/[0.28]
+                  shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                style={{ background: 'rgba(255,255,255,0.08)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.16)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
               >
                 <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d={a.iconPath} />
@@ -316,96 +383,100 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
-      {/* Próxima cita + progreso del día */}
+      {/* ── Próxima cita + progreso ────────────────────── */}
       {totalToday > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.28 }}
+          transition={{ delay: 0.12, duration: 0.28 }}
           className="flex flex-col sm:flex-row gap-3"
         >
-          {/* Próxima cita */}
           {upcomingAppt ? (
             <div
               onClick={() => navigate(`/pacientes/${upcomingAppt.patient.id}`)}
-              className="flex-1 bg-white rounded-xl shadow-card px-5 py-4 flex items-center gap-4 cursor-pointer hover:shadow-card-hover transition-all group"
+              className="flex-1 bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.06)]
+                px-5 py-4 flex items-center gap-4 cursor-pointer
+                hover:shadow-[0_6px_24px_rgba(0,0,0,0.10)] hover:-translate-y-0.5 transition-all group"
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+                style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}>
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Próxima cita</p>
-                <p className="text-sm font-bold text-gray-900 truncate group-hover:text-[#00AEEF] transition-colors">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Próxima cita</p>
+                <p className="text-sm font-bold text-gray-900 truncate group-hover:text-[#00AEEF] transition-colors mt-0.5">
                   {upcomingAppt.patient.name} {upcomingAppt.patient.lastName}
                 </p>
-                <p className="text-xs text-gray-400 truncate">{upcomingAppt.reason}</p>
+                <p className="text-xs text-gray-400 truncate mt-0.5">{upcomingAppt.reason}</p>
               </div>
               <div className="shrink-0 text-right">
-                <p className="text-lg font-black text-gray-900 tabular-nums">{formatTime(upcomingAppt.date)}</p>
-                <p className="text-[11px] font-medium text-gray-400">{upcomingAppt.duration} min</p>
+                <p className="text-xl font-black text-gray-900 tabular-nums">{formatTime(upcomingAppt.date)}</p>
+                <p className="text-[11px] font-medium text-gray-400 mt-0.5">{upcomingAppt.duration} min</p>
               </div>
             </div>
           ) : (
-            <div className="flex-1 bg-green-50 rounded-xl px-5 py-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center shrink-0">
-                <svg className="w-4.5 h-4.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="flex-1 bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-bold text-green-700">Todas las citas atendidas</p>
-                <p className="text-xs text-green-600">Sin citas pendientes por hoy</p>
+                <p className="text-sm font-bold text-emerald-700">Todas las citas atendidas</p>
+                <p className="text-xs text-emerald-600 mt-0.5">Sin citas pendientes por hoy</p>
               </div>
             </div>
           )}
 
-          {/* Progreso del día */}
-          <div className="sm:w-56 bg-white rounded-xl shadow-card px-5 py-4 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Progreso del día</p>
-              <span className="text-xs font-black text-gray-900 tabular-nums">{completedToday}/{totalToday}</span>
+          {/* Day progress */}
+          <div className="sm:w-60 bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.06)] px-5 py-4 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Progreso del día</p>
+              <span className="text-sm font-black text-gray-900 tabular-nums">{completedToday}/{totalToday}</span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPct}%` }}
-                transition={{ delay: 0.4, duration: 0.6, ease: 'easeOut' }}
+                transition={{ delay: 0.4, duration: 0.7, ease: 'easeOut' as const }}
                 className="h-full rounded-full"
-                style={{ background: progressPct === 100 ? 'linear-gradient(90deg,#10b981,#059669)' : 'linear-gradient(90deg,#00AEEF,#005F8E)' }}
+                style={{ background: progressPct === 100
+                  ? 'linear-gradient(90deg,#10b981,#059669)'
+                  : 'linear-gradient(90deg,#00AEEF,#005F8E)' }}
               />
             </div>
-            <p className="text-[11px] text-gray-400 mt-1.5">
-              {progressPct === 100 ? '¡Día completado!' : `${progressPct}% completado`}
+            <p className="text-[11px] text-gray-400 mt-2 font-medium">
+              {progressPct === 100 ? '¡Día completado! 🎉' : `${progressPct}% completado`}
             </p>
           </div>
         </motion.div>
       )}
 
-      {/* Stats grid */}
+      {/* ── Stats grid ────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {statItems.map((item, i) => (
           <StatCard key={item.label} item={item} index={i} onNavigate={navigate} />
         ))}
       </div>
 
-      {/* Bottom grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* ── Bottom grid ───────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-        {/* Today's appointments — timeline style */}
+        {/* Today's appointments */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.38, duration: 0.28 }}
-          className="lg:col-span-2 bg-white rounded-xl shadow-card overflow-hidden"
+          transition={{ delay: 0.35, duration: 0.28 }}
+          className="lg:col-span-2 bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden"
         >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.05]">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.04]">
             <div className="flex items-center gap-2.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#00AEEF]" />
+              <div className="w-2 h-2 rounded-full bg-[#00AEEF]" />
               <h3 className="text-sm font-bold text-gray-900 tracking-tight">Citas de hoy</h3>
               {todayAppointments.length > 0 && (
-                <span className="px-2 py-0.5 bg-[#00AEEF]/10 text-[#005F8E] text-[11px] font-bold rounded-md">
+                <span className="px-2 py-0.5 bg-[#00AEEF]/[0.09] text-[#005F8E] text-[11px] font-bold rounded-lg">
                   {todayAppointments.length}
                 </span>
               )}
@@ -423,7 +494,7 @@ export default function Dashboard() {
 
           {todayAppointments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 text-center px-6">
-              <div className="w-12 h-12 rounded-xl bg-[#F6F8FA] flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center mb-4 border border-gray-100">
                 <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
@@ -432,7 +503,7 @@ export default function Dashboard() {
               <p className="text-xs text-gray-400 mt-1">Disfruta el día libre</p>
               <button
                 onClick={() => navigate('/citas')}
-                className="mt-4 px-4 py-2 text-xs font-semibold text-white rounded-lg shadow-sm"
+                className="mt-4 px-4 py-2 text-xs font-semibold text-white rounded-xl shadow-sm"
                 style={{ background: 'linear-gradient(135deg,#00AEEF,#005F8E)' }}
               >
                 Agendar cita
@@ -441,37 +512,45 @@ export default function Dashboard() {
           ) : (
             <div className="divide-y divide-black/[0.04]">
               {todayAppointments.map((a) => (
-                <div key={a.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#F6F8FA]/80 transition-colors">
-                  {/* Time column */}
-                  <div className="w-12 shrink-0 text-center">
+                <div key={a.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/80 transition-colors">
+                  {/* Time */}
+                  <div className="w-11 shrink-0 text-center">
                     <p className="text-sm font-black text-gray-900 tabular-nums">{formatTime(a.date)}</p>
                     <p className="text-[10px] text-gray-400 mt-0.5 font-medium">{a.duration}m</p>
                   </div>
 
-                  {/* Divider line + dot */}
-                  <div className="flex flex-col items-center self-stretch py-1">
-                    <div className={`w-2 h-2 rounded-full shrink-0 ${STATUS_DOT[a.status]}`} />
+                  {/* Timeline line + dot */}
+                  <div className="flex flex-col items-center self-stretch py-1 w-4">
+                    <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${STATUS_DOT[a.status]}`} />
                     <div className="w-px flex-1 bg-black/[0.06] mt-1" />
+                  </div>
+
+                  {/* Patient avatar */}
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black text-white shrink-0"
+                    style={{ background: patientColor(a.patient.name, a.patient.lastName) }}
+                  >
+                    {initials(a.patient.name, a.patient.lastName)}
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <button
                       onClick={() => navigate(`/pacientes/${a.patient.id}`)}
-                      className="text-sm font-semibold text-gray-900 truncate hover:text-[#00AEEF] transition-colors text-left w-full"
+                      className="text-sm font-semibold text-gray-900 truncate hover:text-[#00AEEF] transition-colors text-left block w-full"
                     >
                       {a.patient.name} {a.patient.lastName}
                     </button>
                     <p className="text-xs text-gray-400 mt-0.5 truncate">{a.reason}</p>
                   </div>
 
-                  {/* Quick actions + status */}
+                  {/* Actions + status */}
                   <div className="flex items-center gap-1.5 shrink-0">
                     {a.status === 'SCHEDULED' && (
                       <button
                         onClick={() => statusMut.mutate({ id: a.id, status: 'CONFIRMED' })}
                         disabled={statusMut.isPending}
-                        className="w-7 h-7 rounded-lg bg-[#00AEEF]/10 text-[#005F8E] hover:bg-[#00AEEF] hover:text-white transition-all flex items-center justify-center shrink-0 disabled:opacity-50"
+                        className="w-7 h-7 rounded-lg bg-[#00AEEF]/[0.09] text-[#005F8E] hover:bg-[#00AEEF] hover:text-white transition-all flex items-center justify-center shrink-0 disabled:opacity-50"
                         title="Confirmar cita"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -491,7 +570,7 @@ export default function Dashboard() {
                         </svg>
                       </button>
                     )}
-                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-md bg-black/[0.03] ${STATUS_TEXT[a.status]}`}>
+                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg ${STATUS_BG[a.status]} ${STATUS_TEXT[a.status]}`}>
                       {STATUS_LABEL[a.status]}
                     </span>
                   </div>
@@ -503,14 +582,14 @@ export default function Dashboard() {
 
         {/* Recent patients */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.44, duration: 0.28 }}
-          className="bg-white rounded-xl shadow-card overflow-hidden"
+          transition={{ delay: 0.42, duration: 0.28 }}
+          className="bg-white rounded-2xl border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden"
         >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.05]">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.04]">
             <div className="flex items-center gap-2.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+              <div className="w-2 h-2 rounded-full bg-violet-400" />
               <h3 className="text-sm font-bold text-gray-900 tracking-tight">Pacientes recientes</h3>
             </div>
             <button
@@ -526,7 +605,7 @@ export default function Dashboard() {
 
           {recentPatients.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 px-6 text-center">
-              <div className="w-12 h-12 rounded-xl bg-[#F6F8FA] flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center mb-4 border border-gray-100">
                 <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>
                 </svg>
@@ -535,42 +614,34 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="divide-y divide-black/[0.04]">
-              {recentPatients.map((p) => {
-                const initials = `${p.name[0]}${p.lastName[0]}`.toUpperCase();
-                const colors = [
-                  'linear-gradient(135deg,#00AEEF,#005F8E)',
-                  'linear-gradient(135deg,#8b5cf6,#6d28d9)',
-                  'linear-gradient(135deg,#10b981,#059669)',
-                  'linear-gradient(135deg,#f59e0b,#d97706)',
-                ];
-                const colorIdx = (p.name.charCodeAt(0) + p.lastName.charCodeAt(0)) % colors.length;
-                return (
+              {recentPatients.map((p) => (
+                <div
+                  key={p.id}
+                  onClick={() => navigate(`/pacientes/${p.id}`)}
+                  className="flex items-center gap-3.5 px-5 py-3.5 cursor-pointer hover:bg-gray-50/80 transition-colors group"
+                >
                   <div
-                    key={p.id}
-                    onClick={() => navigate(`/pacientes/${p.id}`)}
-                    className="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-[#F6F8FA]/80 transition-colors group"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-[12px] font-black text-white shrink-0 shadow-sm"
+                    style={{ background: patientColor(p.name, p.lastName) }}
                   >
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black text-white shrink-0"
-                      style={{ background: colors[colorIdx] }}
-                    >
-                      {initials}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#00AEEF] transition-colors">
-                        {p.name} {p.lastName}
-                      </p>
-                      <p className="text-xs text-gray-400 truncate">{p.phone}</p>
-                    </div>
-                    <svg className="w-3.5 h-3.5 text-gray-200 group-hover:text-[#00AEEF] group-hover:translate-x-0.5 transition-all shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
-                    </svg>
+                    {initials(p.name, p.lastName)}
                   </div>
-                );
-              })}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#00AEEF] transition-colors">
+                      {p.name} {p.lastName}
+                    </p>
+                    <p className="text-xs text-gray-400 truncate mt-0.5">{p.phone}</p>
+                  </div>
+                  <svg className="w-3.5 h-3.5 text-gray-200 group-hover:text-[#00AEEF] group-hover:translate-x-0.5 transition-all shrink-0"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </div>
+              ))}
             </div>
           )}
         </motion.div>
+
       </div>
     </div>
   );
